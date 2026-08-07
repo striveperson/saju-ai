@@ -1,0 +1,61 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "react"],
+  "categories": {
+    "correctness": "error"
+  },
+  "options": {
+    "typeAware": true
+  },
+  "env": {
+    "builtin": true,
+    "browser": true,
+    "node": true
+  },
+  "jsPlugins": ["@tanstack/eslint-plugin-query"],
+  "rules": {
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-misused-promises": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "warn",
+    "react/react-compiler": "error",
+    "@tanstack/query/exhaustive-deps": "error",
+    "@tanstack/query/no-rest-destructuring": "warn",
+    "@tanstack/query/stable-query-client": "error",
+    "@tanstack/query/no-unstable-deps": "error",
+    "@tanstack/query/infinite-query-property-order": "error",
+    "@tanstack/query/no-void-query-fn": "error",
+    "@tanstack/query/mutation-property-order": "error"
+  },
+  "overrides": [
+    {
+      "files": ["src/lib/saju/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["*", "!./*", "!../*"],
+                "message": "사주 계산 엔진은 외부 의존이 0 이다. 상대 경로 import 만 쓴다. docs/adr/0013 참고."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["src/lib/saju/**/*.test.ts"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist/",
+    ".output/",
+    ".nitro/",
+    ".tanstack/",
+    "src/routeTree.gen.ts"
+  ]
+}

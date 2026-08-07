@@ -1,0 +1,52 @@
+{
+  "name": "web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 3000",
+    "build": "vite build",
+    "build:spa": "SAJU_BUILD_TARGET=spa vite build && node scripts/build-spa.mjs",
+    "preview": "vite preview",
+    "generate-routes": "tsr generate",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "4.3.2",
+    "@tanstack/react-devtools": "0.10.8",
+    "@tanstack/react-query": "5.101.2",
+    "@tanstack/react-query-devtools": "5.101.2",
+    "@tanstack/react-router": "1.170.17",
+    "@tanstack/react-router-devtools": "1.167.0",
+    "@tanstack/react-router-ssr-query": "1.167.1",
+    "@tanstack/react-start": "1.168.27",
+    "nitro": "npm:nitro-nightly@3.0.1-20260711-192203-0ede1536",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwindcss": "4.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "8.0.1",
+    "@rolldown/plugin-babel": "0.2.3",
+    "@tanstack/devtools-vite": "0.8.1",
+    "@tanstack/eslint-plugin-query": "5.101.2",
+    "@tanstack/router-cli": "1.167.18",
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.1",
+    "@types/babel__core": "7.20.5",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "babel-plugin-react-compiler": "1.0.0",
+    "jsdom": "28.1.0",
+    "oxlint": "1.77.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "typescript": "7.0.2",
+    "vite": "8.1.4",
+    "vitest": "4.1.10"
+  }
+}
