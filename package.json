@@ -1,0 +1,25 @@
+{
+  "name": "saju-ai",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "build:spa": "pnpm --filter web build:spa",
+    "mobile:sync": "pnpm --filter web build:spa && pnpm --filter mobile sync",
+    "test": "pnpm --filter web test",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web typecheck",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.59.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "lightningcss"
+    ]
+  }
+}
