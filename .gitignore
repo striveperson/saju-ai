@@ -1,0 +1,32 @@
+node_modules/
+.DS_Store
+
+# web (TanStack Start / Vite / Nitro)
+apps/web/dist/
+apps/web/dist-spa/
+apps/web/.output/
+apps/web/.nitro/
+apps/web/.tanstack/
+
+# mobile (Capacitor)
+# ios/ 와 android/ 는 커밋한다.
+# ADR 0010 의 saju:// 커스텀 스킴 등록이 Info.plist 와 AndroidManifest.xml 에 들어가므로
+# 네이티브 프로젝트를 무시하면 그 설정이 사라진다. 빌드 산출물만 무시한다.
+apps/mobile/dist/
+apps/mobile/ios/App/Pods/
+apps/mobile/ios/App/build/
+apps/mobile/android/.gradle/
+apps/mobile/android/build/
+apps/mobile/android/app/build/
+apps/mobile/android/local.properties
+
+# env
+.env
+.env.*
+!.env.example
+
+# local claude settings
+.claude/settings.local.json
+
+# playwright MCP 아티팩트 (스크린샷, 스냅샷)
+.playwright-mcp/
