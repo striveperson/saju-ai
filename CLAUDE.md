@@ -163,10 +163,11 @@ em dash, 이모지, 번호 목록 안의 굵은 강조 셋이다.
 
 - `writing-style`: 문장 규칙과 고치기 전후 예시. 훅이 잡지 못하는 항목을 담당한다.
 - `commit`: 커밋 메시지 규칙과 scope 목록. 메시지만 만들고 커밋은 하지 않는다.
-- `pr`: PR 본문을 템플릿에 맞춰 채우고 github MCP 로 올린다. 병합은 하지 않는다.
+- `pr`: PR 본문을 쓰고 github MCP 로 올린다. 병합은 하지 않는다.
 
-PR 본문의 구조는 스킬이 아니라 [.github/pull_request_template.md](.github/pull_request_template.md) 가 정한다.
-템플릿을 고치면 스킬을 건드리지 않아도 결과가 따라 바뀐다.
+PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 diff 를 보고 판단해 더한다.
+`.github/pull_request_template.md` 를 두지 않는다. 양식이 있으면 diff 와 CI 가 이미
+말하는 것으로 칸을 채우게 되고, 정작 읽어야 할 왜가 묻힌다.
 
 스킬은 `.claude/skills/` 에만 둔다. Claude Code 가 읽는 경로가 여기뿐이다.
 `.agents/skills/` 는 다른 도구의 규약이고 로드되지 않는다.
