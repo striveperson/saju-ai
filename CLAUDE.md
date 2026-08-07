@@ -166,8 +166,7 @@ em dash, 이모지, 번호 목록 안의 굵은 강조 셋이다.
 - `pr`: PR 본문을 쓰고 github MCP 로 올린다. 병합은 하지 않는다.
 
 PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 diff 를 보고 판단해 더한다.
-`.github/pull_request_template.md` 를 두지 않는다. 양식이 있으면 diff 와 CI 가 이미
-말하는 것으로 칸을 채우게 되고, 정작 읽어야 할 왜가 묻힌다.
+`.github/pull_request_template.md` 를 두지 않는다.
 
 스킬은 `.claude/skills/` 에만 둔다. Claude Code 가 읽는 경로가 여기뿐이다.
 `.agents/skills/` 는 다른 도구의 규약이고 로드되지 않는다.
