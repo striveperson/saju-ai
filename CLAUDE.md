@@ -67,6 +67,7 @@ pnpm format           # oxfmt
 | ----------------------- | ---------------------------- | ------------------------------------------------------------ |
 | `protect-env.sh`        | PreToolUse (Read/Edit/Write) | `.env*` 와 `.claude/settings.local.json` 접근 차단           |
 | `protect-routetree.sh`  | PreToolUse (Edit/Write)      | `routeTree.gen.ts` 편집 차단. 자동 생성 파일이다             |
+| `protect-main.sh`       | PreToolUse (Bash)            | `main` 에서의 커밋과 push, `main` 대상 push 차단             |
 | `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 테스트. 실패하면 커밋 차단 |
 | `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
 | `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
@@ -283,8 +284,11 @@ tarball 을 받아 확인한 사실을 남긴다. 다시 조사하지 않도록.
 
 - 브랜치: `feature/<요약>`, `fix/<요약>`, `chore/<요약>`
 - `main` 에 직접 push 하지 않는다. PR 을 거친다.
-  GitHub 의 브랜치 보호 규칙은 아직 걸려 있지 않다.
-  규칙으로 강제할지 관행으로 둘지는 정하지 않았다.
+  GitHub 의 브랜치 보호 규칙은 걸려 있지 않고 `protect-main.sh` 훅이 그 자리를 대신한다.
+  `main` 에서의 커밋과 push, 다른 브랜치에서 `main` 을 대상으로 하는 push 를 막는다.
+  사람이 판단해 `main` 을 직접 고쳐야 하면 명령에 `# allow-main` 을 붙인다.
+- 커밋과 push 는 명시적으로 요청받았을 때만 한다.
+  `permissions.ask` 에 걸려 있어 매번 확인 프롬프트가 뜬다.
 - 커밋: Conventional Commits 규격에 한국어 본문.
   `feat(saju): 시주 계산에 진태양시 보정 적용`, `docs(adr): 0014 추가`
   scope 목록과 본문 규칙은 `commit` 스킬에 있다.

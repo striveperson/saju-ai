@@ -26,9 +26,9 @@
       "Bash(git log:*)",
       "Bash(git branch:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)",
       "Bash(git switch:*)"
     ],
+    "ask": ["Bash(git commit:*)", "Bash(git push:*)"],
     "deny": ["Read(./**/.env*)", "Read(./**/.claude/settings.local.json)"]
   },
   "hooks": {
@@ -54,6 +54,10 @@
       {
         "matcher": "Bash",
         "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/protect-main.sh"
+          },
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-commit-check.sh",
