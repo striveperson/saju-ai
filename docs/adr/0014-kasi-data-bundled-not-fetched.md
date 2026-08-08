@@ -119,7 +119,8 @@ PR 에서 diff 를 읽을 수 없다. 값이 틀려도 프로그램은 멀쩡히
 ## 영향
 
 - 계산 엔진이 `data/solar-terms.ts` 를 상대 경로로 import 한다.
-  `no-restricted-imports` 의 `!./*`, `!../*` 예외에 그대로 들어간다.
+  `no-restricted-imports` 의 예외를 `!./**`, `!../**` 로 넓혀야 한다.
+  `!./*` 는 한 단계만 허용해서 하위 디렉토리의 모듈이 걸린다.
 - 입력 검증에 연도 범위 확인이 들어간다. 양력과 음력의 상한이 다르므로 따로 본다.
 - [docs/05-saju-domain-rules.md](../05-saju-domain-rules.md) 의 지원 연도 범위가 확정된다.
   CLAUDE.md 의 미정 목록에서 빠진다.
