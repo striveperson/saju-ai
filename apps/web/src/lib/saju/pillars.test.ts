@@ -575,11 +575,13 @@ describe('시주', () => {
       const opposite = c.expected.underOppositeZiPolicy;
       if (!opposite) continue;
 
-      // 일주는 정책에 따라 갈리는 자리인데 시주는 하나뿐이다.
+      // 일주는 정책에 따라 갈리는 자리다.
       const at = caseWallClock(c.input);
       expect(dayPillar(at, 'sameDay'), c.id).not.toBe(dayPillar(at, 'nextDay'));
-      expect(hourPillar(at), `${c.id} 기본 정책`).toBe(c.expected.hour);
-      expect(hourPillar(at), `${c.id} 반대 정책`).toBe(opposite.hour);
+
+      // 그런데 만세력은 두 정책에 같은 시주를 적었고 구현도 그 값 하나를 낸다.
+      expect(opposite.hour, `${c.id} 픽스처`).toBe(c.expected.hour);
+      expect(hourPillar(at), `${c.id} 구현`).toBe(c.expected.hour);
     }
   });
 
