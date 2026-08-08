@@ -8,6 +8,12 @@ apps/web/.output/
 apps/web/.nitro/
 apps/web/.tanstack/
 
+# KASI 데이터 생성 도구 (ADR 0014)
+# 파이썬 환경과 천체력 파일은 스크립트가 만들고 내려받는다. 커밋하지 않는다.
+apps/web/scripts/.venv/
+apps/web/scripts/*.bsp
+apps/web/scripts/computed-terms-*.json
+
 # mobile (Capacitor)
 # ios/ 와 android/ 는 커밋한다.
 # ADR 0010 의 saju:// 커스텀 스킴 등록이 Info.plist 와 AndroidManifest.xml 에 들어가므로
