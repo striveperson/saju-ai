@@ -77,6 +77,7 @@ pnpm format           # oxfmt
 | `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
 | `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
 | `md-style-guard.sh`     | PostToolUse (Edit/Write)     | 문서 스타일 규칙 검사                                        |
+| `saju-validate-gate.sh` | Stop                         | 엔진 변경이 남아 있으면 검증 에이전트를 부르게 한다          |
 
 계산 엔진의 import 경계는 훅이 아니라 oxlint 가 막는다.
 `apps/web/.oxlintrc.json` 의 `overrides` 에서 `src/lib/saju/**` 에 `no-restricted-imports` 를 건다.
@@ -193,6 +194,13 @@ PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 di
 검증을 별도 에이전트로 뗀 이유는 구현한 맥락에서 스스로 확인하면
 방금 한 착각을 그대로 한 번 더 하기 때문이다.
 근거는 [docs/06](docs/06-code-working-rules.md) 4장.
+
+부르는 것은 `saju-validate-gate.sh` 가 챙긴다.
+`apps/web/src/lib/saju` 가 바뀐 채로 턴이 끝나려 하면 종료를 막고 검증기를 부르게 한다.
+편집마다가 아니라 턴이 끝날 때 한 번이다. 구현 중간의 미완성 코드를 검증해봐야 지적만 쌓인다.
+같은 변경 내용으로는 한 번만 막고, 커밋만 하고 넘어가는 경로를 막으려고
+워킹트리뿐 아니라 `main...HEAD` 도 함께 본다.
+건너뛰어야 하면 `SAJU_SKIP_VALIDATE=1` 을 준다.
 
 ## MCP 서버 (`.mcp.json`)
 
