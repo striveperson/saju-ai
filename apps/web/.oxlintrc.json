@@ -56,6 +56,7 @@
     ".output/",
     ".nitro/",
     ".tanstack/",
-    "src/routeTree.gen.ts"
+    "src/routeTree.gen.ts",
+    "scripts/.venv/"
   ]
 }
