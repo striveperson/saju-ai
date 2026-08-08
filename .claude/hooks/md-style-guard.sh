@@ -34,6 +34,8 @@ const CHECKS = [
   [/—/, 'em dash. 쉼표, 콜론, 괄호, 하이픈으로 대체한다', false],
   [EMOJI, '이모지 또는 장식 기호', true],
   [/^\s*\d+\.\s.*\*\*/, '번호 목록 안의 굵은 강조. 번호가 이미 구분하고 있다', false],
+  // 지울 내용이면 지운다. 범위 표기(1900~2100)가 이렇게 바뀌어 있으면 손상된 것이다.
+  [/~~/, '취소선', false],
 ];
 
 const lines = fs.readFileSync(path, 'utf8').split('\n');
