@@ -46,6 +46,14 @@ export type EarthlyBranch = (typeof EARTHLY_BRANCHES)[number];
 export type Element = '목' | '화' | '토' | '금' | '수';
 export type Polarity = '양' | '음';
 
+/**
+ * 간지 한 기둥. 천간 1자와 지지 1자가 붙는다.
+ *
+ * 타입만으로는 60갑자에 실재하지 않는 조합(갑축 등)도 통과한다.
+ * 천간과 지지의 인덱스 홀짝이 같아야 실재하는 조합이고, 그 검사는 테스트가 한다.
+ */
+export type Pillar = `${HeavenlyStem}${EarthlyBranch}`;
+
 /** 천간 오행. docs/05 §1 */
 export const STEM_ELEMENT: Record<HeavenlyStem, Element> = {
   갑: '목',
