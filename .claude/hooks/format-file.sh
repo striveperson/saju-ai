@@ -13,8 +13,11 @@ process.stdin.on('data', c => (d += c)).on('end', () => {
 
 [ -z "$file_path" ] && exit 0
 
+# 마크다운은 oxfmt 에 넘기지 않는다.
+# 범위 표기 `1900~2100` 의 물결표 둘을 짝지어 취소선 `~~` 로 바꿔버린다.
+# 손대지 않은 줄까지 조용히 망가진다. .oxfmtrc.json 의 ignorePatterns 에도 같은 제외가 있다.
 case "$file_path" in
-  *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.json|*.jsonc|*.css|*.md)
+  *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.json|*.jsonc|*.css)
     cd "$CLAUDE_PROJECT_DIR" && pnpm exec oxfmt --no-error-on-unmatched-pattern "$file_path" >/dev/null 2>&1
     ;;
 esac
