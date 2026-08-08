@@ -75,6 +75,7 @@ pnpm --filter web exec vitest run --project saju
 | `pillars.ts` | 년주, 월주, 일주, 시주 |
 | `tables.ts` | 지장간, 오행 상생상극, 십성 5분류 |
 | `strength.ts` | 신강약과 억부용신 |
+| `daeun.ts` | 대운과 세운 |
 | `fixtures/` | 검증 케이스 |
 
 `data/` 두 파일의 성격이 다르다.
@@ -83,7 +84,7 @@ pnpm --filter web exec vitest run --project saju
 
 ## 아직 없는 것
 
-균시차 보정, 대운과 세운, 신살, 음력 입력이다.
+균시차 보정, 월운, 신살, 음력 입력이다.
 십신은 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있고 음양으로 가르는 10종은 없다.
 
 `fixtures/` 에는 공인 만세력 대조를 거친 검증 케이스가 들어간다.

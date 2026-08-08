@@ -255,9 +255,49 @@ export function sajuYear(utcMs: number): number {
   return year - 1;
 }
 
+/**
+ * 사주 연도의 년주. docs/05 2장.
+ *
+ * `yearPillar` 가 순간을 받는 것과 달리 연도를 직접 받는다.
+ * 세운이 같은 규칙이라 이쪽을 쓴다. docs/05 9.5.
+ */
+export function pillarOfSajuYear(year: number): Pillar {
+  return pillarFromIndex(year - YEAR_PILLAR_ANCHOR_YEAR);
+}
+
 /** 년주. docs/05 2장. */
 export function yearPillar(utcMs: number): Pillar {
-  return pillarFromIndex(sajuYear(utcMs) - YEAR_PILLAR_ANCHOR_YEAR);
+  return pillarOfSajuYear(sajuYear(utcMs));
+}
+
+/**
+ * 이 순간을 감싸는 두 절입 시각. 월 경계를 만드는 12절만 본다. docs/05 3장.
+ *
+ * `previous` 는 같은 시각을 포함하고 `next` 는 포함하지 않는다.
+ * 대운수가 이 둘 중 하나와 출생 시각의 간격에서 나온다. docs/05 9.2.
+ */
+export function surroundingMonthTerms(utcMs: number): {
+  previousUtcMs: number;
+  nextUtcMs: number;
+} {
+  const terms = solarTerms();
+  const at = lastTermIndexAtOrBefore(utcMs);
+
+  let before = at;
+  while (before >= 0 && !(terms[before].name in MONTH_TERM_BRANCH)) before--;
+
+  let after = at + 1;
+  while (after < terms.length && !(terms[after].name in MONTH_TERM_BRANCH)) {
+    after++;
+  }
+
+  if (before < 0 || after >= terms.length) {
+    throw new RangeError(
+      `앞뒤 절입 시각이 데이터에 없다. 양력 ${SOLAR_TERM_FIRST_YEAR}년 소한부터 ${SOLAR_TERM_LAST_YEAR}년 대설까지만 계산한다.`,
+    );
+  }
+
+  return { previousUtcMs: terms[before].utcMs, nextUtcMs: terms[after].utcMs };
 }
 
 /**
