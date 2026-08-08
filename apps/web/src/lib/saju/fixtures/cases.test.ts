@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from '../index';
+import { correctBirthTime } from '../time';
 import type { Pillar, Requirement } from './cases';
-import { CASES, PENDING_CASES, VERIFIED_CASES } from './cases';
+import {
+  CASES,
+  PENDING_CASES,
+  VERIFIED_CASES,
+  caseById,
+  correctionOptions,
+  parseBirth,
+} from './cases';
 
 /**
  * docs/05-saju-domain-rules.md 10장의 필수 경계 목록.
@@ -16,6 +24,8 @@ const REQUIRED: readonly Requirement[] = [
   'zi-hour-boundary',
   'timezone-transition',
   'dst',
+  'wall-clock-ambiguity',
+  'pre-standard-time',
   'true-solar-time',
   'lunar-leap-month',
   'daeun-direction',
@@ -147,6 +157,76 @@ describe('pending 케이스', () => {
   it('무엇이 있어야 확정되는지 적혀 있다', () => {
     for (const c of PENDING_CASES) {
       expect(c.blockedBy.length, c.id).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('케이스가 주장하는 시간 구간', () => {
+  /** 케이스 입력을 파이프라인에 태운 결과. 무엇을 겨냥한 케이스인지 여기서 드러난다. */
+  const correctionOf = (c: (typeof CASES)[number]) =>
+    correctBirthTime(parseBirth(c.input.birth), correctionOptions(c.input))
+      .disclosure;
+
+  it('dst 케이스는 실제로 서머타임 구간 안에 있다', () => {
+    // tz-utc830-era 가 서머타임 안에 있으면서 UTC+8:30 을 주장하고 있었다. 그 실수를 막는다.
+    const cases = CASES.filter((c) => c.requirement === 'dst');
+    expect(cases.length).toBeGreaterThan(0);
+
+    for (const c of cases) {
+      expect(correctionOf(c).daylightUnwound, `${c.id} (${c.input.birth})`).toBe(
+        true,
+      );
+    }
+  });
+
+  it('timezone-transition 케이스는 서머타임 밖이다', () => {
+    // 표준시 이력을 겨냥한 케이스인데 서머타임이 섞이면 무엇이 틀렸는지 갈라지지 않는다.
+    for (const c of CASES.filter(
+      (c) => c.requirement === 'timezone-transition',
+    )) {
+      expect(correctionOf(c).daylightUnwound, `${c.id} (${c.input.birth})`).toBe(
+        false,
+      );
+    }
+  });
+
+  it('wall-clock-ambiguity 케이스는 해석이 하나가 아니다', () => {
+    const kinds = CASES.filter(
+      (c) => c.requirement === 'wall-clock-ambiguity',
+    ).map((c) => correctionOf(c).resolution.kind);
+
+    expect(kinds).toContain('ambiguous');
+    expect(kinds).toContain('nonexistent');
+  });
+
+  it('자시 경계 케이스가 보정 후 의도한 시각에 떨어진다', () => {
+    // 진태양시 보정이 항상 걸리므로 기록 시계와 판정 시각이 어긋난다(ADR 0016).
+    // 입력을 잘못 잡으면 경계를 끼지 못한 채 조용히 통과한다.
+    const intended: Record<string, string> = {
+      'zi-2259': '22:59',
+      'zi-2301': '23:01',
+      'zi-2359': '23:59',
+      'zi-0001': '00:01',
+    };
+
+    for (const [id, hhmm] of Object.entries(intended)) {
+      const input = caseById(id).input;
+      const { corrected } = correctBirthTime(
+        parseBirth(input.birth),
+        correctionOptions(input),
+      );
+      const actual = `${String(corrected.hour).padStart(2, '0')}:${String(corrected.minute).padStart(2, '0')}`;
+
+      expect(actual, `${id} (${input.birth})`).toBe(hhmm);
+    }
+  });
+
+  it('pre-standard-time 케이스는 표준시 도입 이전이다', () => {
+    const cases = CASES.filter((c) => c.requirement === 'pre-standard-time');
+    expect(cases.length).toBeGreaterThan(0);
+
+    for (const c of cases) {
+      expect(correctionOf(c).localMeanTimeEra, c.id).toBe(true);
     }
   });
 });

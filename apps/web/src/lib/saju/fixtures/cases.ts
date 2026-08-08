@@ -8,7 +8,10 @@
  * 필수 경계 목록은 docs/05-saju-domain-rules.md 10장이다.
  */
 
+import type { CalendarDateTime } from '../calendar';
 import type { EarthlyBranch, Element, HeavenlyStem } from '../index';
+import type { ZiPolicy as EngineZiPolicy } from '../pillars';
+import type { TimeCorrectionOptions } from '../time';
 
 /** 간지 한 기둥. 천간 1자 + 지지 1자. */
 export type Pillar = `${HeavenlyStem}${EarthlyBranch}`;
@@ -42,7 +45,6 @@ export interface CaseInput {
   longitude: number;
   options: {
     ziPolicy: ZiPolicy;
-    trueSolarTime: boolean;
   };
 }
 
@@ -100,6 +102,8 @@ export type Requirement =
   | 'zi-hour-boundary'
   | 'timezone-transition'
   | 'dst'
+  | 'wall-clock-ambiguity'
+  | 'pre-standard-time'
   | 'true-solar-time'
   | 'lunar-leap-month'
   | 'daeun-direction'
@@ -143,7 +147,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: {
       year: '갑술',
@@ -186,7 +190,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '기묘', day: '무오' },
     verified: true,
@@ -207,7 +211,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '갑자', day: '신사' },
     verified: true,
@@ -227,7 +231,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '을해', day: '정묘' },
     verified: true,
@@ -254,7 +258,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '계묘', month: '을축' },
     verified: true,
@@ -275,7 +279,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '갑진', month: '병인' },
     verified: true,
@@ -297,7 +301,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '갑진', month: '무진' },
     verified: true,
@@ -315,7 +319,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: { year: '갑진', month: '기사' },
     verified: true,
@@ -326,32 +330,37 @@ export const CASES: readonly VerificationCase[] = [
     notes: '입춘 경계와 달리 년주가 갈리지 않는 것이 이 케이스의 요점이다.',
   },
 
-  // 자시 경계. docs/05 10장이 네 시각을 지정한다.
+  // 자시 경계. docs/05 10장이 보정 후 네 시각을 지정한다.
+  //
+  // 진태양시 보정을 항상 적용하므로(ADR 0016) 기록 시계와 판정 시각이 32분 어긋난다.
+  // 서울 기준으로 기록 시계 23:32 가 자시의 시작이다. 입력은 그 경계를 끼도록 잡았다.
   {
     id: 'zi-2259',
-    purpose: '22:59 출생. 자시 진입 전이라 두 정책이 같아야 한다',
+    purpose: '보정 후 22:59. 자시 진입 전이라 두 정책이 같아야 한다',
     requirement: 'zi-hour-boundary',
     input: {
-      birth: '1990-03-10T22:59:00',
+      birth: '1990-03-10T23:31:00',
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
+    notes:
+      '진태양시 보정 -32분을 적용하면 22:59 가 된다. 입력은 기록 시계다',
     blockedBy: '공인 만세력 대조',
   },
   {
     id: 'zi-2301',
-    purpose: '23:01 출생. 정자시설은 익일 일주, 야자시설은 당일 일주',
+    purpose: '보정 후 23:01. 정자시설은 익일 일주, 야자시설은 당일 일주',
     requirement: 'zi-hour-boundary',
     input: {
-      birth: '1990-03-10T23:01:00',
+      birth: '1990-03-10T23:33:00',
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -361,32 +370,36 @@ export const CASES: readonly VerificationCase[] = [
   },
   {
     id: 'zi-2359',
-    purpose: '23:59 출생. 자정 직전에도 정책 분기가 유지되는가',
+    purpose: '보정 후 23:59. 자정 직전에도 정책 분기가 유지되는가',
     requirement: 'zi-hour-boundary',
     input: {
-      birth: '1990-03-10T23:59:00',
+      birth: '1990-03-11T00:31:00',
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
+    notes:
+      '진태양시 보정 -32분을 적용하면 23:59 가 된다. 입력은 기록 시계다',
     blockedBy: '공인 만세력 대조. 두 정책의 값을 모두 받아야 한다',
   },
   {
     id: 'zi-0001',
-    purpose: '00:01 출생. 자정을 넘겨 두 정책이 다시 같아지는가',
+    purpose: '보정 후 00:01. 자정을 넘겨 두 정책이 다시 같아지는가',
     requirement: 'zi-hour-boundary',
     input: {
-      birth: '1990-03-11T00:01:00',
+      birth: '1990-03-11T00:33:00',
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
+    notes:
+      '진태양시 보정 -32분을 적용하면 00:01 가 된다. 입력은 기록 시계다',
     blockedBy: '공인 만세력 대조',
   },
 
@@ -400,7 +413,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -415,7 +428,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -431,7 +444,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -442,15 +455,244 @@ export const CASES: readonly VerificationCase[] = [
     purpose: 'UTC+8:30 시기 한가운데 출생. 구간 내부가 일관되게 처리되는가',
     requirement: 'timezone-transition',
     input: {
-      birth: '1958-05-05T06:15:00',
+      birth: '1958-03-05T06:15:00',
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
     blockedBy: '공인 만세력 대조',
+    notes:
+      '서머타임 밖의 순수한 UTC+8:30 구간이다. 1958년 서머타임은 05-04 에 시작한다',
+  },
+  {
+    id: 'dst-1958-utc930',
+    purpose: '기준이 UTC+8:30 이던 시기의 서머타임. 오프셋이 UTC+9:30 인가',
+    requirement: 'dst',
+    input: {
+      birth: '1958-05-05T06:15:00',
+      calendar: 'solar',
+      gender: 'F',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조',
+    notes:
+      '1987~1988 과 달리 한 시간이 아니라 30분만 풀어야 06:15 가 05:45 가 된다',
+  },
+  {
+    id: 'verified-19550808-seoul',
+    purpose:
+      'UTC+8:30 시기 + 서머타임 + 입추 경계. 정규화와 경도 보정이 합쳐진 값이 맞는가',
+    requirement: 'dst',
+    input: {
+      birth: '1955-08-08T17:28:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: {
+      year: '을미',
+      month: '갑신',
+      day: '신축',
+      hour: '병신',
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '청목서원 명리보감 사례 (waylake/four-eight 조사 노트 경유, 2026-07-27 조사). 보정 경로 -60분 -2분 = 16:26',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 서울시 -2분 06초 선택). 을미 갑신 신축 병신',
+      'uncle.tools 만세력 달력 실측 (2026-08-09). 1955-08-08 일진 신축',
+    ],
+    notes:
+      '당시 오프셋은 UTC+9:30 이다. 서머타임이 UTC+8:30 위에 얹혀 있어 한 시간을 일괄로 빼면 틀린다',
+  },
+  {
+    id: 'verified-19560707-busan',
+    purpose: 'UTC+8:30 시기 + 소서 절입 2분 차. 월주가 갈리는 경계다',
+    requirement: 'solar-term-boundary',
+    input: {
+      birth: '1956-07-07T13:30:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 129.08,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: {
+      year: '병신',
+      month: '을미',
+      day: '을해',
+      hour: '임오',
+      trueSolarOffsetMin: -24,
+    },
+    verified: true,
+    sources: [
+      '청목서원 명리보감 사례 (waylake/four-eight 조사 노트 경유, 2026-07-27 조사). 소서 12:58(E135) 대 출생 13:00',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 부산시 +6분 18초 선택). 병신 을미 을해 임오',
+    ],
+    notes:
+      '30분을 잘못 다루면 소서 이전으로 밀려 월주가 갑오가 된다. 정규화 검증에서 가장 예민한 케이스다',
+  },
+  {
+    id: 'verified-19880608-busan',
+    purpose: '1987~1988 서머타임 구간. 한 시간을 푸는가',
+    requirement: 'dst',
+    input: {
+      birth: '1988-06-08T05:40:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 129.08,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: {
+      year: '무진',
+      month: '무오',
+      day: '갑오',
+      hour: '병인',
+      trueSolarOffsetMin: -24,
+    },
+    verified: true,
+    sources: [
+      '청목서원 명리보감 사례 (waylake/four-eight 조사 노트 경유, 2026-07-27 조사). 동경시 -24분, 서머타임 -60분 = 04:16',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 부산시 +6분 18초 선택). 무진 무오 갑오 병인',
+    ],
+  },
+  {
+    id: 'verified-19880905-seoul',
+    purpose:
+      '서머타임을 푼 뒤 전날 자시로 넘어간다. 야자시 정책이 일주를 가른다',
+    requirement: 'zi-hour-boundary',
+    input: {
+      birth: '1988-09-05T00:50:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: {
+      year: '무진',
+      month: '경신',
+      day: '계해',
+      hour: '임자',
+      underOppositeZiPolicy: { day: '임술', hour: '임자' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '청목서원 명리보감 사례 (waylake/four-eight 조사 노트 경유, 2026-07-27 조사). -32분 -60분 = 09-04 23:18',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 야자시선택 해제). 무진 경신 계해 임자',
+      'uncle.tools 만세력 달력 (조사 노트 인용). 1988-09-04 임술, 09-05 계해',
+    ],
+    notes:
+      '시주는 두 정책이 같다. 야자시설도 시간(時干)은 다음날 일간으로 잡기 때문이다',
+  },
+  {
+    id: 'verified-20050510-0020-busan',
+    purpose: '경도 보정으로 전날 자시로 넘어간다. 야자시 정책이 일주를 가른다',
+    requirement: 'zi-hour-boundary',
+    input: {
+      birth: '2005-05-10T00:20:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 129.08,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: {
+      year: '을유',
+      month: '신사',
+      day: '갑오',
+      hour: '갑자',
+      underOppositeZiPolicy: { day: '계사', hour: '갑자' },
+      trueSolarOffsetMin: -24,
+    },
+    verified: true,
+    sources: [
+      '청목서원 명리보감 사례 (waylake/four-eight 조사 노트 경유, 2026-07-27 조사). -24분 = 05-09 23:56',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 야자시선택 해제). 을유 신사 갑오 갑자',
+      'uncle.tools 만세력 달력 (조사 노트 인용). 2005-05-09 계사, 05-10 갑오',
+    ],
+  },
+  {
+    id: 'verified-20050510-0052-seoul',
+    purpose: '경도 보정을 해도 자정을 넘지 않는다. 두 정책이 같은 값을 낸다',
+    requirement: 'zi-hour-boundary',
+    input: {
+      birth: '2005-05-10T00:52:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: {
+      year: '을유',
+      month: '신사',
+      day: '갑오',
+      hour: '갑자',
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '청목서원 명리보감 사례 (waylake/four-eight 조사 노트 경유, 2026-07-27 조사). -32분 = 00:20',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 서울시 -2분 06초 선택). 을유 신사 갑오 갑자',
+    ],
+    notes:
+      '바로 앞 부산 케이스와 32분 차이로 갈린다. 같은 날 같은 시각대인데 경도가 일주를 바꾼다',
+  },
+  {
+    id: 'ambiguous-19580920-2315',
+    purpose:
+      '두 번 존재하는 벽시계. 해석에 따라 시지와 일주가 함께 갈리는 자리다',
+    requirement: 'wall-clock-ambiguity',
+    input: {
+      birth: '1958-09-20T23:15:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조와 모호 구간 해석 관행 확인',
+    notes:
+      '앞의 해석이면 22:45 라 해시에 20일 일주, 뒤의 해석이면 23:45 라 자시에 21일 일주다',
+  },
+  {
+    id: 'nonexistent-19610810-0010',
+    purpose: '존재하지 않는 벽시계. 전환 직후로 밀어 00:30 이 되는가',
+    requirement: 'wall-clock-ambiguity',
+    input: {
+      birth: '1961-08-10T00:10:00',
+      calendar: 'solar',
+      gender: 'F',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조',
+    notes: '1961-08-10 00:00~00:30 은 시계가 건너뛰어 존재한 적이 없다',
+  },
+  {
+    id: 'pre-standard-19050304',
+    purpose: '표준시 도입 이전 출생. 지방평균태양시로 읽는가',
+    requirement: 'pre-standard-time',
+    input: {
+      birth: '1905-03-04T12:00:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조',
+    notes:
+      '당시 기록된 시각이 어느 시계를 본 것인지 알 수 없다는 한계가 이 케이스에 남는다',
   },
 
   // 서머타임. docs/05 10장이 1987~1988년을 지목한다.
@@ -463,7 +705,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -478,7 +720,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -496,12 +738,13 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 129.08,
-      options: { ziPolicy: 'zheng', trueSolarTime: true },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
     blockedBy: '공인 만세력 대조',
-    notes: '부산은 129.08 도라 약 -24분이다. 보정을 끄면 시주가 달라져야 한다',
+    notes:
+      '부산은 129.08 도라 -24분이다. 13:10 이 12:46 이 되어 시지가 미에서 오로 넘어온다',
   },
 
   // 음력 윤달.
@@ -515,7 +758,7 @@ export const CASES: readonly VerificationCase[] = [
       leapMonth: true,
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -532,7 +775,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -548,7 +791,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -563,7 +806,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -579,7 +822,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -594,7 +837,7 @@ export const CASES: readonly VerificationCase[] = [
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
-      options: { ziPolicy: 'zheng', trueSolarTime: false },
+      options: { ziPolicy: 'zheng' },
     },
     expected: null,
     verified: false,
@@ -613,3 +856,34 @@ export const VERIFIED_CASES: readonly VerifiedCase[] = CASES.filter(
 export const PENDING_CASES: readonly PendingCase[] = CASES.filter(
   (c): c is PendingCase => !c.verified,
 );
+
+/** id 로 케이스를 집는다. 없는 id 는 오타이므로 던진다. */
+export function caseById(id: string): VerificationCase {
+  const found = CASES.find((c) => c.id === id);
+  if (!found) throw new Error(`그런 케이스가 없다: ${id}`);
+  return found;
+}
+
+/** `birth` 문자열을 벽시계로. Date 는 문자열 해석이 실행 환경에 묶여 쓰지 않는다. */
+export function parseBirth(birth: string): CalendarDateTime {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(birth);
+  if (!m) throw new Error(`birth 형식이 아니다: ${birth}`);
+
+  return {
+    year: Number(m[1]),
+    month: Number(m[2]),
+    day: Number(m[3]),
+    hour: Number(m[4]),
+    minute: Number(m[5]),
+  };
+}
+
+/** 픽스처는 원본 JSON 의 어휘를 쓴다. 대응은 docs/05 6장에 있다. */
+export function engineZiPolicy(policy: ZiPolicy): EngineZiPolicy {
+  return policy === 'zheng' ? 'nextDay' : 'sameDay';
+}
+
+/** 케이스 입력을 파이프라인 옵션으로. 서머타임 기록 성격은 픽스처에 없어 기본값을 쓴다. */
+export function correctionOptions(input: CaseInput): TimeCorrectionOptions {
+  return { longitude: input.longitude };
+}

@@ -1,49 +1,33 @@
 import { describe, expect, it } from 'vitest';
 
+import { julianDayNumber, utcMsFromWall } from './calendar';
+import type { CalendarDateTime } from './calendar';
 import { SOLAR_TERM_NAMES, solarTerms } from './data/solar-terms';
-import { VERIFIED_CASES } from './fixtures/cases';
-import type { ZiPolicy as FixtureZiPolicy } from './fixtures/cases';
+import {
+  VERIFIED_CASES,
+  caseById,
+  correctionOptions,
+  engineZiPolicy,
+  parseBirth,
+} from './fixtures/cases';
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from './index';
-import type { CalendarDateTime, ZiPolicy } from './pillars';
 import {
   dayPillar,
+  hourBranch,
   indexFromPillar,
-  julianDayNumber,
   monthBranchIndex,
   monthPillar,
   pillarFromIndex,
   sajuYear,
   yearPillar,
 } from './pillars';
+import { correctBirthTime } from './time';
+import type { CaseInput } from './fixtures/cases';
 
-/** 픽스처의 birth 문자열을 파싱한다. Date 는 문자열 해석이 실행 환경에 묶여 쓰지 않는다. */
-function parseBirth(birth: string): CalendarDateTime {
-  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(birth);
-  if (!m) throw new Error(`birth 형식이 아니다: ${birth}`);
-
-  return {
-    year: Number(m[1]),
-    month: Number(m[2]),
-    day: Number(m[3]),
-    hour: Number(m[4]),
-    minute: Number(m[5]),
-  };
-}
-
-/**
- * 픽스처의 벽시계 시각을 물리적 시각으로 바꾼다.
- *
- * 년주와 월주는 절입 순간과 비교하므로 물리적 시각이 필요하다.
- * 표준시 이력을 다루는 파이프라인이 아직 없어 여기서는 UTC+9 로 고정한다.
- * 픽스처의 년주와 월주 케이스가 전부 1961년 이후라 그 구간에서는 정확하다.
- */
-function toUtcMs(at: CalendarDateTime): number {
-  return Date.UTC(at.year, at.month - 1, at.day, at.hour - 9, at.minute);
-}
-
-/** 픽스처는 원본 JSON 의 어휘를 쓴다. 대응은 docs/05 6장에 있다. */
-function toEnginePolicy(policy: FixtureZiPolicy): ZiPolicy {
-  return policy === 'zheng' ? 'nextDay' : 'sameDay';
+/** 케이스의 벽시계를 파이프라인에 태워 물리적 시각을 얻는다. docs/05 7장. */
+function caseUtcMs(input: CaseInput): number {
+  return correctBirthTime(parseBirth(input.birth), correctionOptions(input))
+    .utcMs;
 }
 
 describe('율리우스 적일', () => {
@@ -136,8 +120,12 @@ describe('일주', () => {
 
   it('모든 verified 케이스의 일주를 재현한다', () => {
     for (const c of withDay) {
-      const at = parseBirth(c.input.birth);
-      const policy = toEnginePolicy(c.input.options.ziPolicy);
+      // 일주는 보정이 끝난 벽시계를 받는다. docs/05 4장
+      const at = correctBirthTime(
+        parseBirth(c.input.birth),
+        correctionOptions(c.input),
+      ).corrected;
+      const policy = engineZiPolicy(c.input.options.ziPolicy);
       expect(dayPillar(at, policy), `${c.id} (${c.input.birth})`).toBe(
         c.expected.day,
       );
@@ -265,8 +253,13 @@ describe('야자시 정책', () => {
   });
 });
 
-/** KST 벽시계 문자열을 물리적 시각으로. 테스트 가독성용이다. */
-const kst = (text: string): number => toUtcMs(parseBirth(text));
+/**
+ * KST 벽시계 문자열을 물리적 시각으로. 테스트 가독성용이다.
+ *
+ * 파이프라인을 태우지 않는다. 여기 쓰는 시각은 절기 경계를 겨냥해 지어낸 값이고
+ * 1899년과 2101년처럼 파이프라인이 먼저 거부할 값도 있다.
+ */
+const kst = (text: string): number => utcMsFromWall(parseBirth(text), 32_400);
 
 describe('년주', () => {
   const withYear = VERIFIED_CASES.filter((c) => c.expected.year);
@@ -278,7 +271,7 @@ describe('년주', () => {
   it('모든 verified 케이스의 년주를 재현한다', () => {
     // 앵커 상수를 흔들면 여기가 깨진다.
     for (const c of withYear) {
-      const at = toUtcMs(parseBirth(c.input.birth));
+      const at = caseUtcMs(c.input);
       expect(yearPillar(at), `${c.id} (${c.input.birth})`).toBe(
         c.expected.year,
       );
@@ -314,7 +307,7 @@ describe('월주', () => {
 
   it('모든 verified 케이스의 월주를 재현한다', () => {
     for (const c of withMonth) {
-      const at = toUtcMs(parseBirth(c.input.birth));
+      const at = caseUtcMs(c.input);
       expect(monthPillar(at), `${c.id} (${c.input.birth})`).toBe(
         c.expected.month,
       );
@@ -409,5 +402,73 @@ describe('절기 데이터와 월 경계', () => {
     for (let i = 1; i < terms.length; i++) {
       expect(terms[i].utcMs).toBeGreaterThan(terms[i - 1].utcMs);
     }
+  });
+});
+
+describe('시지', () => {
+  const on = (hour: number, minute = 0): CalendarDateTime => ({
+    year: 1995,
+    month: 10,
+    day: 1,
+    hour,
+    minute,
+  });
+
+  it('자시가 23시에 열려 자정을 걸친다', () => {
+    expect(hourBranch(on(22, 59))).toBe('해');
+    expect(hourBranch(on(23, 0))).toBe('자');
+    expect(hourBranch(on(23, 59))).toBe('자');
+    expect(hourBranch(on(0, 1))).toBe('자');
+    expect(hourBranch(on(1, 0))).toBe('축');
+  });
+
+  it('12지가 두 시간씩 순서대로 돈다', () => {
+    // docs/05 5.1 의 구간표 그대로다.
+    const expected = [
+      '자',
+      '축',
+      '인',
+      '묘',
+      '진',
+      '사',
+      '오',
+      '미',
+      '신',
+      '유',
+      '술',
+      '해',
+    ];
+
+    for (const [i, branch] of expected.entries()) {
+      const start = (23 + i * 2) % 24;
+      expect(hourBranch(on(start)), `${start}시`).toBe(branch);
+      expect(hourBranch(on((start + 1) % 24)), `${start + 1}시`).toBe(branch);
+    }
+  });
+
+  it('진태양시 보정이 시지를 넘긴다', () => {
+    // 부산 129.08 도는 -24분이라 13:10 이 12:46 이 되어 미시에서 오시로 넘어온다.
+    const busan = caseById('true-solar-busan').input;
+    const at = parseBirth(busan.birth);
+
+    // 보정을 넣지 않은 기록 시계로는 미시다. 보정이 항상 걸리므로 결과는 오시다. ADR 0016
+    expect(hourBranch(at)).toBe('미');
+    expect(
+      hourBranch(
+        correctBirthTime(at, { longitude: busan.longitude }).corrected,
+      ),
+    ).toBe('오');
+  });
+
+  it('서머타임을 풀면 시지가 넘어온다', () => {
+    // dst-1988 의 notes 가 예고한 값이다. 13:20 을 풀면 12:20 이라 오시다.
+    const at = parseBirth(caseById('dst-1988').input.birth);
+
+    expect(hourBranch(at)).toBe('미');
+    expect(
+      hourBranch(
+        correctBirthTime(at, { longitude: 126.98 }).corrected,
+      ),
+    ).toBe('오');
   });
 });

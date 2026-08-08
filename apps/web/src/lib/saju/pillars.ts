@@ -10,9 +10,11 @@
  * 년주와 월주는 물리적 시각을 받는다. 절입 순간과 비교해야 하고 그 순간은 지구 전체에 하나다.
  *
  * 벽시계에서 물리적 시각으로 가는 변환은 표준시 이력을 아는 파이프라인의 몫이다.
- * docs/05 7장이고 아직 구현하지 않았다. 여기서 그 순서를 추측해 넣지 않는다.
+ * docs/05 7장이고 `time.ts` 가 한다. 여기서 그 순서를 다시 밟지 않는다.
  */
 
+import { julianDayNumber } from './calendar';
+import type { CalendarDateTime } from './calendar';
 import {
   SOLAR_TERM_FIRST_YEAR,
   SOLAR_TERM_LAST_YEAR,
@@ -21,19 +23,6 @@ import {
 import type { SolarTermName } from './data/solar-terms';
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from './index';
 import type { EarthlyBranch, HeavenlyStem, Pillar } from './index';
-
-/** 보정이 끝난 벽시계 시각. 어느 시간대의 값인지는 호출부가 정한다. */
-export interface CalendarDateTime {
-  year: number;
-  /** 1 부터 12 */
-  month: number;
-  /** 1 부터 31 */
-  day: number;
-  /** 0 부터 23 */
-  hour: number;
-  /** 0 부터 59 */
-  minute: number;
-}
 
 /**
  * 야자시 정책. docs/05 6장.
@@ -124,32 +113,6 @@ const MONTH_BRANCH_ORDER: readonly EarthlyBranch[] = [
   '축',
 ];
 
-/**
- * 그레고리력 날짜의 율리우스 적일.
- *
- * Fliegel 과 Van Flandern 의 정수 연산식이다. Date 를 쓰지 않으므로
- * 실행 환경 타임존과 무관하게 같은 값이 나온다.
- */
-export function julianDayNumber(
-  year: number,
-  month: number,
-  day: number,
-): number {
-  const a = Math.floor((14 - month) / 12);
-  const y = year + 4800 - a;
-  const m = month + 12 * a - 3;
-
-  return (
-    day +
-    Math.floor((153 * m + 2) / 5) +
-    365 * y +
-    Math.floor(y / 4) -
-    Math.floor(y / 100) +
-    Math.floor(y / 400) -
-    32045
-  );
-}
-
 /** 60갑자 인덱스를 간지로 바꾼다. 갑자가 0 이고 계해가 59 다. */
 export function pillarFromIndex(index: number): Pillar {
   const i = ((index % 60) + 60) % 60;
@@ -186,6 +149,18 @@ export function dayPillarJdn(at: CalendarDateTime, ziPolicy: ZiPolicy): number {
  */
 export function dayPillar(at: CalendarDateTime, ziPolicy: ZiPolicy): Pillar {
   return pillarFromIndex(dayPillarJdn(at, ziPolicy) + DAY_PILLAR_ANCHOR);
+}
+
+/**
+ * 시지. docs/05 5.1.
+ *
+ * 자시가 23시에 시작해 두 시간씩 나간다. 23시를 0으로 당기면 지지 순서와 그대로 맞물린다.
+ *
+ * 보정이 끝난 벽시계를 받는다. 진태양시를 켰다면 그 보정까지 끝난 값이어야 한다.
+ * 시간(時干)을 정하는 시두법은 아직 구현하지 않았다.
+ */
+export function hourBranch(at: CalendarDateTime): EarthlyBranch {
+  return EARTHLY_BRANCHES[Math.floor(((at.hour + 1) % 24) / 2)];
 }
 
 /** 절기 데이터는 연도마다 24개가 소한부터 동지 순서로 들어 있다. */
