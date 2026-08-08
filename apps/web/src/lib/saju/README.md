@@ -14,8 +14,12 @@
 ## 이 디렉토리의 제약
 
 외부 의존이 0 이다. React, 날짜 라이브러리, Supabase 클라이언트, UI 코드를 import 하지 않는다.
-허용 예외는 KASI 절기·음력 데이터 모듈뿐이며, 그 모듈도 파일에서 데이터를 읽는 형태여야 하고
+허용 예외는 `data/` 의 절기와 음력 데이터 모듈뿐이며, 그 모듈도 값을 품고 있는 형태여야 하고
 네트워크를 타면 안 된다.
+
+`data/solar-terms.ts` 는 자동 생성 파일이라 직접 고치지 않는다.
+`apps/web/scripts/build-terms-table.mjs` 가 만든다. 근거는
+[ADR 0014](../../../../../docs/adr/0014-kasi-data-bundled-not-fetched.md).
 
 현재 시각과 실행 환경 타임존을 읽지 않는다.
 `Date.now()`, 인자 없는 `new Date()`, `Math.random()`, `getTimezoneOffset()`,
@@ -24,10 +28,10 @@
 
 이 제약은 두 겹으로 강제된다.
 
-| 수단 | 담당 | 위치 |
-| --- | --- | --- |
-| lint | import 경계 | `apps/web/.oxlintrc.json` 의 `overrides` |
-| 훅 | 환경 의존 호출 | `.claude/hooks/saju-engine-purity.sh` |
+| 수단 | 담당           | 위치                                     |
+| ---- | -------------- | ---------------------------------------- |
+| lint | import 경계    | `apps/web/.oxlintrc.json` 의 `overrides` |
+| 훅   | 환경 의존 호출 | `.claude/hooks/saju-engine-purity.sh`    |
 
 정당한 예외가 있으면 같은 줄에 `hook-allow` 와 사유를 주석으로 남긴다.
 
