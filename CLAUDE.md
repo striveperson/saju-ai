@@ -374,7 +374,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 | 년주, 월주, 일주, 시주 | `apps/web/src/lib/saju/pillars.ts` |
 | 검증 케이스 35개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
 
-검증 케이스는 35개 중 14개가 `verified` 다. 나머지 21개는 표준시 전환, 음력, 대운이라
+검증 케이스는 35개 중 18개가 `verified` 다. 나머지 17개는 표준시 전환, 음력, 대운이라
 공인 만세력 대조가 붙어야 채운다. 각 케이스의 `blockedBy` 에 적혀 있다.
 다만 표준시와 서머타임 케이스는 간지가 비어 있어도 파이프라인 출력이 검증된다.
 tz database 로 결정되는 값이라 만세력을 기다릴 이유가 없다.

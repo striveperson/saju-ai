@@ -334,6 +334,18 @@ export const CASES: readonly VerificationCase[] = [
   //
   // 진태양시 보정을 항상 적용하므로(ADR 0016) 기록 시계와 판정 시각이 32분 어긋난다.
   // 서울 기준으로 기록 시계 23:32 가 자시의 시작이다. 입력은 그 경계를 끼도록 잡았다.
+  //
+  // 네 건 모두 1990-03-10 과 03-11 이라 년주와 월주가 경오 기묘로 같다.
+  // 갈리는 것은 일주와 시주뿐이고 그것이 이 묶음이 겨냥하는 것이다.
+  //
+  // 야자시 조회는 정책이 실제로 갈리는 두 건에만 했다.
+  // 나머지 둘은 보정 후 시각이 23시대 밖이라 정책이 일주를 옮길 여지가 없다.
+  //
+  // 두 곳에서 확인한 것은 일주뿐이다. 년주와 월주, 시주는 포스텔러 한 곳에 기댄다.
+  // 기준 케이스와 같은 상황이고 이유도 같다(README 의 기둥별 독립 출처 표).
+  // uncle.tools 는 자시를 23:30 으로 여는 시간표라 서울 보정을 -30분으로 잡는다.
+  // 우리는 경도 126.98도에서 -32분이고, 그 2분이 정확히 zi-2259 와 zi-2301 을 가른다.
+  // 그래서 이 묶음에서는 일진 달력으로만 쓰고 네 기둥 대조에는 쓰지 않는다.
   {
     id: 'zi-2259',
     purpose: '보정 후 22:59. 자시 진입 전이라 두 정책이 같아야 한다',
@@ -345,10 +357,20 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    notes: '진태양시 보정 -32분을 적용하면 22:59 가 된다. 입력은 기록 시계다',
-    blockedBy: '공인 만세력 대조',
+    expected: {
+      year: '경오',
+      month: '기묘',
+      day: '갑술',
+      hour: '을해',
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-09, 서울특별시 지역시 -32분). 경오 기묘 갑술 을해',
+      'uncle.tools 만세력 달력 실측 (2026-08-09). 1990-03-10 갑술',
+    ],
+    notes:
+      '기록 시계 23:31 이 보정 후 22:59 라 해시다. 바로 다음 케이스와 2분 차이로 자시가 갈린다',
   },
   {
     id: 'zi-2301',
@@ -361,11 +383,22 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy: '공인 만세력 대조. 두 정책의 값을 모두 받아야 한다',
+    expected: {
+      year: '경오',
+      month: '기묘',
+      day: '을해',
+      hour: '병자',
+      underOppositeZiPolicy: { day: '갑술', hour: '병자' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-09, 서울특별시 지역시 -32분). 경오 기묘 을해 병자',
+      '같은 조회에 야자시/조자시를 켠 값 (2026-08-09). 일주만 갑술로 바뀌고 시주는 병자 그대로',
+      'uncle.tools 만세력 달력 실측 (2026-08-09). 1990-03-10 갑술, 03-11 을해',
+    ],
     notes:
-      '정책별로 일주가 갈리는 지점이다. expected 와 underOppositeZiPolicy 를 모두 채운다',
+      '앞 케이스와 2분 차이로 일주와 시주가 함께 갈린다. 시주는 두 정책이 같다',
   },
   {
     id: 'zi-2359',
@@ -378,10 +411,22 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    notes: '진태양시 보정 -32분을 적용하면 23:59 가 된다. 입력은 기록 시계다',
-    blockedBy: '공인 만세력 대조. 두 정책의 값을 모두 받아야 한다',
+    expected: {
+      year: '경오',
+      month: '기묘',
+      day: '을해',
+      hour: '병자',
+      underOppositeZiPolicy: { day: '갑술', hour: '병자' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-09, 서울특별시 지역시 -32분). 경오 기묘 을해 병자',
+      '같은 조회에 야자시/조자시를 켠 값 (2026-08-09). 일주만 갑술로 바뀌고 시주는 병자 그대로',
+      'uncle.tools 만세력 달력 실측 (2026-08-09). 1990-03-10 갑술, 03-11 을해',
+    ],
+    notes:
+      '입력 날짜가 03-11 인데 보정 후 03-10 으로 되돌아간다. 정책 분기가 자정 직전까지 살아 있다',
   },
   {
     id: 'zi-0001',
@@ -394,10 +439,20 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    notes: '진태양시 보정 -32분을 적용하면 00:01 가 된다. 입력은 기록 시계다',
-    blockedBy: '공인 만세력 대조',
+    expected: {
+      year: '경오',
+      month: '기묘',
+      day: '을해',
+      hour: '병자',
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-09, 서울특별시 지역시 -32분). 경오 기묘 을해 병자',
+      'uncle.tools 만세력 달력 실측 (2026-08-09). 1990-03-11 을해',
+    ],
+    notes:
+      '앞 케이스와 시주가 같은 병자인데 일주가 정책과 무관해진다. 조자시라 옮길 자정이 없다',
   },
 
   // 표준시 전환일. docs/05 10장이 두 날짜를 지정한다.
