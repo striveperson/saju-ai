@@ -188,14 +188,15 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng', trueSolarTime: false },
     },
-    expected: { day: '무오' },
+    expected: { year: '기묘', day: '무오' },
     verified: true,
     sources: [
-      'KASI 음양력 정보 getLunCalInfo 실측 (2026-08-08). 율리우스 적일 2451545',
+      'KASI 음양력 정보 getLunCalInfo 실측 (2026-08-08). 율리우스 적일 2451545, 일진 무오, 세차 기묘',
     ],
     notes:
       '기준 케이스와 정확히 1800일(60의 30배) 떨어져 있어 60갑자 잔여가 같다. ' +
-      '공식을 새로 제약하지는 않고 윤년 계산이 5년 구간에서 어긋나지 않는지만 확인한다.',
+      '공식을 새로 제약하지는 않고 윤년 계산이 5년 구간에서 어긋나지 않는지만 확인한다. ' +
+      '입춘과 설날 둘 다 이전이라 KASI 세차가 사주 년주와 같다. 사주 연도는 1999년이다.',
   },
   {
     id: 'anchor-19840217',
@@ -208,11 +209,14 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng', trueSolarTime: false },
     },
-    expected: { day: '신사' },
+    expected: { year: '갑자', day: '신사' },
     verified: true,
     sources: [
-      'KASI 음양력 정보 getLunCalInfo 실측 (2026-08-08). 율리우스 적일 2445748',
+      'KASI 음양력 정보 getLunCalInfo 실측 (2026-08-08). 율리우스 적일 2445748, 일진 신사, 세차 갑자',
     ],
+    notes:
+      '입춘과 설날을 둘 다 지난 날짜라 KASI 세차가 사주 년주와 같다. ' +
+      '1984년이 갑자년이라는 년주 앵커의 근거다.',
   },
   {
     id: 'anchor-19350620',
@@ -225,66 +229,101 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng', trueSolarTime: false },
     },
-    expected: { day: '정묘' },
+    expected: { year: '을해', day: '정묘' },
     verified: true,
     sources: [
-      'KASI 음양력 정보 getLunCalInfo 실측 (2026-08-08). 율리우스 적일 2427974',
+      'KASI 음양력 정보 getLunCalInfo 실측 (2026-08-08). 율리우스 적일 2427974, 일진 정묘, 세차 을해',
     ],
+    notes:
+      '한여름이라 입춘과 설날 구간에서 멀다. KASI 세차가 사주 년주와 같다.',
   },
 
   // 입춘 경계. 년주와 월주가 함께 갈린다.
   // docs/05 10장은 절입 1분 전과 1분 후를 요구한다. 절입 시각이 있어야 시각을 확정할 수 있다.
+  // 2024년 입춘은 KST 02-04 17:27 이다. data/solar-terms.ts 의 값이고
+  // KASI 특일정보 발표값과 분 단위로 일치한다.
+  //
+  // 년주는 60갑자 연 순환이라 다툼이 없다. 월주는 월두법 표(docs/05 3.1)에서 나오므로
+  // 구현이 표를 잘못 옮겼는지는 잡히지만 표 자체가 틀렸는지는 이 케이스로 잡히지 않는다.
   {
     id: 'ipchun-2024-before',
     purpose: '입춘 절입 1분 전 출생. 전년도 년주와 축월이 유지되는가',
     requirement: 'ipchun-boundary',
     input: {
-      birth: '2024-02-04T00:00:00',
+      birth: '2024-02-04T17:26:00',
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
       options: { ziPolicy: 'zheng', trueSolarTime: false },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      'KASI 2024년 입춘 절입 시각. 확정 후 birth 를 절입 1분 전으로 고친다',
-    notes: '년주는 계묘(전년), 월주는 축월이어야 한다',
+    expected: { year: '계묘', month: '을축' },
+    verified: true,
+    sources: [
+      'KASI 특일정보 get24DivisionsInfo 실측 (2026-08-08). 2024년 입춘 KST 17:27',
+      'docs/05 3.1 월두법. 년간 계에서 인월이 갑인이고 축월은 열한 칸 뒤다',
+    ],
+    notes:
+      '사주 연도가 2023년이라 년주가 계묘다. 절입 1분 전이므로 아직 축월이다. ' +
+      '월주 근거가 규칙표라 표 자체의 오류는 이 케이스로 잡히지 않는다.',
   },
   {
     id: 'ipchun-2024-after',
     purpose: '입춘 절입 1분 후 출생. 새 년주와 인월로 전환되는가',
     requirement: 'ipchun-boundary',
     input: {
-      birth: '2024-02-04T00:00:00',
+      birth: '2024-02-04T17:28:00',
       calendar: 'solar',
       gender: 'F',
       longitude: 126.98,
       options: { ziPolicy: 'zheng', trueSolarTime: false },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      'KASI 2024년 입춘 절입 시각. 확정 후 birth 를 절입 1분 후로 고친다',
-    notes: '년주는 갑진, 월주는 인월이어야 한다',
+    expected: { year: '갑진', month: '병인' },
+    verified: true,
+    sources: [
+      'KASI 특일정보 get24DivisionsInfo 실측 (2026-08-08). 2024년 입춘 KST 17:27',
+      'docs/05 3.1 월두법. 년간 갑에서 인월이 병인이다',
+    ],
+    notes: '2분 사이에 년주와 월주가 함께 갈린다. before 와 짝이다.',
   },
 
-  // 입춘 외의 절기 경계. 월주만 갈린다.
+  // 입춘 외의 절기 경계. 월주만 갈리고 년주는 그대로다.
+  // 2024년 입하는 KST 05-05 09:10 이다.
   {
-    id: 'ipha-2024-boundary',
-    purpose: '입하 절입 전후. 입춘이 아닌 절기에서 월주만 갈리는가',
+    id: 'ipha-2024-before',
+    purpose: '입하 절입 1분 전 출생. 진월이 유지되는가',
     requirement: 'solar-term-boundary',
     input: {
-      birth: '2024-05-05T00:00:00',
+      birth: '2024-05-05T09:09:00',
       calendar: 'solar',
       gender: 'M',
       longitude: 126.98,
       options: { ziPolicy: 'zheng', trueSolarTime: false },
     },
-    expected: null,
-    verified: false,
-    blockedBy: 'KASI 2024년 입하 절입 시각',
-    notes: '년주는 갈리지 않고 월주만 사월로 넘어가야 한다',
+    expected: { year: '갑진', month: '무진' },
+    verified: true,
+    sources: [
+      'KASI 특일정보 get24DivisionsInfo 실측 (2026-08-08). 2024년 입하 KST 09:10',
+      'docs/05 3.1 월두법. 년간 갑에서 인월이 병인이고 진월은 두 칸 뒤다',
+    ],
+  },
+  {
+    id: 'ipha-2024-after',
+    purpose: '입하 절입 1분 후 출생. 월주만 사월로 넘어가고 년주는 그대로인가',
+    requirement: 'solar-term-boundary',
+    input: {
+      birth: '2024-05-05T09:11:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng', trueSolarTime: false },
+    },
+    expected: { year: '갑진', month: '기사' },
+    verified: true,
+    sources: [
+      'KASI 특일정보 get24DivisionsInfo 실측 (2026-08-08). 2024년 입하 KST 09:10',
+      'docs/05 3.1 월두법. 년간 갑에서 인월이 병인이고 사월은 세 칸 뒤다',
+    ],
+    notes: '입춘 경계와 달리 년주가 갈리지 않는 것이 이 케이스의 요점이다.',
   },
 
   // 자시 경계. docs/05 10장이 네 시각을 지정한다.

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { SOLAR_TERM_NAMES, solarTerms } from './data/solar-terms';
 import { VERIFIED_CASES } from './fixtures/cases';
 import type { ZiPolicy as FixtureZiPolicy } from './fixtures/cases';
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from './index';
@@ -8,7 +9,11 @@ import {
   dayPillar,
   indexFromPillar,
   julianDayNumber,
+  monthBranchIndex,
+  monthPillar,
   pillarFromIndex,
+  sajuYear,
+  yearPillar,
 } from './pillars';
 
 /** 픽스처의 birth 문자열을 파싱한다. Date 는 문자열 해석이 실행 환경에 묶여 쓰지 않는다. */
@@ -23,6 +28,17 @@ function parseBirth(birth: string): CalendarDateTime {
     hour: Number(m[4]),
     minute: Number(m[5]),
   };
+}
+
+/**
+ * 픽스처의 벽시계 시각을 물리적 시각으로 바꾼다.
+ *
+ * 년주와 월주는 절입 순간과 비교하므로 물리적 시각이 필요하다.
+ * 표준시 이력을 다루는 파이프라인이 아직 없어 여기서는 UTC+9 로 고정한다.
+ * 픽스처의 년주와 월주 케이스가 전부 1961년 이후라 그 구간에서는 정확하다.
+ */
+function toUtcMs(at: CalendarDateTime): number {
+  return Date.UTC(at.year, at.month - 1, at.day, at.hour - 9, at.minute);
 }
 
 /** 픽스처는 원본 JSON 의 어휘를 쓴다. 대응은 docs/05 6장에 있다. */
@@ -246,5 +262,152 @@ describe('야자시 정책', () => {
       minute: 30,
     };
     expect(dayPillar(night, 'sameDay')).toBe(dayPillar(noon, 'sameDay'));
+  });
+});
+
+/** KST 벽시계 문자열을 물리적 시각으로. 테스트 가독성용이다. */
+const kst = (text: string): number => toUtcMs(parseBirth(text));
+
+describe('년주', () => {
+  const withYear = VERIFIED_CASES.filter((c) => c.expected.year);
+
+  it('검증 케이스가 셋 이상 있다', () => {
+    expect(withYear.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('모든 verified 케이스의 년주를 재현한다', () => {
+    // 앵커 상수를 흔들면 여기가 깨진다.
+    for (const c of withYear) {
+      const at = toUtcMs(parseBirth(c.input.birth));
+      expect(yearPillar(at), `${c.id} (${c.input.birth})`).toBe(
+        c.expected.year,
+      );
+    }
+  });
+
+  it('경계가 양력 1월 1일이 아니다', () => {
+    // 2024-01-01 은 아직 2023년 사주다. 입춘이 2월 4일이기 때문이다.
+    expect(sajuYear(kst('2024-01-01T12:00:00'))).toBe(2023);
+    expect(sajuYear(kst('2024-06-01T12:00:00'))).toBe(2024);
+  });
+
+  it('입춘 절입 1분 전후로 갈린다', () => {
+    // 2024년 입춘은 KST 17:27 이다.
+    expect(yearPillar(kst('2024-02-04T17:26:00'))).toBe('계묘');
+    expect(yearPillar(kst('2024-02-04T17:28:00'))).toBe('갑진');
+  });
+
+  it('60년 주기로 돌아온다', () => {
+    expect(yearPillar(kst('2044-06-01T12:00:00'))).toBe(
+      yearPillar(kst('1984-06-01T12:00:00')),
+    );
+  });
+
+  it('지원 범위 밖은 던진다', () => {
+    expect(() => yearPillar(kst('1899-06-01T12:00:00'))).toThrow(RangeError);
+    expect(() => yearPillar(kst('2101-06-01T12:00:00'))).toThrow(RangeError);
+  });
+});
+
+describe('월주', () => {
+  const withMonth = VERIFIED_CASES.filter((c) => c.expected.month);
+
+  it('모든 verified 케이스의 월주를 재현한다', () => {
+    for (const c of withMonth) {
+      const at = toUtcMs(parseBirth(c.input.birth));
+      expect(monthPillar(at), `${c.id} (${c.input.birth})`).toBe(
+        c.expected.month,
+      );
+    }
+  });
+
+  it('입춘 전후로 축월에서 인월로 넘어간다', () => {
+    expect(monthPillar(kst('2024-02-04T17:26:00'))).toBe('을축');
+    expect(monthPillar(kst('2024-02-04T17:28:00'))).toBe('병인');
+  });
+
+  it('입하 전후로 월주만 갈리고 년주는 그대로다', () => {
+    // 2024년 입하는 KST 09:10 이다.
+    const before = kst('2024-05-05T09:09:00');
+    const after = kst('2024-05-05T09:11:00');
+
+    expect(monthPillar(before)).toBe('무진');
+    expect(monthPillar(after)).toBe('기사');
+    expect(yearPillar(before)).toBe(yearPillar(after));
+  });
+
+  it('중기는 월 경계가 아니다', () => {
+    // 곡우는 청명과 입하 사이의 중기다. 앞뒤로 월주가 바뀌면 안 된다.
+    expect(monthPillar(kst('2024-04-19T12:00:00'))).toBe(
+      monthPillar(kst('2024-04-21T12:00:00')),
+    );
+  });
+
+  it('월지가 한 해에 인묘진사오미신유술해자축 순서로 정확히 열두 번 바뀐다', () => {
+    // 2024년 입춘 다음날부터 2025년 입춘 전날까지 훑는다.
+    const seen: number[] = [];
+    let cursor = kst('2024-02-05T12:00:00');
+    const end = kst('2025-02-03T12:00:00');
+
+    while (cursor <= end) {
+      const branch = monthBranchIndex(cursor);
+      if (seen[seen.length - 1] !== branch) seen.push(branch);
+      cursor += 24 * 3600 * 1000;
+    }
+
+    expect(seen).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+  });
+
+  it('월두법 표대로 인월 월주가 나온다', () => {
+    // docs/05 3.1. 년간 다섯 묶음이 각각 병인, 무인, 경인, 임인, 갑인을 연다.
+    const expected: [string, string][] = [
+      ['2024', '병인'], // 갑진년
+      ['2025', '무인'], // 을사년
+      ['2026', '경인'], // 병오년
+      ['2027', '임인'], // 정미년
+      ['2028', '갑인'], // 무신년
+      ['2029', '병인'], // 기유년. 갑과 같은 묶음이다
+    ];
+
+    for (const [year, pillar] of expected) {
+      // 입춘 직후는 반드시 인월이다.
+      const at = kst(`${year}-02-20T12:00:00`);
+      expect(monthPillar(at), `${year} 인월`).toBe(pillar);
+    }
+  });
+
+  it('지원 범위 밖은 던진다', () => {
+    expect(() => monthPillar(kst('1899-06-01T12:00:00'))).toThrow(RangeError);
+    expect(() => monthPillar(kst('2101-06-01T12:00:00'))).toThrow(RangeError);
+  });
+});
+
+describe('절기 데이터와 월 경계', () => {
+  it('절기 이름의 짝수 자리가 12절과 일치한다', () => {
+    // 구현은 이름 표를 쓰지만 데이터 순서도 같은 성질을 갖는지 확인한다.
+    // 어긋나면 데이터 생성 쪽이 바뀐 것이다.
+    const 절 = [
+      '소한',
+      '입춘',
+      '경칩',
+      '청명',
+      '입하',
+      '망종',
+      '소서',
+      '입추',
+      '백로',
+      '한로',
+      '입동',
+      '대설',
+    ];
+    expect(SOLAR_TERM_NAMES.filter((_, i) => i % 2 === 0)).toEqual(절);
+  });
+
+  it('한 해의 절기가 24개이고 시간순이다', () => {
+    const terms = solarTerms();
+    expect(terms.length % 24).toBe(0);
+    for (let i = 1; i < terms.length; i++) {
+      expect(terms[i].utcMs).toBeGreaterThan(terms[i - 1].utcMs);
+    }
   });
 });

@@ -324,12 +324,26 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 ## 아직 만들지 않은 것
 
-- 사주 계산 (엔진에는 60갑자 기본 테이블만 있다)
-- 검증 케이스 (`apps/web/src/lib/saju/fixtures/` 에 채우는 방법만 적혀 있다)
+- 시주. 시간 보정 파이프라인(docs/05 7장)이 선행 조건이다
+- 시간 보정 파이프라인. 표준시 이력, 서머타임 해제, 진태양시 보정
+- 신강약과 용신 판정 (`strength.ts`)
+- 대운과 세운
 - Supabase 스키마와 RLS
 - API 라우트와 화면
 - AI 해석 레이어
 - 네이티브 프로젝트 (`apps/mobile/ios`, `android`)
+
+만들어진 것은 이렇다.
+
+| 항목 | 위치 |
+| ---- | ---- |
+| 60갑자 테이블 | `apps/web/src/lib/saju/index.ts` |
+| 절기 데이터 1900~2100 | `apps/web/src/lib/saju/data/solar-terms.ts` |
+| 년주, 월주, 일주 | `apps/web/src/lib/saju/pillars.ts` |
+| 검증 케이스 24개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
+
+검증 케이스는 24개 중 8개가 `verified` 다. 나머지 16개는 표준시 전환, 서머타임,
+진태양시, 대운이라 공인 만세력 대조가 붙어야 채운다. 각 케이스의 `blockedBy` 에 적혀 있다.
 
 에이전트와 커스텀 커맨드도 아직 없다. 대상이 생길 때 만든다.
 엔진 구현을 시작하면 `/Users/mychoi/f-lab/saju` 의 `saju-calc` 스킬과 `saju-master` 에이전트를
