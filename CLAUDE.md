@@ -17,6 +17,11 @@
 | 모바일 셸                        | [apps/mobile/README.md](apps/mobile/README.md)                     |
 | 왜 이렇게 결정했는가             | [docs/adr/](docs/adr/)                                             |
 | 문서 작성 규칙                   | [docs/00-documentation-guide.md](docs/00-documentation-guide.md)   |
+| 코드를 고칠 때의 작업 방식       | [docs/06-code-working-rules.md](docs/06-code-working-rules.md)     |
+
+06 은 세션마다 자동으로 읽힌다. 표의 나머지는 필요할 때 열어본다.
+
+@docs/06-code-working-rules.md
 
 ## 모노레포 구조
 
@@ -108,6 +113,10 @@ pnpm format           # oxfmt
   태양 겉보기 황경이 15도의 배수가 되는 순간을 계산한 값이고, 근사 공식이 아니다.
   KASI 는 값의 출처가 아니라 교차검증 코퍼스다. 특일정보 API 가 2000~2028 만 주기 때문이고,
   그 구간은 정답지 역할을 한다([ADR 0014](docs/adr/0014-kasi-data-bundled-not-fetched.md)).
+- 표준시 이력과 서머타임은 `apps/web/src/lib/saju/data/korea-time.ts` 를 쓴다.
+  tz database `Asia/Seoul` 을 손으로 옮긴 표이고, `Intl` 이나 날짜 라이브러리로 대신하지 않는다.
+  값을 고쳤으면 `node apps/web/scripts/dump-tzdb-seoul.mjs --check` 로 정답지를 먼저 확인한다
+  ([ADR 0015](docs/adr/0015-korea-time-history-bundled.md)).
 - 음력에서 양력으로의 변환은 KASI 공식 데이터를 쓴다. 자체 음력 산출 알고리즘을 구현하지 않는다.
 - 일주 앵커 값을 하드코딩하지 않는다.
   `verified: true` 검증 케이스 3개 이상으로 확정한다.
@@ -143,8 +152,9 @@ pnpm format           # oxfmt
 
 | 지점               | 옵션                      | 기본값         |
 | ------------------ | ------------------------- | -------------- |
-| 진태양시 보정      | `trueSolarTime`           | 끔             |
 | 야자시 정책        | `ziPolicy`                | 제품 결정 사항 |
+| 서머타임 기록 성격 | `dstAssumption`           | `unknown`      |
+| 모호한 벽시계 해석 | `ambiguityChoice`         | `earlier`      |
 | 지원 세력 범위     | `supportIncludesResource` | true           |
 | 대운수 나머지 처리 | 설정 상수                 | 문서 참조      |
 
@@ -240,7 +250,7 @@ Claude Code 확장 모음이다. 필요한 것만 골라 우리 규약에 맞게
 `silent-failure-hunter` 를 첫 대상으로 잡은 이유는 이 앱의 최악의 실패가 예외가 아니라
 조용히 틀린 간지를 돌려주는 것이기 때문이다.
 입춘 경계에서 년주가 하나 밀려도 프로그램은 멀쩡히 돌고 화면에는 여덟 글자가 그대로 뜬다.
-[ADR 0006](docs/adr/0006-manseryeok-and-time-correction.md) 의 진태양시 -30분 폴백 명시 조건과
+[docs/05](docs/05-saju-domain-rules.md) 7.3 의 진태양시 -30분 폴백 명시 조건과
 야자시 적용 방식 표기 조건이 정확히 이 유형이다.
 
 이식할 때 그대로 복사하지 않는다. 원본의 네트워크, 파일, DB, 트랜잭션 항목은 계산 엔진에 해당이 없다.
@@ -278,7 +288,7 @@ tarball 을 받아 확인한 사실을 남긴다. 다시 조사하지 않도록.
   새 ADR 을 쓰고 기존 것의 상태를 `대체됨`으로 바꾼다.
 - 채택하지 않기로 한 것도 기록한다. 같은 논의가 반복되는 것을 막는 것이 ADR 의 값어치다.
 
-현재 ADR 0001부터 0014까지 채택되어 있다. 목록은 [docs/adr/](docs/adr/) 에 있다.
+현재 ADR 0001부터 0016까지 채택되어 있다. 목록은 [docs/adr/](docs/adr/) 에 있다.
 
 ## Git
 
@@ -310,6 +320,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 ## 아직 정해지지 않은 것
 
 - 야자시 정책 기본값
+- 이상 구간 경고와 절입 근처 경고의 화면 문구 체계
 - MVP 화면 디자인
 - 앱 푸시 알림 내용과 발송 시점
 
@@ -324,8 +335,8 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 ## 아직 만들지 않은 것
 
-- 시주. 시간 보정 파이프라인(docs/05 7장)이 선행 조건이다
-- 시간 보정 파이프라인. 표준시 이력, 서머타임 해제, 진태양시 보정
+- 시주의 시간(時干). 시지는 있고 시두법(docs/05 5.2)이 남았다
+- 균시차 보정. docs/05 7.3 이 유파 선택 옵션으로 둔 항목이다
 - 신강약과 용신 판정 (`strength.ts`)
 - 대운과 세운
 - Supabase 스키마와 RLS
@@ -339,11 +350,16 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 | ---- | ---- |
 | 60갑자 테이블 | `apps/web/src/lib/saju/index.ts` |
 | 절기 데이터 1900~2100 | `apps/web/src/lib/saju/data/solar-terms.ts` |
-| 년주, 월주, 일주 | `apps/web/src/lib/saju/pillars.ts` |
-| 검증 케이스 24개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
+| 표준시 전환 이력 | `apps/web/src/lib/saju/data/korea-time.ts` |
+| 달력 산술 | `apps/web/src/lib/saju/calendar.ts` |
+| 시간 보정 파이프라인 | `apps/web/src/lib/saju/time.ts` |
+| 년주, 월주, 일주, 시지 | `apps/web/src/lib/saju/pillars.ts` |
+| 검증 케이스 35개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
 
-검증 케이스는 24개 중 8개가 `verified` 다. 나머지 16개는 표준시 전환, 서머타임,
-진태양시, 대운이라 공인 만세력 대조가 붙어야 채운다. 각 케이스의 `blockedBy` 에 적혀 있다.
+검증 케이스는 35개 중 14개가 `verified` 다. 나머지 21개는 표준시 전환, 음력, 대운이라
+공인 만세력 대조가 붙어야 채운다. 각 케이스의 `blockedBy` 에 적혀 있다.
+다만 표준시와 서머타임 케이스는 간지가 비어 있어도 파이프라인 출력이 검증된다.
+tz database 로 결정되는 값이라 만세력을 기다릴 이유가 없다.
 
 에이전트와 커스텀 커맨드도 아직 없다. 대상이 생길 때 만든다.
 엔진 구현을 시작하면 `/Users/mychoi/f-lab/saju` 의 `saju-calc` 스킬과 `saju-master` 에이전트를

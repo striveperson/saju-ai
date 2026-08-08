@@ -1,0 +1,1011 @@
+{
+  "$comment": "tz database Asia/Seoul 전환 이력. data/korea-time.ts 의 정답지다. 손으로 고치지 않는다. 갱신은 dump-tzdb-seoul.mjs 를 다시 돌린다.",
+  "zone": "Asia/Seoul",
+  "source": {
+    "tzif": "/var/db/timezone/zoneinfo/Asia/Seoul",
+    "tzifVersion": "2",
+    "nodeIcuTz": "2025c"
+  },
+  "crossCheck": {
+    "intlGridSamples": 293656,
+    "stepSeconds": 21600
+  },
+  "range": {
+    "firstYear": 1900,
+    "lastYear": 2100
+  },
+  "initial": {
+    "offsetSeconds": 30472,
+    "dst": false,
+    "abbr": "LMT",
+    "note": "1900 년 초에 쓰이던 타입"
+  },
+  "transitionCount": 29,
+  "anomalyCount": 28,
+  "transitions": [
+    {
+      "utc": "1908-03-31T15:32:08Z",
+      "before": {
+        "offsetSeconds": 30472,
+        "dst": false,
+        "abbr": "LMT",
+        "localBefore": "1908-03-31T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1908-04-01T00:02:08"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1908-04-01T00:00:00",
+        "untilLocal": "1908-04-01T00:02:08",
+        "seconds": 128
+      }
+    },
+    {
+      "utc": "1911-12-31T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1911-12-31T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "JST",
+        "localAfter": "1912-01-01T00:30:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1912-01-01T00:00:00",
+        "untilLocal": "1912-01-01T00:30:00",
+        "seconds": 1800
+      }
+    },
+    {
+      "utc": "1945-09-07T15:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "JST",
+        "localBefore": "1945-09-07T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1945-09-08T00:00:00"
+      },
+      "anomaly": null
+    },
+    {
+      "utc": "1948-05-31T15:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1948-05-31T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1948-06-01T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1948-06-01T00:00:00",
+        "untilLocal": "1948-06-01T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1948-09-12T14:00:00Z",
+      "before": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1948-09-12T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1948-09-12T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1948-09-12T23:00:00",
+        "untilLocal": "1948-09-13T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1949-04-02T15:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1949-04-02T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1949-04-03T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1949-04-03T00:00:00",
+        "untilLocal": "1949-04-03T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1949-09-10T14:00:00Z",
+      "before": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1949-09-10T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1949-09-10T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1949-09-10T23:00:00",
+        "untilLocal": "1949-09-11T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1950-03-31T15:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1950-03-31T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1950-04-01T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1950-04-01T00:00:00",
+        "untilLocal": "1950-04-01T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1950-09-09T14:00:00Z",
+      "before": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1950-09-09T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1950-09-09T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1950-09-09T23:00:00",
+        "untilLocal": "1950-09-10T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1951-05-05T15:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1951-05-05T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1951-05-06T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1951-05-06T00:00:00",
+        "untilLocal": "1951-05-06T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1951-09-08T14:00:00Z",
+      "before": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1951-09-08T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1951-09-08T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1951-09-08T23:00:00",
+        "untilLocal": "1951-09-09T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1954-03-20T15:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1954-03-20T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1954-03-20T23:30:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1954-03-20T23:30:00",
+        "untilLocal": "1954-03-21T00:00:00",
+        "seconds": 1800
+      }
+    },
+    {
+      "utc": "1955-05-04T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1955-05-04T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1955-05-05T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1955-05-05T00:00:00",
+        "untilLocal": "1955-05-05T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1955-09-08T14:30:00Z",
+      "before": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1955-09-08T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1955-09-08T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1955-09-08T23:00:00",
+        "untilLocal": "1955-09-09T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1956-05-19T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1956-05-19T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1956-05-20T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1956-05-20T00:00:00",
+        "untilLocal": "1956-05-20T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1956-09-29T14:30:00Z",
+      "before": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1956-09-29T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1956-09-29T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1956-09-29T23:00:00",
+        "untilLocal": "1956-09-30T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1957-05-04T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1957-05-04T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1957-05-05T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1957-05-05T00:00:00",
+        "untilLocal": "1957-05-05T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1957-09-21T14:30:00Z",
+      "before": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1957-09-21T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1957-09-21T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1957-09-21T23:00:00",
+        "untilLocal": "1957-09-22T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1958-05-03T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1958-05-03T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1958-05-04T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1958-05-04T00:00:00",
+        "untilLocal": "1958-05-04T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1958-09-20T14:30:00Z",
+      "before": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1958-09-20T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1958-09-20T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1958-09-20T23:00:00",
+        "untilLocal": "1958-09-21T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1959-05-02T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1959-05-02T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1959-05-03T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1959-05-03T00:00:00",
+        "untilLocal": "1959-05-03T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1959-09-19T14:30:00Z",
+      "before": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1959-09-19T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1959-09-19T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1959-09-19T23:00:00",
+        "untilLocal": "1959-09-20T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1960-04-30T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1960-04-30T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1960-05-01T01:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1960-05-01T00:00:00",
+        "untilLocal": "1960-05-01T01:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1960-09-17T14:30:00Z",
+      "before": {
+        "offsetSeconds": 34200,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1960-09-17T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1960-09-17T23:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1960-09-17T23:00:00",
+        "untilLocal": "1960-09-18T00:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1961-08-09T15:30:00Z",
+      "before": {
+        "offsetSeconds": 30600,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1961-08-09T23:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1961-08-10T00:30:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1961-08-10T00:00:00",
+        "untilLocal": "1961-08-10T00:30:00",
+        "seconds": 1800
+      }
+    },
+    {
+      "utc": "1987-05-09T17:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1987-05-10T01:59:59"
+      },
+      "after": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1987-05-10T03:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1987-05-10T02:00:00",
+        "untilLocal": "1987-05-10T03:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1987-10-10T17:00:00Z",
+      "before": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1987-10-11T02:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1987-10-11T02:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1987-10-11T02:00:00",
+        "untilLocal": "1987-10-11T03:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1988-05-07T17:00:00Z",
+      "before": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localBefore": "1988-05-08T01:59:59"
+      },
+      "after": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localAfter": "1988-05-08T03:00:00"
+      },
+      "anomaly": {
+        "kind": "nonexistent",
+        "fromLocal": "1988-05-08T02:00:00",
+        "untilLocal": "1988-05-08T03:00:00",
+        "seconds": 3600
+      }
+    },
+    {
+      "utc": "1988-10-08T17:00:00Z",
+      "before": {
+        "offsetSeconds": 36000,
+        "dst": true,
+        "abbr": "KDT",
+        "localBefore": "1988-10-09T02:59:59"
+      },
+      "after": {
+        "offsetSeconds": 32400,
+        "dst": false,
+        "abbr": "KST",
+        "localAfter": "1988-10-09T02:00:00"
+      },
+      "anomaly": {
+        "kind": "ambiguous",
+        "fromLocal": "1988-10-09T02:00:00",
+        "untilLocal": "1988-10-09T03:00:00",
+        "seconds": 3600
+      }
+    }
+  ],
+  "anomalies": [
+    {
+      "utc": "1908-03-31T15:32:08Z",
+      "kind": "nonexistent",
+      "fromLocal": "1908-04-01T00:00:00",
+      "untilLocal": "1908-04-01T00:02:08",
+      "seconds": 128
+    },
+    {
+      "utc": "1911-12-31T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1912-01-01T00:00:00",
+      "untilLocal": "1912-01-01T00:30:00",
+      "seconds": 1800
+    },
+    {
+      "utc": "1948-05-31T15:00:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1948-06-01T00:00:00",
+      "untilLocal": "1948-06-01T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1948-09-12T14:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1948-09-12T23:00:00",
+      "untilLocal": "1948-09-13T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1949-04-02T15:00:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1949-04-03T00:00:00",
+      "untilLocal": "1949-04-03T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1949-09-10T14:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1949-09-10T23:00:00",
+      "untilLocal": "1949-09-11T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1950-03-31T15:00:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1950-04-01T00:00:00",
+      "untilLocal": "1950-04-01T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1950-09-09T14:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1950-09-09T23:00:00",
+      "untilLocal": "1950-09-10T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1951-05-05T15:00:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1951-05-06T00:00:00",
+      "untilLocal": "1951-05-06T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1951-09-08T14:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1951-09-08T23:00:00",
+      "untilLocal": "1951-09-09T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1954-03-20T15:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1954-03-20T23:30:00",
+      "untilLocal": "1954-03-21T00:00:00",
+      "seconds": 1800
+    },
+    {
+      "utc": "1955-05-04T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1955-05-05T00:00:00",
+      "untilLocal": "1955-05-05T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1955-09-08T14:30:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1955-09-08T23:00:00",
+      "untilLocal": "1955-09-09T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1956-05-19T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1956-05-20T00:00:00",
+      "untilLocal": "1956-05-20T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1956-09-29T14:30:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1956-09-29T23:00:00",
+      "untilLocal": "1956-09-30T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1957-05-04T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1957-05-05T00:00:00",
+      "untilLocal": "1957-05-05T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1957-09-21T14:30:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1957-09-21T23:00:00",
+      "untilLocal": "1957-09-22T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1958-05-03T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1958-05-04T00:00:00",
+      "untilLocal": "1958-05-04T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1958-09-20T14:30:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1958-09-20T23:00:00",
+      "untilLocal": "1958-09-21T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1959-05-02T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1959-05-03T00:00:00",
+      "untilLocal": "1959-05-03T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1959-09-19T14:30:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1959-09-19T23:00:00",
+      "untilLocal": "1959-09-20T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1960-04-30T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1960-05-01T00:00:00",
+      "untilLocal": "1960-05-01T01:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1960-09-17T14:30:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1960-09-17T23:00:00",
+      "untilLocal": "1960-09-18T00:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1961-08-09T15:30:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1961-08-10T00:00:00",
+      "untilLocal": "1961-08-10T00:30:00",
+      "seconds": 1800
+    },
+    {
+      "utc": "1987-05-09T17:00:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1987-05-10T02:00:00",
+      "untilLocal": "1987-05-10T03:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1987-10-10T17:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1987-10-11T02:00:00",
+      "untilLocal": "1987-10-11T03:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1988-05-07T17:00:00Z",
+      "kind": "nonexistent",
+      "fromLocal": "1988-05-08T02:00:00",
+      "untilLocal": "1988-05-08T03:00:00",
+      "seconds": 3600
+    },
+    {
+      "utc": "1988-10-08T17:00:00Z",
+      "kind": "ambiguous",
+      "fromLocal": "1988-10-09T02:00:00",
+      "untilLocal": "1988-10-09T03:00:00",
+      "seconds": 3600
+    }
+  ],
+  "samples": [
+    {
+      "utc": "1904-02-15T19:46:04Z",
+      "offsetSeconds": 30472,
+      "dst": false,
+      "abbr": "LMT"
+    },
+    {
+      "utc": "1910-02-14T15:31:04Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1928-11-03T15:15:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "JST"
+    },
+    {
+      "utc": "1947-01-19T03:00:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1948-07-22T14:30:00Z",
+      "offsetSeconds": 36000,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1948-12-22T14:30:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1949-06-22T02:30:00Z",
+      "offsetSeconds": 36000,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1949-12-20T14:30:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1950-06-20T14:30:00Z",
+      "offsetSeconds": 36000,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1951-01-06T14:30:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1951-07-07T14:30:00Z",
+      "offsetSeconds": 36000,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1952-12-13T14:30:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1954-10-11T15:15:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1955-07-07T03:00:00Z",
+      "offsetSeconds": 34200,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1956-01-13T15:00:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1956-07-25T03:00:00Z",
+      "offsetSeconds": 34200,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1957-01-16T03:00:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1957-07-13T15:00:00Z",
+      "offsetSeconds": 34200,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1958-01-11T15:00:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1958-07-12T15:00:00Z",
+      "offsetSeconds": 34200,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1959-01-10T15:00:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1959-07-11T15:00:00Z",
+      "offsetSeconds": 34200,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1960-01-09T15:00:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1960-07-09T15:00:00Z",
+      "offsetSeconds": 34200,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1961-02-27T15:00:00Z",
+      "offsetSeconds": 30600,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1974-06-24T16:15:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1987-07-25T17:00:00Z",
+      "offsetSeconds": 36000,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "1988-01-23T17:00:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    },
+    {
+      "utc": "1988-07-23T17:00:00Z",
+      "offsetSeconds": 36000,
+      "dst": true,
+      "abbr": "KDT"
+    },
+    {
+      "utc": "2044-11-19T08:30:00Z",
+      "offsetSeconds": 32400,
+      "dst": false,
+      "abbr": "KST"
+    }
+  ]
+}

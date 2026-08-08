@@ -63,9 +63,25 @@ pnpm --filter web exec vitest run --project saju
 경계 케이스 테스트는 선택이 아니다.
 필수 목록은 [`docs/05-saju-domain-rules.md`](../../../../../docs/05-saju-domain-rules.md) 10장에 있다.
 
-## 현재 상태
+## 파일
 
-스캐폴딩 단계다. 60갑자 기본 테이블과 오행·음양 매핑만 있고 계산은 아직 없다.
+| 파일 | 하는 일 |
+| ---- | ------- |
+| `index.ts` | 천간, 지지, 오행, 음양 기본 테이블 |
+| `calendar.ts` | 율리우스 적일과 벽시계 왕복. 도메인 규칙이 없는 바닥이다 |
+| `data/solar-terms.ts` | 절기 1900~2100. 자동 생성 |
+| `data/korea-time.ts` | 표준시 전환 이력. 손으로 옮긴 표 |
+| `time.ts` | 시간 보정 파이프라인 |
+| `pillars.ts` | 년주, 월주, 일주, 시지 |
+| `fixtures/` | 검증 케이스 |
+
+`data/` 두 파일의 성격이 다르다.
+`solar-terms.ts` 는 자동 생성이라 직접 고치지 않고, `korea-time.ts` 는 손으로 고치는 표다.
+고쳤으면 `node apps/web/scripts/dump-tzdb-seoul.mjs --check` 로 정답지와 대조한다.
+
+## 아직 없는 것
+
+시두법(시간), 신강약과 용신, 대운과 세운, 신살, 음력 입력이다.
 
 `fixtures/` 에는 공인 만세력 대조를 거친 검증 케이스가 들어간다.
 일주 앵커 값은 문서에 하드코딩하지 않고 `verified: true` 케이스 3개 이상으로 확정한다.
