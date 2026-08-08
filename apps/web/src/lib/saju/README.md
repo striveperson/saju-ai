@@ -72,7 +72,7 @@ pnpm --filter web exec vitest run --project saju
 | `data/solar-terms.ts` | 절기 1900~2100. 자동 생성 |
 | `data/korea-time.ts` | 표준시 전환 이력. 손으로 옮긴 표 |
 | `time.ts` | 시간 보정 파이프라인 |
-| `pillars.ts` | 년주, 월주, 일주, 시지 |
+| `pillars.ts` | 년주, 월주, 일주, 시주 |
 | `fixtures/` | 검증 케이스 |
 
 `data/` 두 파일의 성격이 다르다.
@@ -81,7 +81,7 @@ pnpm --filter web exec vitest run --project saju
 
 ## 아직 없는 것
 
-시두법(시간), 신강약과 용신, 대운과 세운, 신살, 음력 입력이다.
+균시차 보정, 신강약과 용신, 대운과 세운, 신살, 음력 입력이다.
 
 `fixtures/` 에는 공인 만세력 대조를 거친 검증 케이스가 들어간다.
 일주 앵커 값은 문서에 하드코딩하지 않고 `verified: true` 케이스 3개 이상으로 확정한다.

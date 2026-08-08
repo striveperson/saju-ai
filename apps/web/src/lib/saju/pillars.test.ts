@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { julianDayNumber, utcMsFromWall } from './calendar';
+import {
+  calendarDateFromJdn,
+  julianDayNumber,
+  utcMsFromWall,
+} from './calendar';
 import type { CalendarDateTime } from './calendar';
 import { SOLAR_TERM_NAMES, solarTerms } from './data/solar-terms';
 import {
@@ -11,9 +15,11 @@ import {
   parseBirth,
 } from './fixtures/cases';
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from './index';
+import type { HeavenlyStem, Pillar } from './index';
 import {
   dayPillar,
   hourBranch,
+  hourPillar,
   indexFromPillar,
   monthBranchIndex,
   monthPillar,
@@ -28,6 +34,12 @@ import type { CaseInput } from './fixtures/cases';
 function caseUtcMs(input: CaseInput): number {
   return correctBirthTime(parseBirth(input.birth), correctionOptions(input))
     .utcMs;
+}
+
+/** 같은 파이프라인의 보정된 벽시계. 일주와 시주가 쓰는 값이다. */
+function caseWallClock(input: CaseInput): CalendarDateTime {
+  return correctBirthTime(parseBirth(input.birth), correctionOptions(input))
+    .corrected;
 }
 
 describe('율리우스 적일', () => {
@@ -128,6 +140,28 @@ describe('일주', () => {
       const policy = engineZiPolicy(c.input.options.ziPolicy);
       expect(dayPillar(at, policy), `${c.id} (${c.input.birth})`).toBe(
         c.expected.day,
+      );
+    }
+  });
+
+  it('반대 정책의 일주도 재현한다', () => {
+    // 정책 분기가 실제로 갈리는 케이스만 이 값을 갖는다.
+    const cases = VERIFIED_CASES.filter(
+      (c) => c.expected.underOppositeZiPolicy,
+    );
+    expect(cases.length).toBeGreaterThan(0);
+
+    for (const c of cases) {
+      const opposite = c.expected.underOppositeZiPolicy;
+      if (!opposite) continue;
+
+      const at = caseWallClock(c.input);
+      const flipped =
+        engineZiPolicy(c.input.options.ziPolicy) === 'nextDay'
+          ? 'sameDay'
+          : 'nextDay';
+      expect(dayPillar(at, flipped), `${c.id} (${c.input.birth})`).toBe(
+        opposite.day,
       );
     }
   });
@@ -466,9 +500,145 @@ describe('시지', () => {
 
     expect(hourBranch(at)).toBe('미');
     expect(
-      hourBranch(
-        correctBirthTime(at, { longitude: 126.98 }).corrected,
-      ),
+      hourBranch(correctBirthTime(at, { longitude: 126.98 }).corrected),
     ).toBe('오');
+  });
+});
+
+describe('시주', () => {
+  /** docs/05 5.2 오서둔 표. 구현의 상수를 그대로 가져오지 않고 문서에서 옮긴다. */
+  const ZI_HOUR_PILLAR: Record<HeavenlyStem, Pillar> = {
+    갑: '갑자',
+    기: '갑자',
+    을: '병자',
+    경: '병자',
+    병: '무자',
+    신: '무자',
+    정: '경자',
+    임: '경자',
+    무: '임자',
+    계: '임자',
+  };
+
+  /** 기둥의 천간. 문자열 인덱싱 결과를 일간 타입으로 좁힌다. */
+  const stemOf = (pillar: Pillar): HeavenlyStem => pillar[0] as HeavenlyStem;
+
+  /** 적일에서 00:30 벽시계를 만든다. 자시이면서 정책 분기에 걸리지 않는 시각이다. */
+  const ziAt = (jdn: number): CalendarDateTime => ({
+    ...calendarDateFromJdn(jdn),
+    hour: 0,
+    minute: 30,
+  });
+
+  it('일간 열 개의 자시 시주가 오서둔 표와 같다', () => {
+    // 60일을 훑으면 열 개 일간이 각각 여섯 번씩 나온다.
+    const base = julianDayNumber(2024, 1, 1);
+    const seen = new Set<string>();
+
+    for (let i = 0; i < 60; i++) {
+      const at = ziAt(base + i);
+      const stem = stemOf(dayPillar(at, 'nextDay'));
+      seen.add(stem);
+      expect(hourPillar(at), `${stem} 일간의 자시`).toBe(ZI_HOUR_PILLAR[stem]);
+    }
+
+    expect(seen.size).toBe(10);
+  });
+
+  it('자시 시주의 60갑자 인덱스가 일간 인덱스의 12배다', () => {
+    // 표를 대신하는 식이 아니라 표가 옳은지 교차 확인하는 항등식이다.
+    for (const [i, stem] of HEAVENLY_STEMS.entries()) {
+      expect(indexFromPillar(ZI_HOUR_PILLAR[stem]), stem).toBe((i * 12) % 60);
+    }
+  });
+
+  it('모든 verified 케이스의 시주를 재현한다', () => {
+    const withHour = VERIFIED_CASES.filter((c) => c.expected.hour);
+    expect(withHour.length).toBeGreaterThanOrEqual(3);
+
+    for (const c of withHour) {
+      const at = caseWallClock(c.input);
+      expect(hourPillar(at), `${c.id} (${c.input.birth})`).toBe(
+        c.expected.hour,
+      );
+    }
+  });
+
+  it('야자시 정책을 뒤집어도 시주가 같다', () => {
+    // docs/05 5.2. 시간은 자시가 속한 날의 일간에서 나오므로 정책이 개입하지 않는다.
+    const cases = VERIFIED_CASES.filter(
+      (c) => c.expected.underOppositeZiPolicy,
+    );
+    expect(cases.length).toBeGreaterThan(0);
+
+    for (const c of cases) {
+      const opposite = c.expected.underOppositeZiPolicy;
+      if (!opposite) continue;
+
+      // 일주는 정책에 따라 갈리는 자리다.
+      const at = caseWallClock(c.input);
+      expect(dayPillar(at, 'sameDay'), c.id).not.toBe(dayPillar(at, 'nextDay'));
+
+      // 그런데 만세력은 두 정책에 같은 시주를 적었고 구현도 그 값 하나를 낸다.
+      expect(opposite.hour, `${c.id} 픽스처`).toBe(c.expected.hour);
+      expect(hourPillar(at), `${c.id} 구현`).toBe(c.expected.hour);
+    }
+  });
+
+  it('열두 시진이 60갑자 순서로 이어진다', () => {
+    // 자시부터 두 시간씩. 23:30 의 다음 시진은 날짜가 바뀐 01:30 이다.
+    const base = julianDayNumber(1990, 3, 10);
+    const start: CalendarDateTime = {
+      ...calendarDateFromJdn(base),
+      hour: 23,
+      minute: 30,
+    };
+
+    let previous = indexFromPillar(hourPillar(start));
+    expect(previous).toBe(indexFromPillar(hourPillar(ziAt(base + 1))));
+
+    for (let i = 1; i < 12; i++) {
+      const at: CalendarDateTime = {
+        ...calendarDateFromJdn(base + 1),
+        hour: i * 2 - 1,
+        minute: 30,
+      };
+      const index = indexFromPillar(hourPillar(at));
+      expect((index - previous + 60) % 60, `${at.hour}시`).toBe(1);
+      previous = index;
+    }
+  });
+
+  it('해시에서 자시로 넘어갈 때 일간이 다음날로 바뀐다', () => {
+    const base = julianDayNumber(1990, 3, 10);
+    const day = calendarDateFromJdn(base);
+    const before: CalendarDateTime = { ...day, hour: 22, minute: 59 };
+    const after: CalendarDateTime = { ...day, hour: 23, minute: 1 };
+
+    // 자시 시주는 당일이 아니라 다음날 일간에서 나온다.
+    expect(hourPillar(after)).toBe(
+      ZI_HOUR_PILLAR[stemOf(dayPillar(after, 'nextDay'))],
+    );
+    expect(hourPillar(after)).not.toBe(
+      ZI_HOUR_PILLAR[stemOf(dayPillar(after, 'sameDay'))],
+    );
+
+    // 해시와 자시는 60갑자에서 이웃이다. 날짜가 바뀌어도 흐름이 끊기지 않는다.
+    const diff =
+      indexFromPillar(hourPillar(after)) - indexFromPillar(hourPillar(before));
+    expect(((diff % 60) + 60) % 60).toBe(1);
+  });
+
+  it('야자시설에서는 일주 일간과 시주가 오서둔을 어긋난다', () => {
+    // 구현 오류가 아니라 야자시설의 성질이다. docs/05 5.2.
+    const c = caseById('verified-19880905-seoul');
+    const at = caseWallClock(c.input);
+    const day = dayPillar(at, 'sameDay');
+
+    expect(day).toBe('임술');
+    expect(hourPillar(at)).toBe('임자');
+
+    // 임 일간의 자시는 경자다. 야자시설의 일주와 시주는 그 표를 만족하지 않는다.
+    expect(hourPillar(at)).not.toBe(ZI_HOUR_PILLAR[stemOf(day)]);
   });
 });

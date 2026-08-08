@@ -77,6 +77,7 @@ pnpm format           # oxfmt
 | `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
 | `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
 | `md-style-guard.sh`     | PostToolUse (Edit/Write)     | 문서 스타일 규칙 검사                                        |
+| `saju-validate-gate.sh` | Stop                         | 엔진 변경이 남아 있으면 검증 에이전트를 부르게 한다          |
 
 계산 엔진의 import 경계는 훅이 아니라 oxlint 가 막는다.
 `apps/web/.oxlintrc.json` 의 `overrides` 에서 `src/lib/saju/**` 에 `no-restricted-imports` 를 건다.
@@ -185,6 +186,22 @@ PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 di
 스킬은 `.claude/skills/` 에만 둔다. Claude Code 가 읽는 경로가 여기뿐이다.
 `.agents/skills/` 는 다른 도구의 규약이고 로드되지 않는다.
 
+## 에이전트 (`.claude/agents/`)
+
+- `saju-engine-validator`: 엔진 변경을 [docs/05](docs/05-saju-domain-rules.md) 와 대조한다.
+  읽기만 하고 고치지 않는다.
+
+검증을 별도 에이전트로 뗀 이유는 구현한 맥락에서 스스로 확인하면
+방금 한 착각을 그대로 한 번 더 하기 때문이다.
+근거는 [docs/06](docs/06-code-working-rules.md) 4장.
+
+부르는 것은 `saju-validate-gate.sh` 가 챙긴다.
+`apps/web/src/lib/saju` 가 바뀐 채로 턴이 끝나려 하면 종료를 막고 검증기를 부르게 한다.
+편집마다가 아니라 턴이 끝날 때 한 번이다. 구현 중간의 미완성 코드를 검증해봐야 지적만 쌓인다.
+같은 변경 내용으로는 한 번만 막고, 커밋만 하고 넘어가는 경로를 막으려고
+워킹트리뿐 아니라 `main...HEAD` 도 함께 본다.
+건너뛰어야 하면 `SAJU_SKIP_VALIDATE=1` 을 준다.
+
 ## MCP 서버 (`.mcp.json`)
 
 쓰이는 시점에 맞춰 단계적으로 붙인다. 안 쓰는 도구를 설정에 쌓지 않는다.
@@ -237,7 +254,7 @@ Claude Code 확장 모음이다. 필요한 것만 골라 우리 규약에 맞게
 
 | 우리 작업             | 가져올 것                                                       | 상태                                                      |
 | --------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| 계산 엔진 구현        | `silent-failure-hunter`                                         | 엔진 시작할 때                                            |
+| 계산 엔진 구현        | `silent-failure-hunter`                                         | 안 가져옴. `saju-engine-validator` 로 대신함              |
 | 계산 엔진 구현        | `tdd-guide`                                                     | 검토. 픽스처 선행이 이미 더 강해서 불필요할 수 있다       |
 | API 와 화면           | `typescript-reviewer`, `react-reviewer`, `react-build-resolver` | 그 다음                                                   |
 | Supabase 스키마와 RLS | `database-reviewer`                                             | 그 다음                                                   |
@@ -247,15 +264,17 @@ Claude Code 확장 모음이다. 필요한 것만 골라 우리 규약에 맞게
 기획과 설계 단계 도구(`planner`, `architect`, `plan-prd`)는 쓰지 않았다.
 그 자리는 ADR 13편이 대신했고, 범용 도구가 낼 수 없는 이 프로젝트만의 결정을 근거와 함께 남겼다.
 
-`silent-failure-hunter` 를 첫 대상으로 잡은 이유는 이 앱의 최악의 실패가 예외가 아니라
+`silent-failure-hunter` 를 첫 대상으로 잡았던 이유는 이 앱의 최악의 실패가 예외가 아니라
 조용히 틀린 간지를 돌려주는 것이기 때문이다.
 입춘 경계에서 년주가 하나 밀려도 프로그램은 멀쩡히 돌고 화면에는 여덟 글자가 그대로 뜬다.
 [docs/05](docs/05-saju-domain-rules.md) 7.3 의 진태양시 -30분 폴백 명시 조건과
 야자시 적용 방식 표기 조건이 정확히 이 유형이다.
 
-이식할 때 그대로 복사하지 않는다. 원본의 네트워크, 파일, DB, 트랜잭션 항목은 계산 엔진에 해당이 없다.
-대신 도메인 항목을 더한다. 판정 함수가 어느 분기에도 걸리지 않았을 때 기본값을 반환하는가,
-검증 케이스가 없는 경계 조건을 조용히 통과시키는가 같은 것이다.
+막상 이식하려니 남길 것이 거의 없었다.
+원본의 네트워크, 파일, DB, 트랜잭션 항목은 계산 엔진에 해당이 없고,
+정작 필요한 것은 전부 도메인 쪽이었다. 판정 함수가 어느 분기에도 걸리지 않았을 때
+기본값을 반환하는가, 검증 케이스가 없는 경계 조건을 조용히 통과시키는가 같은 것이다.
+그래서 가져오는 대신 `saju-engine-validator` 를 새로 썼다.
 
 ### react-doctor (보류)
 
@@ -335,7 +354,6 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 ## 아직 만들지 않은 것
 
-- 시주의 시간(時干). 시지는 있고 시두법(docs/05 5.2)이 남았다
 - 균시차 보정. docs/05 7.3 이 유파 선택 옵션으로 둔 항목이다
 - 신강약과 용신 판정 (`strength.ts`)
 - 대운과 세운
@@ -353,7 +371,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 | 표준시 전환 이력 | `apps/web/src/lib/saju/data/korea-time.ts` |
 | 달력 산술 | `apps/web/src/lib/saju/calendar.ts` |
 | 시간 보정 파이프라인 | `apps/web/src/lib/saju/time.ts` |
-| 년주, 월주, 일주, 시지 | `apps/web/src/lib/saju/pillars.ts` |
+| 년주, 월주, 일주, 시주 | `apps/web/src/lib/saju/pillars.ts` |
 | 검증 케이스 35개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
 
 검증 케이스는 35개 중 14개가 `verified` 다. 나머지 21개는 표준시 전환, 음력, 대운이라
@@ -361,6 +379,6 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 다만 표준시와 서머타임 케이스는 간지가 비어 있어도 파이프라인 출력이 검증된다.
 tz database 로 결정되는 값이라 만세력을 기다릴 이유가 없다.
 
-에이전트와 커스텀 커맨드도 아직 없다. 대상이 생길 때 만든다.
-엔진 구현을 시작하면 `/Users/mychoi/f-lab/saju` 의 `saju-calc` 스킬과 `saju-master` 에이전트를
-가져올지 그때 정한다. 검증할 코드가 없는 상태에서 도메인 검증 에이전트를 만들어봐야 할 일이 없다.
+에이전트는 `saju-engine-validator` 하나고 커스텀 커맨드는 아직 없다. 대상이 생길 때 만든다.
+`/Users/mychoi/f-lab/saju` 의 `saju-calc` 스킬과 `saju-master` 에이전트는 가져오지 않았다.
+검증 쪽은 이미 자리가 찼고, 계산 쪽은 이 저장소의 순수 함수와 픽스처가 담당한다.

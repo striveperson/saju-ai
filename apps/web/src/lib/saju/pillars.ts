@@ -2,11 +2,11 @@
  * 간지 기둥 계산.
  *
  * 규칙의 단일 진실 공급원은 docs/05-saju-domain-rules.md 다.
- * 년주는 2장, 월주는 3장, 일주는 4장, 야자시 정책은 6장이다.
+ * 년주는 2장, 월주는 3장, 일주는 4장, 시주는 5장, 야자시 정책은 6장이다.
  *
  * 입력 타입이 기둥마다 다르다.
  *
- * 일주는 벽시계 시각을 받는다. 자시 경계인 23시가 벽시계 개념이기 때문이다.
+ * 일주와 시주는 벽시계 시각을 받는다. 자시 경계인 23시가 벽시계 개념이기 때문이다.
  * 년주와 월주는 물리적 시각을 받는다. 절입 순간과 비교해야 하고 그 순간은 지구 전체에 하나다.
  *
  * 벽시계에서 물리적 시각으로 가는 변환은 표준시 이력을 아는 파이프라인의 몫이다.
@@ -97,6 +97,24 @@ const FIRST_MONTH_PILLAR: Record<HeavenlyStem, Pillar> = {
   계: '갑인',
 };
 
+/**
+ * 시두법(오서둔). 일간에서 자시의 시주를 정한다. docs/05 5.2 표 그대로다.
+ *
+ * 이후 시간은 60갑자 순서로 진행한다. 월두법과 같은 모양이다.
+ */
+const FIRST_HOUR_PILLAR: Record<HeavenlyStem, Pillar> = {
+  갑: '갑자',
+  기: '갑자',
+  을: '병자',
+  경: '병자',
+  병: '무자',
+  신: '무자',
+  정: '경자',
+  임: '경자',
+  무: '임자',
+  계: '임자',
+};
+
 /** 인월을 0 으로 둔 월지 순서. 월주는 이 순서로 60갑자를 진행한다. */
 const MONTH_BRANCH_ORDER: readonly EarthlyBranch[] = [
   '인',
@@ -152,15 +170,37 @@ export function dayPillar(at: CalendarDateTime, ziPolicy: ZiPolicy): Pillar {
 }
 
 /**
- * 시지. docs/05 5.1.
+ * 자시를 0 으로 둔 시지 순서. docs/05 5.1.
  *
  * 자시가 23시에 시작해 두 시간씩 나간다. 23시를 0으로 당기면 지지 순서와 그대로 맞물린다.
+ */
+function hourBranchIndex(at: CalendarDateTime): number {
+  return Math.floor(((at.hour + 1) % 24) / 2);
+}
+
+/**
+ * 시지. docs/05 5.1.
  *
- * 보정이 끝난 벽시계를 받는다. 진태양시를 켰다면 그 보정까지 끝난 값이어야 한다.
- * 시간(時干)을 정하는 시두법은 아직 구현하지 않았다.
+ * 보정이 끝난 벽시계를 받는다. 진태양시 보정까지 끝난 값이어야 한다.
  */
 export function hourBranch(at: CalendarDateTime): EarthlyBranch {
-  return EARTHLY_BRANCHES[Math.floor(((at.hour + 1) % 24) / 2)];
+  return EARTHLY_BRANCHES[hourBranchIndex(at)];
+}
+
+/**
+ * 시주. docs/05 5.2.
+ *
+ * 시간(時干)은 자시가 속한 날의 일간에서 나온다.
+ * 야자시 정책이 일주를 당일로 붙잡아도 시주는 다음날 일간 기준이라 정책을 받지 않는다.
+ *
+ * 그래서 야자시설에서는 일주의 일간과 시주가 오서둔 표를 어긋난다.
+ * 구현 오류가 아니라 야자시설의 성질이다. docs/05 5.2 에 근거를 적었다.
+ */
+export function hourPillar(at: CalendarDateTime): Pillar {
+  const stem = dayPillar(at, 'nextDay')[0] as HeavenlyStem;
+  return pillarFromIndex(
+    indexFromPillar(FIRST_HOUR_PILLAR[stem]) + hourBranchIndex(at),
+  );
 }
 
 /** 절기 데이터는 연도마다 24개가 소한부터 동지 순서로 들어 있다. */
