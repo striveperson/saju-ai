@@ -106,6 +106,20 @@ describe('verified 케이스', () => {
     }
   });
 
+  it('반대 정책 값도 실재하는 조합이다', () => {
+    for (const c of VERIFIED_CASES) {
+      const opposite = c.expected.underOppositeZiPolicy;
+      if (!opposite) continue;
+
+      expect(isValidPillar(opposite.day), `${c.id} 의 ${opposite.day}`).toBe(
+        true,
+      );
+      expect(isValidPillar(opposite.hour), `${c.id} 의 ${opposite.hour}`).toBe(
+        true,
+      );
+    }
+  });
+
   it('대운 첫 간지도 실재하는 조합이다', () => {
     for (const c of VERIFIED_CASES) {
       if (!c.expected.daeun) continue;
@@ -173,9 +187,10 @@ describe('케이스가 주장하는 시간 구간', () => {
     expect(cases.length).toBeGreaterThan(0);
 
     for (const c of cases) {
-      expect(correctionOf(c).daylightUnwound, `${c.id} (${c.input.birth})`).toBe(
-        true,
-      );
+      expect(
+        correctionOf(c).daylightUnwound,
+        `${c.id} (${c.input.birth})`,
+      ).toBe(true);
     }
   });
 
@@ -184,9 +199,10 @@ describe('케이스가 주장하는 시간 구간', () => {
     for (const c of CASES.filter(
       (c) => c.requirement === 'timezone-transition',
     )) {
-      expect(correctionOf(c).daylightUnwound, `${c.id} (${c.input.birth})`).toBe(
-        false,
-      );
+      expect(
+        correctionOf(c).daylightUnwound,
+        `${c.id} (${c.input.birth})`,
+      ).toBe(false);
     }
   });
 

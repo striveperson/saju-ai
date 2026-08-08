@@ -347,8 +347,7 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    notes:
-      '진태양시 보정 -32분을 적용하면 22:59 가 된다. 입력은 기록 시계다',
+    notes: '진태양시 보정 -32분을 적용하면 22:59 가 된다. 입력은 기록 시계다',
     blockedBy: '공인 만세력 대조',
   },
   {
@@ -381,8 +380,7 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    notes:
-      '진태양시 보정 -32분을 적용하면 23:59 가 된다. 입력은 기록 시계다',
+    notes: '진태양시 보정 -32분을 적용하면 23:59 가 된다. 입력은 기록 시계다',
     blockedBy: '공인 만세력 대조. 두 정책의 값을 모두 받아야 한다',
   },
   {
@@ -398,8 +396,7 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    notes:
-      '진태양시 보정 -32분을 적용하면 00:01 가 된다. 입력은 기록 시계다',
+    notes: '진태양시 보정 -32분을 적용하면 00:01 가 된다. 입력은 기록 시계다',
     blockedBy: '공인 만세력 대조',
   },
 
@@ -589,7 +586,9 @@ export const CASES: readonly VerificationCase[] = [
       'uncle.tools 만세력 달력 (조사 노트 인용). 1988-09-04 임술, 09-05 계해',
     ],
     notes:
-      '시주는 두 정책이 같다. 야자시설도 시간(時干)은 다음날 일간으로 잡기 때문이다',
+      '시주는 두 정책이 같다. 야자시설도 시간(時干)은 다음날 일간으로 잡기 때문이다. ' +
+      'underOppositeZiPolicy 의 일주는 uncle.tools 실측이고 시주는 docs/05 5.2 규칙에서 유도했다. ' +
+      '플러스만세력 조회는 야자시선택을 해제한 상태라 야자시설 값을 직접 받지는 못했다',
   },
   {
     id: 'verified-20050510-0020-busan',
@@ -616,6 +615,9 @@ export const CASES: readonly VerificationCase[] = [
       '플러스만세력 manse.sajuplus.net 실측 (2026-08-09, 야자시선택 해제). 을유 신사 갑오 갑자',
       'uncle.tools 만세력 달력 (조사 노트 인용). 2005-05-09 계사, 05-10 갑오',
     ],
+    notes:
+      'underOppositeZiPolicy 의 일주는 uncle.tools 실측이고 시주는 docs/05 5.2 규칙에서 유도했다. ' +
+      '플러스만세력 조회는 야자시선택을 해제한 상태라 야자시설 값을 직접 받지는 못했다',
   },
   {
     id: 'verified-20050510-0052-seoul',

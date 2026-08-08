@@ -335,7 +335,6 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 ## 아직 만들지 않은 것
 
-- 시주의 시간(時干). 시지는 있고 시두법(docs/05 5.2)이 남았다
 - 균시차 보정. docs/05 7.3 이 유파 선택 옵션으로 둔 항목이다
 - 신강약과 용신 판정 (`strength.ts`)
 - 대운과 세운
@@ -353,7 +352,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 | 표준시 전환 이력 | `apps/web/src/lib/saju/data/korea-time.ts` |
 | 달력 산술 | `apps/web/src/lib/saju/calendar.ts` |
 | 시간 보정 파이프라인 | `apps/web/src/lib/saju/time.ts` |
-| 년주, 월주, 일주, 시지 | `apps/web/src/lib/saju/pillars.ts` |
+| 년주, 월주, 일주, 시주 | `apps/web/src/lib/saju/pillars.ts` |
 | 검증 케이스 35개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
 
 검증 케이스는 35개 중 14개가 `verified` 다. 나머지 21개는 표준시 전환, 음력, 대운이라
