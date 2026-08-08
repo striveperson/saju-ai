@@ -10,12 +10,13 @@ apps/web/
 ├── src/
 │   ├── routes/           파일 기반 라우트. __root.tsx 가 HTML 셸
 │   ├── lib/saju/         계산 엔진 (외부 의존 0). README 를 먼저 읽는다
-│   │   └── fixtures/     검증 케이스
+│   │   ├── data/         절기와 표준시 이력 데이터 모듈
+│   │   └── fixtures/     검증 케이스와 정답지
 │   ├── test/             vitest 셋업과 하네스 테스트
 │   ├── router.tsx        라우터와 QueryClient 구성
 │   ├── styles.css        Tailwind 진입점
 │   └── routeTree.gen.ts  자동 생성. 직접 수정하지 않는다
-├── scripts/build-spa.mjs SPA 산출물을 Capacitor 용으로 변환
+├── scripts/              SPA 변환, 절기 계산, tz 정답지 생성
 ├── vite.config.ts        빌드 타깃 두 개를 환경변수로 분기
 └── vitest.config.ts      saju(node) 와 web(jsdom) 두 프로젝트
 ```
