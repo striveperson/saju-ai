@@ -629,9 +629,10 @@ describe('시주', () => {
     expect(((diff % 60) + 60) % 60).toBe(1);
   });
 
-  it('자시 경계 네 시각이 정책별로 갈리는 대로 나온다', () => {
+  it('자정을 걸친 자시가 한 시진으로 이어진다', () => {
     // docs/05 10장의 "보정 후 22:59, 23:01, 23:59, 00:01" 항목이다.
-    // 값 자체는 verified 재현 테스트가 잡고, 여기서는 네 시각의 관계를 본다.
+    // 네 기둥 값은 verified 재현이, 보정 후 시각은 cases.test.ts 가 잡는다.
+    // 여기서는 그 둘로 나뉘지 않는 것, 자정을 건너는 자시의 연속성만 본다.
     const at = (id: string) => caseWallClock(caseById(id).input);
     const [t2259, t2301, t2359, t0001] = [
       'zi-2259',
@@ -640,21 +641,20 @@ describe('시주', () => {
       'zi-0001',
     ].map(at);
 
-    // 2분 차이로 자시에 들어가면서 일주와 시주가 함께 갈린다.
-    expect(hourPillar(t2259)).not.toBe(hourPillar(t2301));
-    expect(dayPillar(t2259, 'nextDay')).not.toBe(dayPillar(t2301, 'nextDay'));
+    // 기록 시계 2분 차이가 보정을 지나 해시와 자시로 갈린다.
+    expect(hourBranch(t2259)).toBe('해');
+    expect(hourBranch(t2301)).toBe('자');
 
-    // 자시 안에서는 자정을 걸쳐도 같은 시주다.
-    expect(hourPillar(t2359)).toBe(hourPillar(t2301));
+    // 셋째 케이스는 입력이 03-11 인데 보정이 03-10 으로 되돌린다.
+    expect(t2359.day).toBe(t2301.day);
+    expect(t0001.day).toBe(t2301.day + 1);
+
+    // 날짜가 갈려도 같은 자시라 시주가 하나다. 시두법이 당일 일간을 쓰면 깨진다.
     expect(hourPillar(t0001)).toBe(hourPillar(t2301));
 
-    // 정책 분기는 23시대에만 산다. 자정을 넘기면 두 정책이 다시 합쳐진다.
-    for (const t of [t2301, t2359]) {
-      expect(dayPillar(t, 'sameDay')).not.toBe(dayPillar(t, 'nextDay'));
-    }
-    for (const t of [t2259, t0001]) {
-      expect(dayPillar(t, 'sameDay')).toBe(dayPillar(t, 'nextDay'));
-    }
+    // 정책 분기는 23시대에만 산다. 자정을 넘기면 두 정책이 합쳐진다.
+    expect(dayPillar(t2359, 'sameDay')).not.toBe(dayPillar(t2359, 'nextDay'));
+    expect(dayPillar(t0001, 'sameDay')).toBe(dayPillar(t0001, 'nextDay'));
   });
 
   it('야자시설에서는 일주 일간과 시주가 오서둔을 어긋난다', () => {
