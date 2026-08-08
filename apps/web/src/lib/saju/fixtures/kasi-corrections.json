@@ -1,0 +1,121 @@
+{
+  "$comment": "KASI 절기 데이터와 우리 계산이 어긋나는 건들의 명시적 목록. verify-terms.py 가 읽는다. 여기 없는 불일치가 나오면 검증이 실패한다. 임계값을 느슨하게 푸는 대신 알려진 건만 근거와 함께 통과시킨다. KASI 가 데이터를 갱신해 재현되지 않으면 STALE 로 보고되므로 그때 항목을 지운다.",
+  "classifications": {
+    "KASI_DATE_FIELD_ERROR": "KASI 의 날짜 필드가 틀렸다. 계산값으로 대체한다",
+    "KASI_TIME_FIELD_ERROR": "KASI 의 시각 필드가 틀렸다. 계산값으로 대체한다",
+    "KASI_MALFORMED": "존재하지 않는 시각. 무엇의 오타인지 알 수 없어 보정하지 않고 계산값을 쓴다",
+    "ROUNDING_DIRECTION": "참값이 30초 부근이라 반올림 방향이 갈렸다. 어느 쪽도 틀리지 않았다. 계산값을 쓴다"
+  },
+  "entries": {
+    "대한@2011": {
+      "classification": "KASI_DATE_FIELD_ERROR",
+      "kasi": "2011-01-21 19:18",
+      "corrected": "2011-01-20 19:19",
+      "evidence": {
+        "kasiResidualSec": 89150.5,
+        "computedResidualSec": 28.7,
+        "intervalFromPrevTermDays": 15.72,
+        "expectedIntervalDays": 14.71,
+        "note": "근일점 부근이라 절기 간격이 가장 짧아야 하는 구간인데 15.72일로 튄다. 분이 19:18 과 19:19 로 거의 같아 날짜 필드만 하루 밀린 형태다"
+      }
+    },
+    "입동@2011": {
+      "classification": "KASI_TIME_FIELD_ERROR",
+      "kasi": "2011-11-08 09:26",
+      "corrected": "2011-11-08 03:35",
+      "evidence": {
+        "kasiResidualSec": 21441.6,
+        "computedResidualSec": 4.4,
+        "note": "KASI 의 입동 2012 값이 09:26 으로 같다. 2012 값은 계산과 분 단위로 정확히 일치하므로 2012 행이 원본이고 2011 행이 복사본이다"
+      }
+    },
+    "하지@2015": {
+      "classification": "KASI_TIME_FIELD_ERROR",
+      "kasi": "2015-06-22 01:58",
+      "corrected": "2015-06-22 01:38",
+      "evidence": {
+        "kasiResidualSec": 1166.1,
+        "computedResidualSec": 4.1,
+        "note": "분의 십의 자리만 다르다. 겹치는 값이 다른 레코드에 없어 오타로 본다"
+      }
+    },
+    "대한@2019": {
+      "classification": "KASI_MALFORMED",
+      "kasi": "2019-01-20 17:60",
+      "corrected": "2019-01-20 18:00",
+      "evidence": {
+        "note": "분이 60 이라 존재하지 않는 시각이다. 18:00 일 수도 17:06 오타일 수도 있어 자동 보정하지 않는다. 계산값이 18:00 이라 결과적으로 같으나 근거는 계산 쪽이다"
+      }
+    },
+    "우수@2012": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2012-02-19 15:17",
+      "corrected": "2012-02-19 15:18",
+      "evidence": {
+        "kasiResidualSec": 37.9,
+        "computedResidualSec": 23.6,
+        "trueSecond": 36
+      }
+    },
+    "청명@2012": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2012-04-04 18:05",
+      "corrected": "2012-04-04 18:06",
+      "evidence": {
+        "kasiResidualSec": 35.8,
+        "computedResidualSec": 24.2,
+        "trueSecond": 35
+      }
+    },
+    "동지@2012": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2012-12-21 20:11",
+      "corrected": "2012-12-21 20:12",
+      "evidence": {
+        "kasiResidualSec": 37.7,
+        "computedResidualSec": 24.3,
+        "trueSecond": 36
+      }
+    },
+    "우수@2013": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2013-02-18 21:01",
+      "corrected": "2013-02-18 21:02",
+      "evidence": {
+        "kasiResidualSec": 36.5,
+        "computedResidualSec": 24.9,
+        "trueSecond": 35
+      }
+    },
+    "소서@2013": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2013-07-07 07:34",
+      "corrected": "2013-07-07 07:35",
+      "evidence": {
+        "kasiResidualSec": 35.4,
+        "computedResidualSec": 22.6,
+        "trueSecond": 36
+      }
+    },
+    "입하@2015": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2015-05-06 04:52",
+      "corrected": "2015-05-06 04:53",
+      "evidence": {
+        "kasiResidualSec": 35.2,
+        "computedResidualSec": 23.7,
+        "trueSecond": 35
+      }
+    },
+    "입동@2015": {
+      "classification": "ROUNDING_DIRECTION",
+      "kasi": "2015-11-08 02:58",
+      "corrected": "2015-11-08 02:59",
+      "evidence": {
+        "kasiResidualSec": 39.1,
+        "computedResidualSec": 22.0,
+        "trueSecond": 38
+      }
+    }
+  }
+}
