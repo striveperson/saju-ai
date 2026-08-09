@@ -30,6 +30,8 @@ const REQUIRED: readonly Requirement[] = [
   'lunar-leap-month',
   'daeun-direction',
   'daeun-on-term-day',
+  'strength-boundary',
+  'yongshin-fallback',
 ];
 
 /** 60갑자에 실재하는 조합인가. 천간과 지지의 인덱스 홀짝이 같아야 한다. */
