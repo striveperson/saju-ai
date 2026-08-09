@@ -259,7 +259,7 @@ export function sajuYear(utcMs: number): number {
  * 사주 연도의 년주. docs/05 2장.
  *
  * `yearPillar` 가 순간을 받는 것과 달리 연도를 직접 받는다.
- * 세운이 같은 규칙이라 이쪽을 쓴다. docs/05 9.5.
+ * 세운이 같은 규칙이라 이쪽을 쓴다. docs/05 9장 5항.
  */
 export function pillarOfSajuYear(year: number): Pillar {
   return pillarFromIndex(year - YEAR_PILLAR_ANCHOR_YEAR);
@@ -274,7 +274,7 @@ export function yearPillar(utcMs: number): Pillar {
  * 이 순간을 감싸는 두 절입 시각. 월 경계를 만드는 12절만 본다. docs/05 3장.
  *
  * `previous` 는 같은 시각을 포함하고 `next` 는 포함하지 않는다.
- * 대운수가 이 둘 중 하나와 출생 시각의 간격에서 나온다. docs/05 9.2.
+ * 대운수가 이 둘 중 하나와 출생 시각의 간격에서 나온다. docs/05 9장 2항.
  */
 export function surroundingMonthTerms(utcMs: number): {
   previousUtcMs: number;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { utcMsFromWall } from './calendar';
+import { utcMsFromWall, wallFromUtcMs } from './calendar';
+import { solarTerms } from './data/solar-terms';
 import { daeunDirection, daeunList, daeunStart, sewoonList } from './daeun';
 import type { Gender } from './daeun';
 import {
@@ -9,7 +10,7 @@ import {
   correctionOptions,
   parseBirth,
 } from './fixtures/cases';
-import { indexFromPillar, monthPillar, yearPillar } from './pillars';
+import { indexFromPillar, monthPillar, sajuYear, yearPillar } from './pillars';
 import { correctBirthTime } from './time';
 import type { CaseInput } from './fixtures/cases';
 
@@ -23,7 +24,7 @@ function caseUtcMs(input: CaseInput): number {
 const kst = (text: string): number => utcMsFromWall(parseBirth(text), 32_400);
 
 describe('대운 방향', () => {
-  it('년간 음양과 성별 네 조합이 docs/05 9.1 표대로 갈린다', () => {
+  it('년간 음양과 성별 네 조합이 docs/05 9장 1항대로 갈린다', () => {
     // 픽스처 넷이 이 조합을 겨냥해 만들어져 있다. 1996년은 병(양), 1997년은 정(음)이다.
     const combos: [string, Gender, string][] = [
       ['daeun-yang-male', 'M', 'forward'],
@@ -68,13 +69,20 @@ describe('대운수', () => {
   });
 
   it('나머지를 버린다', () => {
-    // docs/05 9.2. 7.14년의 몫은 7이고 0.14년을 개월로 올려 8로 만들지 않는다.
+    // docs/05 9장 2항. 7.14년의 몫은 7이고 0.14년을 개월로 올려 8로 만들지 않는다.
     const c = caseById('verified-19950127-1439-F-seoul');
     const start = daeunStart(caseUtcMs(c.input), 'F');
 
     expect(start.years).toBeGreaterThan(7);
     expect(start.years).toBeLessThan(8);
     expect(start.startAge).toBe(7);
+
+    // 소수부가 0.5 를 넘는 자리라야 반올림과 갈린다. 2024-04-20 순행이 4.96년이다.
+    // 이 단언이 없으면 Math.round 로 바꿔도 테스트가 전부 통과한다.
+    const half = daeunStart(kst('2024-04-20T12:00:00'), 'M');
+    expect(half.years).toBeGreaterThan(4.5);
+    expect(half.years).toBeLessThan(5);
+    expect(half.startAge).toBe(4);
   });
 
   it('기준 절입이 방향에 따라 갈린다', () => {
@@ -86,25 +94,34 @@ describe('대운수', () => {
   });
 
   it('중기는 기준이 아니다', () => {
-    // 2024년 곡우(청명과 입하 사이의 중기)는 04-19 다. 그 앞뒤 어느 쪽도 기준이 되면 안 된다.
-    const at = kst('2024-04-20T12:00:00');
+    // 2024년 곡우(청명과 입하 사이의 중기)는 04-19 다.
+    // 출생을 절과 중기 사이에 두어야 순행과 역행 양쪽에서 중기가 걸릴 수 있다.
+    // 곡우 뒤에서 재면 순행 탐색이 애초에 곡우를 지나쳐 아무것도 잡지 못한다.
+    const at = kst('2024-04-10T12:00:00');
     const forward = daeunStart(at, 'M');
     const backward = daeunStart(at, 'F');
 
-    // 청명 04-04 와 입하 05-05 가 감싼다. 곡우가 걸리면 간격이 하루 남짓으로 줄어든다.
+    // 청명 04-04 와 입하 05-05 가 감싼다. 곡우가 섞이면 양쪽 다 열흘 아래로 줄어든다.
     expect(forward.gapMs / 86_400_000).toBeGreaterThan(10);
-    expect(backward.gapMs / 86_400_000).toBeGreaterThan(10);
+    expect(backward.gapMs / 86_400_000).toBeGreaterThan(5);
   });
 
-  it('절입 순간에 태어나면 역행 대운수가 0 이다', () => {
+  it('절입일 당일 출생은 역행 대운수가 0 이다', () => {
     // docs/05 10장의 절입일 당일 항목이다. 2024년 입하는 KST 05-05 09:10 이다.
-    const at = kst('2024-05-05T09:10:00');
+    const at = caseUtcMs(caseById('daeun-on-term-day').input);
 
-    expect(daeunStart(at, 'F').gapMs).toBe(0);
     expect(daeunStart(at, 'F').startAge).toBe(0);
 
-    // 같은 순간이라도 순행은 다음 절입까지 한 달 가까이 남는다.
+    // 같은 출생이라도 순행은 다음 절입까지 한 달 가까이 남는다. 성별로 가장 크게 갈린다.
     expect(daeunStart(at, 'M').startAge).toBeGreaterThan(8);
+  });
+
+  it('절입 순간에 태어나면 간격이 정확히 0 이다', () => {
+    // 절기 데이터가 분 단위라 같은 순간을 만들 수 있다. 등호가 어느 쪽에 붙는지 본다.
+    const exact = kst('2024-05-05T09:10:00');
+
+    expect(daeunStart(exact, 'F').gapMs).toBe(0);
+    expect(daeunStart(exact, 'F').startAge).toBe(0);
   });
 
   it('지원 범위 밖은 던진다', () => {
@@ -128,7 +145,7 @@ describe('대운 간지', () => {
   });
 
   it('첫 대운은 월주가 아니라 그 다음 간지다', () => {
-    // docs/05 9.3. 월주는 원국이므로 대운에 다시 나오지 않는다.
+    // docs/05 9장 3항. 월주는 원국이므로 대운에 다시 나오지 않는다.
     const at = caseUtcMs(caseById('verified-19950127-1439-F-seoul').input);
     const month = indexFromPillar(monthPillar(at));
 
@@ -166,11 +183,19 @@ describe('대운 간지', () => {
 
     for (const [i, daeun] of list.entries()) {
       expect(daeun.index).toBe(i);
+      expect(daeun.direction).toBe('forward');
       expect(daeun.startAge).toBe(list[0].startAge + i * 10);
       expect(daeun.endAge).toBe(daeun.startAge + 9);
-      // docs/05 9.5. 대운이 시작하는 사주 연도는 출생 연도에 시작 나이를 더한 값이다.
+      // 5월 출생은 생일이 입춘에서 멀어 산술값과 같다.
       expect(daeun.startYear).toBe(birthYear + daeun.startAge);
     }
+  });
+
+  it('절기 데이터 범위를 넘는 대운도 시작 연도를 낸다', () => {
+    // 대운 열 개면 출생에서 100년 뒤까지 간다. 데이터는 2100년에서 끝난다.
+    // 입춘 구간 밖 생일은 절기를 보지 않고 답하므로 여기서 막히면 안 된다.
+    const list = daeunList(kst('2015-05-15T12:00:00'), 'M');
+    expect(list[9].startYear).toBeGreaterThan(2100);
   });
 
   it('다른 계보의 구현과 값이 같다', () => {
@@ -178,11 +203,11 @@ describe('대운 간지', () => {
     // 그 결과가 core/extended.test.ts 에 기준값으로 박혀 있다.
     // 우리 구현과 계보가 완전히 다르므로 산술을 독립적으로 확인해 준다.
     //
-    // 그쪽 보정은 서울 관례 -30분이고 우리는 경도 126.98도에서 -32분이다.
-    // 5월 중순이라 절입에서 멀어 2분 차이가 대운수를 흔들지 않는다.
-    const at = correctBirthTime(parseBirth('1990-05-15T14:30:00'), {
-      longitude: 126.98,
-    }).utcMs;
+    // 그쪽은 벽시계를 서울 관례 -30분 옮긴 뒤 절기 비교까지 그 값으로 한다.
+    // 우리는 진태양시를 시지 판정에만 쓰고 절기 비교에는 쓰지 않는다(docs/05 7.3).
+    // 그래서 두 구현의 기준 시각이 30분 어긋나는데, 5월 중순이라 절입에서 멀어
+    // 대운수가 흔들리지 않는다. 절입 근처 케이스를 더할 때는 이 여유가 없다.
+    const at = kst('1990-05-15T14:30:00');
 
     const first = daeunList(at, 'M')[0];
     expect(first.pillar).toBe('임오');
@@ -214,6 +239,46 @@ describe('대운 간지', () => {
   });
 });
 
+describe('입춘 직전 출생의 대운 시작 연도', () => {
+  it('입춘이 2월 3일에서 5일 사이에만 놓인다', () => {
+    // 구현이 그 폭 밖에서는 절기 데이터를 보지 않는다. 폭이 넓어지면 그 지름길이 틀린다.
+    for (const term of solarTerms()) {
+      if (term.name !== '입춘') continue;
+      const w = wallFromUtcMs(term.utcMs, 32_400);
+      expect(w.month, `${w.year}년 입춘`).toBe(2);
+      expect(w.day, `${w.year}년 입춘`).toBeGreaterThanOrEqual(3);
+      expect(w.day, `${w.year}년 입춘`).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it('산술로 더한 값과 갈리는 자리가 있다', () => {
+    // docs/05 9.7. 1901년 입춘 1분 전 출생이라 사주 연도가 1900 이다.
+    // 만 20세가 되는 1921-02-04 20:38 은 그 해 입춘을 이미 지났으므로 1921년이다.
+    const at = kst('1901-02-04T20:38:00');
+    expect(sajuYear(at)).toBe(1900);
+
+    const twenty = daeunList(at, 'M').find((d) => d.startAge === 20);
+    if (!twenty) throw new Error('만 20세에 시작하는 대운이 없다');
+
+    // 산술이면 1900 + 20 = 1920 이다. 생일 기준이면 1921 이다.
+    expect(twenty.startYear).toBe(1921);
+    expect(twenty.startYear).not.toBe(sajuYear(at) + twenty.startAge);
+
+    // 세운 열 해가 통째로 한 칸 밀린다. 조용히 틀리는 유형이라 간지까지 본다.
+    expect(sewoonList(twenty)[0].pillar).toBe(
+      yearPillar(kst('1921-06-01T12:00:00')),
+    );
+  });
+
+  it('입춘에서 먼 출생은 산술값과 같다', () => {
+    // 지름길이 과하게 걸려 정상 케이스를 흔들지 않는지 본다.
+    const at = kst('1901-08-15T12:00:00');
+    for (const daeun of daeunList(at, 'F')) {
+      expect(daeun.startYear).toBe(sajuYear(at) + daeun.startAge);
+    }
+  });
+});
+
 describe('세운', () => {
   it('열 해가 나이와 함께 이어진다', () => {
     const at = kst('1990-05-15T14:30:00');
@@ -228,7 +293,7 @@ describe('세운', () => {
   });
 
   it('세운 간지가 그 해의 년주와 같다', () => {
-    // docs/05 9.5. 세운은 년주와 같은 규칙이라 따로 정할 것이 없다.
+    // docs/05 9장 5항. 세운은 년주와 같은 규칙이라 따로 정할 것이 없다.
     const at = kst('1990-05-15T14:30:00');
 
     for (const s of sewoonList(daeunList(at, 'M')[0])) {

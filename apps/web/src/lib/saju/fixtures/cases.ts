@@ -907,9 +907,10 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: 'KASI 절입 시각과 대운수 나머지 처리 상수 확정',
+    blockedBy: '공인 만세력 대조',
     notes:
-      '대운수 나머지 처리는 유파가 갈리는 지점이다. 어느 규칙을 적용했는지 함께 기록한다',
+      '2024년 입하는 KST 05-05 09:10 이다. 역행이면 그 절입까지 세 시간이 채 안 되어 대운수가 0 이고 ' +
+      '순행이면 망종까지 한 달이 남아 열 살을 넘는다. 같은 출생이 성별로 가장 크게 갈리는 자리다',
   },
 
   // 신강약 등급 임계와 용신 대체.
