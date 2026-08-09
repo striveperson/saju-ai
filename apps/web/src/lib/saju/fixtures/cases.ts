@@ -107,7 +107,9 @@ export type Requirement =
   | 'true-solar-time'
   | 'lunar-leap-month'
   | 'daeun-direction'
-  | 'daeun-on-term-day';
+  | 'daeun-on-term-day'
+  | 'strength-boundary'
+  | 'yongshin-fallback';
 
 interface BaseCase {
   id: string;
@@ -908,6 +910,66 @@ export const CASES: readonly VerificationCase[] = [
     blockedBy: 'KASI 절입 시각과 대운수 나머지 처리 상수 확정',
     notes:
       '대운수 나머지 처리는 유파가 갈리는 지점이다. 어느 규칙을 적용했는지 함께 기록한다',
+  },
+
+  // 신강약 등급 임계와 용신 대체.
+  //
+  // 생년월일시는 임의로 고른 것이 아니라 현재 엔진이 그 경계에 놓는 값을 찾아 골랐다.
+  // 팔자가 만세력으로 확정되면 등급과 용신을 기대값으로 채운다.
+  // 임계값 자체는 유파 표준이 아니라 ADR 0007 이 정한 이 앱의 상수다.
+  {
+    id: 'strength-threshold-strong',
+    purpose:
+      'score 가 임계 3.0 에 정확히 걸리는 사주. 신강과 중화가 갈리는 자리',
+    requirement: 'strength-boundary',
+    input: {
+      birth: '1980-02-15T10:00:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조',
+    notes:
+      '득지, 득시, 득세가 참이라 1.0 + 0.5 + 1.5 다. 3.0 은 신강에 포함된다',
+  },
+  {
+    id: 'strength-threshold-balanced',
+    purpose:
+      'score 가 임계 1.5 에 정확히 걸리는 사주. 중화와 신약이 갈리는 자리',
+    requirement: 'strength-boundary',
+    input: {
+      birth: '1981-03-05T04:00:00',
+      calendar: 'solar',
+      gender: 'F',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조',
+    notes: '득세만 참이라 1.5 다. 1.5 는 중화에 포함된다',
+  },
+  {
+    id: 'yongshin-fallback-no-root',
+    purpose:
+      '신강인데 관성이 지장간 포함 무근이라 용신이 식상으로 대체되는 사주',
+    requirement: 'yongshin-fallback',
+    input: {
+      birth: '1980-05-25T16:00:00',
+      calendar: 'solar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    },
+    expected: null,
+    verified: false,
+    blockedBy: '공인 만세력 대조',
+    notes:
+      '대체가 일어나면 결과에 사유가 남아야 한다. ' +
+      '유파가 갈리는 지점이므로 만세력이 극제 노선을 내놓아도 그 자체로는 어긋난 것이 아니다',
   },
 ];
 
