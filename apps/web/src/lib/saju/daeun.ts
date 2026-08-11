@@ -150,29 +150,37 @@ export function daeunList(utcMs: number, gender: Gender): Daeun[] {
 
 /** 세운 한 해. docs/05 9장 5항 */
 export interface Sewoon {
-  /** 사주 연도. 경계가 입춘이라 양력 연도와 어긋나는 구간이 있다 */
-  year: number;
-  /** 그 해에 도달하는 만 나이 */
+  /** 이 해에 도달하는 만 나이. 열 해의 축이다 */
   age: number;
-  pillar: Pillar;
+  /**
+   * 그 나이가 되는 생일이 속한 사주 연도. 경계가 입춘이라 양력 연도와 어긋나는 구간이 있다.
+   *
+   * 절기 데이터 밖이면 `null` 이다. docs/05 9.8.
+   */
+  year: number | null;
+  /** 연도가 비면 그 해의 간지도 정해지지 않는다 */
+  pillar: Pillar | null;
 }
 
 /**
  * 한 대운이 덮는 열 해의 세운. docs/05 9장 5항.
  *
+ * 축은 만 나이다. 대운 시작 나이에서 1씩 늘고, 각 해의 사주 연도는
+ * 그 나이가 되는 생일에서 얻는다. 시작 연도에 더해 가는 산술로 대신하지 않는다.
+ * 입춘 시각이 흔들려 그 산술이 경계에서 어긋난다. docs/05 9.7.
+ *
+ * 그래서 인접한 두 해의 사주 연도가 같거나 한 해를 건너뛸 수 있다.
+ * 한 사주 연도 안에 생일이 두 번 들거나 한 번도 들지 않는 경우다.
+ *
+ * 출생 순간을 받는 이유는 생일을 알아야 하기 때문이다. 대운만으로는 판정할 수 없다.
  * 세운 간지는 그 해의 년주와 같은 규칙이라 따로 정할 것이 없다.
- *
- * 시작 연도가 비어 있으면 열 해가 어느 사주 연도인지도 정해지지 않는다. docs/05 9.8.
- *
- * `age` 는 그 해의 이름값이다. 대운이 열 해를 덮으므로 시작 나이에서 하나씩 더한다.
  */
-export function sewoonList(daeun: Daeun): Sewoon[] {
-  if (daeun.startYear === null) return [];
+export function sewoonList(utcMs: number, daeun: Daeun): Sewoon[] {
+  const birth = wallFromUtcMs(utcMs, KST_OFFSET_SECONDS);
 
-  const startYear = daeun.startYear;
-  return Array.from({ length: DAEUN_SPAN_YEARS }, (_, offset) => ({
-    year: startYear + offset,
-    age: daeun.startAge + offset,
-    pillar: pillarOfSajuYear(startYear + offset),
-  }));
+  return Array.from({ length: DAEUN_SPAN_YEARS }, (_, offset) => {
+    const age = daeun.startAge + offset;
+    const year = sajuYearAtAge(birth, age);
+    return { age, year, pillar: year === null ? null : pillarOfSajuYear(year) };
+  });
 }

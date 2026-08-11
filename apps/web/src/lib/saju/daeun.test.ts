@@ -227,9 +227,9 @@ describe('대운 간지', () => {
     expect(first.pillar).toBe('임오');
     expect(first.startAge).toBe(7);
     expect(first.startYear).toBe(1997);
-    expect(sewoonList(first)[0]).toEqual({
-      year: 1997,
+    expect(sewoonList(at, first)[0]).toEqual({
       age: 7,
+      year: 1997,
       pillar: '정축',
     });
   });
@@ -268,7 +268,7 @@ describe('입춘 직전 출생의 대운 시작 연도', () => {
     expect(twenty.startYear).not.toBe(sajuYear(at) + twenty.startAge);
 
     // 세운 열 해가 통째로 한 칸 밀린다. 조용히 틀리는 유형이라 간지까지 본다.
-    expect(sewoonList(twenty)[0].pillar).toBe(
+    expect(sewoonList(at, twenty)[0].pillar).toBe(
       yearPillar(kst('1921-06-01T12:00:00')),
     );
   });
@@ -283,10 +283,36 @@ describe('입춘 직전 출생의 대운 시작 연도', () => {
 });
 
 describe('세운', () => {
+  it('연도를 나이별 생일로 판정한다', () => {
+    // docs/05 9장 5항과 9.7. 1901년 입춘 1분 전 출생이라 사주 연도가 1900 이다.
+    // 생일이 2월 4일이라 입춘과 엎치락뒤치락한다. 만 4세와 만 5세 생일이 모두
+    // 1905년에 들고 1904년에는 생일이 없다. 산술이면 1900 에서 1909 로 고르게 는다.
+    const at = kst('1901-02-04T20:38:00');
+    const first = daeunList(at, 'M')[0];
+    const sewoon = sewoonList(at, first);
+
+    expect(sewoon.map((s) => s.age)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(sewoon.map((s) => s.year)).toEqual([
+      1900, 1901, 1902, 1903, 1905, 1905, 1906, 1907, 1909, 1909,
+    ]);
+  });
+
+  it('대운 열 개의 나이가 빈틈없이 이어진다', () => {
+    // 축이 나이라는 것이 여기서 고정된다. docs/05 9.7.
+    // 연도를 축으로 삼으면 이 어긋남이 대운 사이로 옮겨가 겹치는 해나 빈 해가 생긴다.
+    const at = kst('1901-02-04T20:38:00');
+    const list = daeunList(at, 'M');
+    const ages = list.flatMap((d) => sewoonList(at, d).map((s) => s.age));
+
+    expect(ages).toEqual(
+      Array.from({ length: 100 }, (_, i) => list[0].startAge + i),
+    );
+  });
+
   it('열 해가 나이와 함께 이어진다', () => {
     const at = kst('1990-05-15T14:30:00');
     const first = daeunList(at, 'M')[0];
-    const sewoon = sewoonList(first);
+    const sewoon = sewoonList(at, first);
 
     // 1997년에 열리는 대운이라 열 해가 모두 절기 데이터 안이다.
     const startYear = first.startYear;
@@ -303,7 +329,7 @@ describe('세운', () => {
     // docs/05 9장 5항. 세운은 년주와 같은 규칙이라 따로 정할 것이 없다.
     const at = kst('1990-05-15T14:30:00');
 
-    for (const s of sewoonList(daeunList(at, 'M')[0])) {
+    for (const s of sewoonList(at, daeunList(at, 'M')[0])) {
       // 입춘을 지난 시각으로 년주를 뽑아 대조한다.
       expect(s.pillar, `${s.year}년`).toBe(
         yearPillar(kst(`${s.year}-06-01T12:00:00`)),
@@ -313,12 +339,15 @@ describe('세운', () => {
 
   it('60갑자 순서로 한 칸씩 나아간다', () => {
     const at = kst('1990-05-15T14:30:00');
-    const sewoon = sewoonList(daeunList(at, 'M')[0]);
+    const sewoon = sewoonList(at, daeunList(at, 'M')[0]);
 
+    // 5월 출생이라 열 해가 겹치거나 건너뛰지 않고 데이터 안이다.
     for (let i = 1; i < sewoon.length; i++) {
-      const diff =
-        indexFromPillar(sewoon[i].pillar) -
-        indexFromPillar(sewoon[i - 1].pillar);
+      const pillar = sewoon[i].pillar;
+      const before = sewoon[i - 1].pillar;
+      if (pillar === null || before === null) throw new Error('간지가 비었다');
+
+      const diff = indexFromPillar(pillar) - indexFromPillar(before);
       expect(((diff % 60) + 60) % 60).toBe(1);
     }
   });
