@@ -160,7 +160,7 @@ pnpm format           # oxfmt
 
 대운수 나머지 처리는 이 표에 있었으나 뺐다. 가르는 검증 케이스가 없어
 옵션으로 두면 근거 없이 다른 값을 내는 경로가 남는다. 근거는
-[docs/05](docs/05-saju-domain-rules.md) 9.1 이다.
+[docs/05](docs/05-saju-domain-rules.md) 9.6 이다.
 
 ## 문서와 마크다운 규칙
 
