@@ -20,7 +20,7 @@ import {
   monthPillar,
   pillarFromIndex,
   pillarOfSajuYear,
-  sajuYear,
+  sajuYearOrNull,
   surroundingMonthTerms,
   yearPillar,
 } from './pillars';
@@ -36,13 +36,6 @@ const DAYS_PER_DAEUN_YEAR = 3;
 
 const DAY_MS = 86_400_000;
 
-/**
- * 입춘이 놓일 수 있는 날짜. 1900~2100 구간에서 KST 2월 3일부터 5일까지다.
- * daeun.test.ts 가 절기 데이터로 이 폭을 다시 확인한다.
- */
-const IPCHUN_FIRST_DAY = 3;
-const IPCHUN_LAST_DAY = 5;
-
 /** 사주 연도를 판정할 때 쓰는 시간대. 절기 시각과 같은 프레임이면 된다. */
 const KST_OFFSET_SECONDS = 32_400;
 
@@ -53,20 +46,17 @@ const DAEUN_SPAN_YEARS = 10;
 const DAEUN_COUNT = 10;
 
 /**
- * 이 벽시계가 속한 사주 연도. docs/05 2장의 판정과 결과가 같다.
+ * 만 `age` 세가 되는 생일이 속한 사주 연도. docs/05 9.7.
  *
- * 입춘 구간 밖이면 절기 데이터를 보지 않는다. 대운 열 개가 출생에서 100년 뒤까지 가는데
- * 절기 데이터는 2100년에서 끝나므로, 데이터를 항상 보면 현대 출생의 늦은 대운이 막힌다.
- * 2월 3일부터 5일 사이만 데이터를 보고 나머지는 달력만으로 답한다.
+ * 출생 사주 연도에 나이를 더하는 산술로 대신하지 않는다.
+ * 입춘 절입 시각이 해마다 흔들려 그 산술이 경계에서 한 해 밀린다.
+ *
+ * 절기 데이터 밖이면 `null` 이다. docs/05 9.8.
  */
-function sajuYearOfWall(at: CalendarDateTime): number {
-  if (at.month > 2 || (at.month === 2 && at.day > IPCHUN_LAST_DAY)) {
-    return at.year;
-  }
-  if (at.month === 1 || (at.month === 2 && at.day < IPCHUN_FIRST_DAY)) {
-    return at.year - 1;
-  }
-  return sajuYear(utcMsFromWall(at, KST_OFFSET_SECONDS));
+function sajuYearAtAge(birth: CalendarDateTime, age: number): number | null {
+  return sajuYearOrNull(
+    utcMsFromWall({ ...birth, year: birth.year + age }, KST_OFFSET_SECONDS),
+  );
 }
 
 /**
@@ -129,8 +119,9 @@ export interface Daeun {
    * 이 대운이 시작하는 사주 연도. 만 `startAge` 세가 되는 생일이 속한 해다.
    *
    * 출생 사주 연도에 나이를 더하는 산술로 대신하지 않는다. docs/05 9.7.
+   * 그 생일이 절기 데이터 밖이면 `null` 이다. 간지와 나이는 그대로 있다. docs/05 9.8.
    */
-  startYear: number;
+  startYear: number | null;
 }
 
 /**
@@ -152,7 +143,7 @@ export function daeunList(utcMs: number, gender: Gender): Daeun[] {
       pillar: pillarFromIndex(month + step * (index + 1)),
       startAge,
       endAge: startAge + DAEUN_SPAN_YEARS - 1,
-      startYear: sajuYearOfWall({ ...birth, year: birth.year + startAge }),
+      startYear: sajuYearAtAge(birth, startAge),
     };
   });
 }
@@ -170,15 +161,18 @@ export interface Sewoon {
  * 한 대운이 덮는 열 해의 세운. docs/05 9장 5항.
  *
  * 세운 간지는 그 해의 년주와 같은 규칙이라 따로 정할 것이 없다.
- * `pillarOfSajuYear` 는 60갑자 산술뿐이라 절기 데이터 범위와 무관하고,
- * 그래서 2100년을 넘는 대운의 세운도 값이 나온다.
+ *
+ * 시작 연도가 비어 있으면 열 해가 어느 사주 연도인지도 정해지지 않는다. docs/05 9.8.
  *
  * `age` 는 그 해의 이름값이다. 대운이 열 해를 덮으므로 시작 나이에서 하나씩 더한다.
  */
 export function sewoonList(daeun: Daeun): Sewoon[] {
+  if (daeun.startYear === null) return [];
+
+  const startYear = daeun.startYear;
   return Array.from({ length: DAEUN_SPAN_YEARS }, (_, offset) => ({
-    year: daeun.startYear + offset,
+    year: startYear + offset,
     age: daeun.startAge + offset,
-    pillar: pillarOfSajuYear(daeun.startYear + offset),
+    pillar: pillarOfSajuYear(startYear + offset),
   }));
 }

@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { utcMsFromWall, wallFromUtcMs } from './calendar';
-import { solarTerms } from './data/solar-terms';
+import { utcMsFromWall } from './calendar';
 import { daeunDirection, daeunList, daeunStart, sewoonList } from './daeun';
 import type { Gender } from './daeun';
 import {
@@ -191,11 +190,26 @@ describe('대운 간지', () => {
     }
   });
 
-  it('절기 데이터 범위를 넘는 대운도 시작 연도를 낸다', () => {
-    // 대운 열 개면 출생에서 100년 뒤까지 간다. 데이터는 2100년에서 끝난다.
-    // 입춘 구간 밖 생일은 절기를 보지 않고 답하므로 여기서 막히면 안 된다.
-    const list = daeunList(kst('2015-05-15T12:00:00'), 'M');
-    expect(list[9].startYear).toBeGreaterThan(2100);
+  it('절기 데이터 범위를 넘는 대운은 연도만 빈다', () => {
+    // docs/05 9.8. 대운 열 개면 출생에서 100년 뒤까지 가고 데이터는 2100년에서 끝난다.
+    // 그 해가 어느 사주 연도인지는 입춘 시각을 알아야 정해지므로 연도만 비운다.
+    const last = daeunList(kst('2015-05-15T12:00:00'), 'M')[9];
+
+    expect(last.startYear).toBeNull();
+    expect(last.pillar).toHaveLength(2);
+    expect(last.startAge).toBe(
+      daeunList(kst('2015-05-15T12:00:00'), 'M')[0].startAge + 90,
+    );
+  });
+
+  it('입춘 부근 출생도 대운 열 개를 낸다', () => {
+    // docs/05 9.8 과 10장. verified 픽스처 둘이 KST 2월 4일이고
+    // 이 출생의 늦은 대운이 데이터 경계를 넘는다. 입력은 지원 범위 안이라 거부 대상이 아니다.
+    for (const id of ['ipchun-2024-before', 'ipchun-2024-after']) {
+      const at = caseUtcMs(caseById(id).input);
+      expect(() => daeunList(at, 'M'), id).not.toThrow();
+      expect(daeunList(at, 'M'), id).toHaveLength(10);
+    }
   });
 
   it('다른 계보의 구현과 값이 같다', () => {
@@ -240,17 +254,6 @@ describe('대운 간지', () => {
 });
 
 describe('입춘 직전 출생의 대운 시작 연도', () => {
-  it('입춘이 2월 3일에서 5일 사이에만 놓인다', () => {
-    // 구현이 그 폭 밖에서는 절기 데이터를 보지 않는다. 폭이 넓어지면 그 지름길이 틀린다.
-    for (const term of solarTerms()) {
-      if (term.name !== '입춘') continue;
-      const w = wallFromUtcMs(term.utcMs, 32_400);
-      expect(w.month, `${w.year}년 입춘`).toBe(2);
-      expect(w.day, `${w.year}년 입춘`).toBeGreaterThanOrEqual(3);
-      expect(w.day, `${w.year}년 입춘`).toBeLessThanOrEqual(5);
-    }
-  });
-
   it('산술로 더한 값과 갈리는 자리가 있다', () => {
     // docs/05 9.7. 1901년 입춘 1분 전 출생이라 사주 연도가 1900 이다.
     // 만 20세가 되는 1921-02-04 20:38 은 그 해 입춘을 이미 지났으므로 1921년이다.
@@ -285,10 +288,14 @@ describe('세운', () => {
     const first = daeunList(at, 'M')[0];
     const sewoon = sewoonList(first);
 
+    // 1997년에 열리는 대운이라 열 해가 모두 절기 데이터 안이다.
+    const startYear = first.startYear;
+    if (startYear === null) throw new Error('시작 연도가 비었다');
+
     expect(sewoon.length).toBe(10);
-    expect(sewoon[0].year).toBe(first.startYear);
+    expect(sewoon[0].year).toBe(startYear);
     expect(sewoon[0].age).toBe(first.startAge);
-    expect(sewoon[9].year).toBe(first.startYear + 9);
+    expect(sewoon[9].year).toBe(startYear + 9);
     expect(sewoon[9].age).toBe(first.endAge);
   });
 
