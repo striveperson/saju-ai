@@ -111,8 +111,9 @@ describe('대운수', () => {
 
     expect(daeunStart(at, 'F').startAge).toBe(0);
 
-    // 같은 출생이라도 순행은 다음 절입까지 한 달 가까이 남는다. 성별로 가장 크게 갈린다.
-    expect(daeunStart(at, 'M').startAge).toBeGreaterThan(8);
+    // 같은 출생이라도 순행은 다음 절입인 망종까지 31일 남아 10 이다.
+    // 성별로 가장 크게 갈리는 자리이고 대운수 상한이기도 하다.
+    expect(daeunStart(at, 'M').startAge).toBe(10);
   });
 
   it('절입 순간에 태어나면 간격이 정확히 0 이다', () => {
@@ -163,6 +164,7 @@ describe('대운 간지', () => {
       ['F', -1],
     ] as const) {
       const list = daeunList(at, gender);
+      // docs/05 9장 3항의 "10개" 를 여기서 고정한다. 개수 단언은 이 한 곳뿐이다.
       expect(list.length).toBe(10);
 
       for (let i = 1; i < list.length; i++) {
@@ -176,18 +178,21 @@ describe('대운 간지', () => {
   });
 
   it('나이와 사주 연도가 십년씩 나아간다', () => {
-    const at = kst('1990-05-15T14:30:00');
-    const list = daeunList(at, 'M');
-    const birthYear = 1990;
+    // 대운수 7 이라 나이가 7 에서 97 까지다. docs/05 9장 3항과 4항.
+    // 구현의 산술을 다시 쓰지 않고 값을 적는다. 되풀이하면 어느 쪽이 틀려도 함께 틀린다.
+    const list = daeunList(kst('1990-05-15T14:30:00'), 'M');
 
-    for (const [i, daeun] of list.entries()) {
-      expect(daeun.index).toBe(i);
-      expect(daeun.direction).toBe('forward');
-      expect(daeun.startAge).toBe(list[0].startAge + i * 10);
-      expect(daeun.endAge).toBe(daeun.startAge + 9);
-      // 5월 출생은 생일이 입춘에서 멀어 산술값과 같다.
-      expect(daeun.startYear).toBe(birthYear + daeun.startAge);
-    }
+    expect(list.map((d) => d.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    expect(list.map((d) => d.startAge)).toEqual([
+      7, 17, 27, 37, 47, 57, 67, 77, 87, 97,
+    ]);
+    expect(list.map((d) => d.endAge)).toEqual([
+      16, 26, 36, 46, 56, 66, 76, 86, 96, 106,
+    ]);
+    // 5월 출생은 생일이 입춘에서 멀어 산술값과 같다.
+    expect(list.map((d) => d.startYear)).toEqual([
+      1997, 2007, 2017, 2027, 2037, 2047, 2057, 2067, 2077, 2087,
+    ]);
   });
 
   it('절기 데이터 범위를 넘는 대운은 연도만 빈다', () => {
@@ -195,11 +200,14 @@ describe('대운 간지', () => {
     // 그 해가 어느 사주 연도인지는 입춘 시각을 알아야 정해지므로 연도만 비운다.
     const list = daeunList(kst('2015-05-15T12:00:00'), 'M');
 
+    // 2015년은 을미년이라 남자는 역행이고 월주 신사에서 거꾸로 진행한다.
+    // 데이터 밖에서도 간지와 나이는 그대로 나온다. 비는 것은 연도뿐이다.
+    expect(list[9].pillar).toBe('신미');
+    expect(list[9].startAge).toBe(93);
     expect(list[9].startYear).toBeNull();
-    expect(list[9].startAge).toBe(list[0].startAge + 90);
+
     // 이른 대운은 데이터 안이다. 과하게 비우면 여기서 걸린다.
-    // 5월 출생이라 생일이 입춘에서 멀어 산술값과 같다.
-    expect(list[0].startYear).toBe(2015 + list[0].startAge);
+    expect(list[0].startYear).toBe(2018);
   });
 
   it('입춘 부근 출생도 대운 열 개를 낸다', () => {
@@ -209,9 +217,24 @@ describe('대운 간지', () => {
       // 고치기 전에는 이 호출이 RangeError 로 끝났다.
       const list = daeunList(caseUtcMs(caseById(id).input), 'M');
 
-      expect(list[0].startYear, id).not.toBeNull();
-      expect(list[9].startYear, id).toBeNull();
+      // 대운수 9 라 여덟째부터 2100년을 넘는다. 앞의 일곱은 값이 있어야 한다.
+      expect(
+        list.map((d) => d.startYear),
+        id,
+      ).toEqual([2033, 2043, 2053, 2063, 2073, 2083, 2093, null, null, null]);
     }
+
+    // 두 케이스는 입춘을 사이에 두고 월주가 갈리므로 대운 간지도 갈린다.
+    const before = daeunList(
+      caseUtcMs(caseById('ipchun-2024-before').input),
+      'M',
+    );
+    const after = daeunList(
+      caseUtcMs(caseById('ipchun-2024-after').input),
+      'M',
+    );
+    expect(before[0].pillar).toBe('갑자');
+    expect(after[0].pillar).toBe('정묘');
   });
 
   it('다른 계보의 구현과 값이 같다', () => {
@@ -305,12 +328,34 @@ describe('세운', () => {
     const at = kst('1992-04-05T12:00:00');
     const last = sewoonList(at, daeunList(at, 'M')[9]);
 
-    expect(last[9].year).toBeNull();
-    expect(last[9].pillar).toBeNull();
-    expect(last[9].age).toBe(109);
-    // 같은 대운의 이른 해는 데이터 안이다. 연도가 있으면 간지도 있다.
-    expect(last[0].year).toBe(2092);
-    expect(last[0].pillar).not.toBeNull();
+    expect(last.map((s) => s.age)).toEqual([
+      100, 101, 102, 103, 104, 105, 106, 107, 108, 109,
+    ]);
+    expect(last.map((s) => s.year)).toEqual([
+      2092,
+      2093,
+      2094,
+      2095,
+      2096,
+      2097,
+      2098,
+      2099,
+      2100,
+      null,
+    ]);
+    // 연도가 비는 해만 간지가 빈다. 나머지 아홉은 그 해의 년주 그대로다.
+    expect(last.map((s) => s.pillar)).toEqual([
+      '임자',
+      '계축',
+      '갑인',
+      '을묘',
+      '병진',
+      '정사',
+      '무오',
+      '기미',
+      '경신',
+      null,
+    ]);
   });
 
   it('대운 열 개의 나이가 빈틈없이 이어진다', () => {
@@ -326,19 +371,16 @@ describe('세운', () => {
   });
 
   it('열 해가 나이와 함께 이어진다', () => {
+    // 대운수 7 이고 1997년에 열린다. 열 해가 모두 절기 데이터 안이다.
     const at = kst('1990-05-15T14:30:00');
-    const first = daeunList(at, 'M')[0];
-    const sewoon = sewoonList(at, first);
+    const sewoon = sewoonList(at, daeunList(at, 'M')[0]);
 
-    // 1997년에 열리는 대운이라 열 해가 모두 절기 데이터 안이다.
-    const startYear = first.startYear;
-    if (startYear === null) throw new Error('시작 연도가 비었다');
-
-    expect(sewoon.length).toBe(10);
-    expect(sewoon[0].year).toBe(startYear);
-    expect(sewoon[0].age).toBe(first.startAge);
-    expect(sewoon[9].year).toBe(startYear + 9);
-    expect(sewoon[9].age).toBe(first.endAge);
+    expect(sewoon.map((s) => s.age)).toEqual([
+      7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+    ]);
+    expect(sewoon.map((s) => s.year)).toEqual([
+      1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+    ]);
   });
 
   it('세운 간지가 그 해의 년주와 같다', () => {
