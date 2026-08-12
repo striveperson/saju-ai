@@ -93,16 +93,17 @@ describe('대운수', () => {
   });
 
   it('중기는 기준이 아니다', () => {
-    // 2024년 곡우(청명과 입하 사이의 중기)는 04-19 다.
-    // 출생을 절과 중기 사이에 두어야 순행과 역행 양쪽에서 중기가 걸릴 수 있다.
-    // 곡우 뒤에서 재면 순행 탐색이 애초에 곡우를 지나쳐 아무것도 잡지 못한다.
-    const at = kst('2024-04-10T12:00:00');
-    const forward = daeunStart(at, 'M');
-    const backward = daeunStart(at, 'F');
+    // 2024년 곡우(청명 04-04 와 입하 05-05 사이의 중기)는 04-19 23:00 이다.
+    // 곡우를 사이에 두고 두 출생이 필요하다. 한 출생으로는 한쪽 방향만 갈린다.
+    const day = 86_400_000;
 
-    // 청명 04-04 와 입하 05-05 가 감싼다. 곡우가 섞이면 양쪽 다 열흘 아래로 줄어든다.
-    expect(forward.gapMs / 86_400_000).toBeGreaterThan(10);
-    expect(backward.gapMs / 86_400_000).toBeGreaterThan(5);
+    // 곡우 앞에서는 순행이 갈린다. 입하까지 24.88일인데 곡우를 세면 9.46일이다.
+    const before = daeunStart(kst('2024-04-10T12:00:00'), 'M');
+    expect(before.gapMs / day).toBeGreaterThan(15);
+
+    // 곡우 뒤에서는 역행이 갈린다. 청명까지 20.83일인데 곡우를 세면 5.54일이다.
+    const after = daeunStart(kst('2024-04-25T12:00:00'), 'F');
+    expect(after.gapMs / day).toBeGreaterThan(15);
   });
 
   it('절입일 당일 출생은 역행 대운수가 0 이다', () => {
@@ -146,14 +147,12 @@ describe('대운 간지', () => {
 
   it('첫 대운은 월주가 아니라 그 다음 간지다', () => {
     // docs/05 9장 3항. 월주는 원국이므로 대운에 다시 나오지 않는다.
+    // 기준 케이스의 월주가 정축이라 역행은 앞의 병자, 순행은 뒤의 무인이다.
     const at = caseUtcMs(caseById('verified-19950127-1439-F-seoul').input);
-    const month = indexFromPillar(monthPillar(at));
 
-    const backward = daeunList(at, 'F');
-    const forward = daeunList(at, 'M');
-
-    expect(indexFromPillar(backward[0].pillar)).toBe((month - 1 + 60) % 60);
-    expect(indexFromPillar(forward[0].pillar)).toBe((month + 1) % 60);
+    expect(monthPillar(at)).toBe('정축');
+    expect(daeunList(at, 'F')[0].pillar).toBe('병자');
+    expect(daeunList(at, 'M')[0].pillar).toBe('무인');
   });
 
   it('열 개가 방향대로 한 칸씩 나아간다', () => {
@@ -183,6 +182,8 @@ describe('대운 간지', () => {
     const list = daeunList(kst('1990-05-15T14:30:00'), 'M');
 
     expect(list.map((d) => d.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    // 1990년은 경오년이고 경이 양간이라 남자는 순행이다. 열 개가 같은 값을 담는다.
+    expect(list.every((d) => d.direction === 'forward')).toBe(true);
     expect(list.map((d) => d.startAge)).toEqual([
       7, 17, 27, 37, 47, 57, 67, 77, 87, 97,
     ]);
@@ -200,7 +201,8 @@ describe('대운 간지', () => {
     // 그 해가 어느 사주 연도인지는 입춘 시각을 알아야 정해지므로 연도만 비운다.
     const list = daeunList(kst('2015-05-15T12:00:00'), 'M');
 
-    // 2015년은 을미년이라 남자는 역행이고 월주 신사에서 거꾸로 진행한다.
+    // 2015년은 을미년이고 을이 음간이라 남자는 역행이다. 월주 신사에서 거꾸로 진행한다.
+    expect(list.every((d) => d.direction === 'backward')).toBe(true);
     // 데이터 밖에서도 간지와 나이는 그대로 나온다. 비는 것은 연도뿐이다.
     expect(list[9].pillar).toBe('신미');
     expect(list[9].startAge).toBe(93);
@@ -365,9 +367,8 @@ describe('세운', () => {
     const list = daeunList(at, 'M');
     const ages = list.flatMap((d) => sewoonList(at, d).map((s) => s.age));
 
-    expect(ages).toEqual(
-      Array.from({ length: 100 }, (_, i) => list[0].startAge + i),
-    );
+    // 이 출생은 대운수가 0 이라 만 0세에서 99세까지 한 번씩 덮는다.
+    expect(ages).toEqual(Array.from({ length: 100 }, (_, i) => i));
   });
 
   it('열 해가 나이와 함께 이어진다', () => {

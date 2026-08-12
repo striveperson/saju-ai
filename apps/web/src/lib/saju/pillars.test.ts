@@ -4,6 +4,7 @@ import {
   calendarDateFromJdn,
   julianDayNumber,
   utcMsFromWall,
+  wallFromUtcMs,
 } from './calendar';
 import type { CalendarDateTime } from './calendar';
 import { SOLAR_TERM_NAMES, solarTerms } from './data/solar-terms';
@@ -24,7 +25,10 @@ import {
   monthBranchIndex,
   monthPillar,
   pillarFromIndex,
+  pillarOfSajuYear,
   sajuYear,
+  sajuYearOrNull,
+  surroundingMonthTerms,
   yearPillar,
 } from './pillars';
 import { correctBirthTime } from './time';
@@ -333,6 +337,78 @@ describe('년주', () => {
   it('지원 범위 밖은 던진다', () => {
     expect(() => yearPillar(kst('1899-06-01T12:00:00'))).toThrow(RangeError);
     expect(() => yearPillar(kst('2101-06-01T12:00:00'))).toThrow(RangeError);
+  });
+
+  it('연도로 직접 년주를 낸다', () => {
+    // 세운이 이 경로를 쓴다. docs/05 9장 5항.
+    // 60갑자 산술뿐이라 절기 데이터 범위와 무관하게 값이 나온다.
+    expect(pillarOfSajuYear(1984)).toBe('갑자');
+    expect(pillarOfSajuYear(1900)).toBe('경자');
+    expect(pillarOfSajuYear(2100)).toBe('경신');
+    expect(pillarOfSajuYear(2160)).toBe(pillarOfSajuYear(2100));
+
+    // 순간을 받는 쪽과 답이 같아야 한다. 입춘을 지난 시각으로 대조한다.
+    expect(pillarOfSajuYear(2024)).toBe(yearPillar(kst('2024-06-01T12:00:00')));
+  });
+});
+
+describe('판정할 수 없는 사주 연도', () => {
+  // docs/05 9.8. 대운과 세운이 지원 범위를 넘는 순간을 만들어 이 경로를 쓴다.
+  it('데이터 안에서는 sajuYear 와 같은 값이다', () => {
+    expect(sajuYearOrNull(kst('2024-01-01T12:00:00'))).toBe(2023);
+    expect(sajuYearOrNull(kst('2024-06-01T12:00:00'))).toBe(2024);
+  });
+
+  it('마지막 절기 이후는 비운다', () => {
+    // 절기 데이터는 2100년 동지(KST 12-22 04:53)에서 끝난다.
+    expect(sajuYearOrNull(kst('2100-12-22T04:53:00'))).toBe(2100);
+    expect(sajuYearOrNull(kst('2100-12-22T04:54:00'))).toBeNull();
+    expect(sajuYearOrNull(kst('2150-06-01T12:00:00'))).toBeNull();
+  });
+
+  it('1900년 입춘 이전도 비운다', () => {
+    // 배열 안이지만 경계인 1899년 입춘이 없다. 1900년 입춘은 KST 02-04 14:51 이다.
+    expect(sajuYearOrNull(kst('1900-02-04T14:51:00'))).toBe(1900);
+    expect(sajuYearOrNull(kst('1900-02-04T14:50:00'))).toBeNull();
+    expect(sajuYearOrNull(kst('1900-01-10T12:00:00'))).toBeNull();
+  });
+
+  it('던지지 않는다', () => {
+    // sajuYear 는 같은 입력에 던진다. 둘의 계약이 다른 것이 이 함수의 존재 이유다.
+    expect(() => sajuYearOrNull(kst('1900-01-10T12:00:00'))).not.toThrow();
+    expect(() => sajuYear(kst('1900-01-10T12:00:00'))).toThrow(RangeError);
+  });
+});
+
+describe('월 경계를 감싸는 두 절입', () => {
+  // 대운수가 이 둘 중 하나와 출생 시각의 간격에서 나온다. docs/05 9장 2항.
+  it('앞은 같은 시각을 포함하고 뒤는 포함하지 않는다', () => {
+    // 2024년 입하는 KST 05-05 09:10 이다.
+    const exact = kst('2024-05-05T09:10:00');
+    const terms = surroundingMonthTerms(exact);
+
+    expect(terms.previousUtcMs).toBe(exact);
+    expect(terms.nextUtcMs).toBeGreaterThan(exact);
+  });
+
+  it('중기를 건너뛰고 12절만 낸다', () => {
+    // 2024년 곡우는 04-19 23:00 이고 청명은 04-04 16:02, 입하는 05-05 09:10 이다.
+    const terms = surroundingMonthTerms(kst('2024-04-25T12:00:00'));
+
+    expect(wallFromUtcMs(terms.previousUtcMs, 32_400)).toMatchObject({
+      month: 4,
+      day: 4,
+    });
+    expect(wallFromUtcMs(terms.nextUtcMs, 32_400)).toMatchObject({
+      month: 5,
+      day: 5,
+    });
+  });
+
+  it('앞뒤 중 하나라도 없으면 던진다', () => {
+    expect(() => surroundingMonthTerms(kst('2100-12-25T12:00:00'))).toThrow(
+      RangeError,
+    );
   });
 });
 

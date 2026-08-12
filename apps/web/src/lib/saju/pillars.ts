@@ -256,16 +256,20 @@ export function sajuYear(utcMs: number): number {
 }
 
 /**
- * 사주 연도. 절기 데이터 밖이면 `null` 이다. docs/05 9.8.
+ * 사주 연도. 절기 데이터로 판정할 수 없으면 `null` 이다. docs/05 9.8.
  *
  * 대운과 세운은 출생에서 100년 뒤까지 뻗어 지원 범위를 넘는 순간을 만든다.
  * 그 순간은 입력이 아니라 지원 범위 안 입력이 만들어 낸 출력이라 거부 대상이 아니다.
  * 원국 계산은 `sajuYear` 를 그대로 써서 범위 밖 입력을 거부한다.
+ *
+ * 판정할 수 없는 구간이 둘이다. 배열 밖이 하나이고,
+ * 1900년 입춘 이전이 다른 하나다. 뒤쪽은 배열 안이지만 경계인 1899년 입춘이 없다.
  */
 export function sajuYearOrNull(utcMs: number): number | null {
   const terms = solarTerms();
   const outside =
-    utcMs < terms[0].utcMs || utcMs > terms[terms.length - 1].utcMs;
+    utcMs < terms[IPCHUN_POSITION].utcMs ||
+    utcMs > terms[terms.length - 1].utcMs;
   return outside ? null : sajuYear(utcMs);
 }
 
