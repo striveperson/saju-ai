@@ -301,15 +301,16 @@ export function surroundingMonthTerms(utcMs: number): {
   const terms = solarTerms();
   const at = lastTermIndexAtOrBefore(utcMs);
 
+  // 배열 첫 항목이 소한이라 하향 탐색은 반드시 12절에서 멈춘다. 밑으로 벗어나지 않는다.
   let before = at;
-  while (before >= 0 && !(terms[before].name in MONTH_TERM_BRANCH)) before--;
+  while (!(terms[before].name in MONTH_TERM_BRANCH)) before--;
 
   let after = at + 1;
   while (after < terms.length && !(terms[after].name in MONTH_TERM_BRANCH)) {
     after++;
   }
 
-  if (before < 0 || after >= terms.length) {
+  if (after >= terms.length) {
     throw new RangeError(
       `앞뒤 절입 시각이 데이터에 없다. 양력 ${SOLAR_TERM_FIRST_YEAR}년 소한부터 ${SOLAR_TERM_LAST_YEAR}년 대설까지만 계산한다.`,
     );
