@@ -255,9 +255,68 @@ export function sajuYear(utcMs: number): number {
   return year - 1;
 }
 
+/**
+ * 사주 연도. 절기 데이터로 판정할 수 없으면 `null` 이다. docs/05 9.8.
+ *
+ * 대운과 세운은 출생에서 100년 뒤까지 뻗어 지원 범위를 넘는 순간을 만든다.
+ * 그 순간은 입력이 아니라 지원 범위 안 입력이 만들어 낸 출력이라 거부 대상이 아니다.
+ * 원국 계산은 `sajuYear` 를 그대로 써서 범위 밖 입력을 거부한다.
+ *
+ * 판정할 수 없는 구간이 둘이다. 배열 밖이 하나이고,
+ * 1900년 입춘 이전이 다른 하나다. 뒤쪽은 배열 안이지만 경계인 1899년 입춘이 없다.
+ */
+export function sajuYearOrNull(utcMs: number): number | null {
+  const terms = solarTerms();
+  const outside =
+    utcMs < terms[IPCHUN_POSITION].utcMs ||
+    utcMs > terms[terms.length - 1].utcMs;
+  return outside ? null : sajuYear(utcMs);
+}
+
+/**
+ * 사주 연도의 년주. docs/05 2장.
+ *
+ * `yearPillar` 가 순간을 받는 것과 달리 연도를 직접 받는다.
+ * 세운이 같은 규칙이라 이쪽을 쓴다. docs/05 9장 5항.
+ */
+export function pillarOfSajuYear(year: number): Pillar {
+  return pillarFromIndex(year - YEAR_PILLAR_ANCHOR_YEAR);
+}
+
 /** 년주. docs/05 2장. */
 export function yearPillar(utcMs: number): Pillar {
-  return pillarFromIndex(sajuYear(utcMs) - YEAR_PILLAR_ANCHOR_YEAR);
+  return pillarOfSajuYear(sajuYear(utcMs));
+}
+
+/**
+ * 이 순간을 감싸는 두 절입 시각. 월 경계를 만드는 12절만 본다. docs/05 3장.
+ *
+ * `previous` 는 같은 시각을 포함하고 `next` 는 포함하지 않는다.
+ * 대운수가 이 둘 중 하나와 출생 시각의 간격에서 나온다. docs/05 9장 2항.
+ */
+export function surroundingMonthTerms(utcMs: number): {
+  previousUtcMs: number;
+  nextUtcMs: number;
+} {
+  const terms = solarTerms();
+  const at = lastTermIndexAtOrBefore(utcMs);
+
+  // 배열 첫 항목이 소한이라 하향 탐색은 반드시 12절에서 멈춘다. 밑으로 벗어나지 않는다.
+  let before = at;
+  while (!(terms[before].name in MONTH_TERM_BRANCH)) before--;
+
+  let after = at + 1;
+  while (after < terms.length && !(terms[after].name in MONTH_TERM_BRANCH)) {
+    after++;
+  }
+
+  if (after >= terms.length) {
+    throw new RangeError(
+      `앞뒤 절입 시각이 데이터에 없다. 양력 ${SOLAR_TERM_FIRST_YEAR}년 소한부터 ${SOLAR_TERM_LAST_YEAR}년 대설까지만 계산한다.`,
+    );
+  }
+
+  return { previousUtcMs: terms[before].utcMs, nextUtcMs: terms[after].utcMs };
 }
 
 /**

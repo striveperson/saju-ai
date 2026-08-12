@@ -157,7 +157,10 @@ pnpm format           # oxfmt
 | 서머타임 기록 성격 | `dstAssumption`           | `unknown`      |
 | 모호한 벽시계 해석 | `ambiguityChoice`         | `earlier`      |
 | 지원 세력 범위     | `supportIncludesResource` | true           |
-| 대운수 나머지 처리 | 설정 상수                 | 문서 참조      |
+
+대운수 나머지 처리는 이 표에 있었으나 뺐다. 가르는 검증 케이스가 없어
+옵션으로 두면 근거 없이 다른 값을 내는 경로가 남는다. 근거는
+[docs/05](docs/05-saju-domain-rules.md) 9.6 이다.
 
 ## 문서와 마크다운 규칙
 
@@ -356,7 +359,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 - 균시차 보정. docs/05 7.3 이 유파 선택 옵션으로 둔 항목이다
 - 십신 10종. 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있다
-- 대운과 세운
+- 월운. docs/05 9장이 대운과 세운까지만 정의한다
 - Supabase 스키마와 RLS
 - API 라우트와 화면
 - AI 해석 레이어
@@ -374,6 +377,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 | 년주, 월주, 일주, 시주 | `apps/web/src/lib/saju/pillars.ts` |
 | 지장간, 상생상극, 십신 5분류 | `apps/web/src/lib/saju/tables.ts` |
 | 신강약과 억부용신 | `apps/web/src/lib/saju/strength.ts` |
+| 대운과 세운 | `apps/web/src/lib/saju/daeun.ts` |
 | 검증 케이스 38개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
 
 검증 케이스는 38개 중 18개가 `verified` 다. 나머지 20개는 표준시 전환, 음력, 대운, 강약이라
