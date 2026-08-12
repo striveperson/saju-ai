@@ -193,22 +193,24 @@ describe('대운 간지', () => {
   it('절기 데이터 범위를 넘는 대운은 연도만 빈다', () => {
     // docs/05 9.8. 대운 열 개면 출생에서 100년 뒤까지 가고 데이터는 2100년에서 끝난다.
     // 그 해가 어느 사주 연도인지는 입춘 시각을 알아야 정해지므로 연도만 비운다.
-    const last = daeunList(kst('2015-05-15T12:00:00'), 'M')[9];
+    const list = daeunList(kst('2015-05-15T12:00:00'), 'M');
 
-    expect(last.startYear).toBeNull();
-    expect(last.pillar).toHaveLength(2);
-    expect(last.startAge).toBe(
-      daeunList(kst('2015-05-15T12:00:00'), 'M')[0].startAge + 90,
-    );
+    expect(list[9].startYear).toBeNull();
+    expect(list[9].startAge).toBe(list[0].startAge + 90);
+    // 이른 대운은 데이터 안이다. 과하게 비우면 여기서 걸린다.
+    // 5월 출생이라 생일이 입춘에서 멀어 산술값과 같다.
+    expect(list[0].startYear).toBe(2015 + list[0].startAge);
   });
 
   it('입춘 부근 출생도 대운 열 개를 낸다', () => {
     // docs/05 9.8 과 10장. verified 픽스처 둘이 KST 2월 4일이고
     // 이 출생의 늦은 대운이 데이터 경계를 넘는다. 입력은 지원 범위 안이라 거부 대상이 아니다.
     for (const id of ['ipchun-2024-before', 'ipchun-2024-after']) {
-      const at = caseUtcMs(caseById(id).input);
-      expect(() => daeunList(at, 'M'), id).not.toThrow();
-      expect(daeunList(at, 'M'), id).toHaveLength(10);
+      // 고치기 전에는 이 호출이 RangeError 로 끝났다.
+      const list = daeunList(caseUtcMs(caseById(id).input), 'M');
+
+      expect(list[0].startYear, id).not.toBeNull();
+      expect(list[9].startYear, id).toBeNull();
     }
   });
 
@@ -295,6 +297,20 @@ describe('세운', () => {
     expect(sewoon.map((s) => s.year)).toEqual([
       1900, 1901, 1902, 1903, 1905, 1905, 1906, 1907, 1909, 1909,
     ]);
+  });
+
+  it('데이터 밖 해는 연도와 간지가 함께 빈다', () => {
+    // docs/05 9.8. 마지막 세운 나이가 대운수 + 99 라 대운 시작 연도보다 먼저 걸린다.
+    // 1992-04-05 출생 남자는 대운수가 10 이라 마지막 세운이 만 109세, 2101년이다.
+    const at = kst('1992-04-05T12:00:00');
+    const last = sewoonList(at, daeunList(at, 'M')[9]);
+
+    expect(last[9].year).toBeNull();
+    expect(last[9].pillar).toBeNull();
+    expect(last[9].age).toBe(109);
+    // 같은 대운의 이른 해는 데이터 안이다. 연도가 있으면 간지도 있다.
+    expect(last[0].year).toBe(2092);
+    expect(last[0].pillar).not.toBeNull();
   });
 
   it('대운 열 개의 나이가 빈틈없이 이어진다', () => {
