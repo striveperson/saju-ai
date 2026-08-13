@@ -15,9 +15,27 @@ docs/
 ├── 01-overview.md
 ├── 02-architecture.md
 ├── 05-saju-domain-rules.md      사주 도메인 SSOT
+├── 06-code-working-rules.md     코드 작업 방식
+├── 07-sinsal-rules.md           신살 SSOT
 └── adr/
-    └── 0001-monorepo-pnpm-workspaces.md ~ 0013-saju-engine-purity-enforcement.md
+    └── 0001-monorepo-pnpm-workspaces.md ~ 0016-true-solar-time-always-applied.md
 ```
+
+### 1.1 무엇을 기준으로 쪼개는가
+
+길이가 아니라 참조 관계로 쪼갠다. 서로를 자주 참조하는 규칙은 한 문서에 둔다.
+길이 규칙(5장)보다 이쪽이 우선한다.
+
+`05-saju-domain-rules.md` 가 그 예다. 스크롤 5번을 넘지만 쪼개지 않는다.
+입력 시각에서 팔자와 운으로 가는 한 줄기라 장 사이 대조가 잦고,
+검증기가 대운 하나를 확인할 때도 머리말부터 10장까지 열어 본다.
+파일이 갈리면 그 대조가 grep 으로 밀린다.
+
+신살을 `07-sinsal-rules.md` 로 뗀 것은 반대 경우다.
+완성된 팔자를 받는 판정이라 05 의 어느 장도 참조하지 않는다.
+
+부피가 문제면 쪼개기 전에 있을 자리가 아닌 것을 먼저 뺀다.
+기각 기록과 결정의 경위는 ADR 이 맡는다.
 
 ## 2. 파일 네이밍 규칙
 
@@ -75,7 +93,7 @@ ADR 은 아래 형식을 지킨다. 이 프로젝트의 모든 ADR 이 같은 �
 | 다이어그램 | [Mermaid](https://mermaid.js.org/) 사용 (GitHub 에서 바로 렌더링됨) |
 | 링크 | 문서 간 이동은 상대 경로 링크 |
 | 용어 | 도메인 용어는 [`01-overview.md`](01-overview.md) 용어집, 계산 규칙은 [`05-saju-domain-rules.md`](05-saju-domain-rules.md) 와 일치시킨다 |
-| 길이 | 한 문서가 너무 길어지면(스크롤 5번 이상) 분리 |
+| 길이 | 한 문서가 너무 길어지면(스크롤 5번 이상) 분리. 쪼개는 기준은 1.1 이 우선한다 |
 
 ### 5.1 강조와 기호
 
