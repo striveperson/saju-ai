@@ -348,7 +348,10 @@ describe('년주', () => {
     expect(pillarOfSajuYear(2160)).toBe(pillarOfSajuYear(2100));
 
     // 순간을 받는 쪽과 답이 같아야 한다. 입춘을 지난 시각으로 대조한다.
-    expect(pillarOfSajuYear(2024)).toBe(yearPillar(kst('2024-06-01T12:00:00')));
+    // 양쪽을 값으로 적는다. yearPillar 가 내부에서 pillarOfSajuYear 를 부르므로
+    // 둘을 직접 비교하면 같은 길을 두 번 지나 사주 연도 판정만 확인하게 된다.
+    expect(pillarOfSajuYear(2024)).toBe('갑진');
+    expect(yearPillar(kst('2024-06-01T12:00:00'))).toBe('갑진');
   });
 });
 
@@ -395,13 +398,20 @@ describe('월 경계를 감싸는 두 절입', () => {
     // 2024년 곡우는 04-19 23:00 이고 청명은 04-04 16:02, 입하는 05-05 09:10 이다.
     const terms = surroundingMonthTerms(kst('2024-04-25T12:00:00'));
 
-    expect(wallFromUtcMs(terms.previousUtcMs, 32_400)).toMatchObject({
+    // 연도와 시각까지 본다. 월일만 보면 엉뚱한 해의 4월 4일도 통과한다.
+    expect(wallFromUtcMs(terms.previousUtcMs, 32_400)).toEqual({
+      year: 2024,
       month: 4,
       day: 4,
+      hour: 16,
+      minute: 2,
     });
-    expect(wallFromUtcMs(terms.nextUtcMs, 32_400)).toMatchObject({
+    expect(wallFromUtcMs(terms.nextUtcMs, 32_400)).toEqual({
+      year: 2024,
       month: 5,
       day: 5,
+      hour: 9,
+      minute: 10,
     });
   });
 
@@ -521,6 +531,19 @@ describe('절기 데이터와 월 경계', () => {
     for (let i = 1; i < terms.length; i++) {
       expect(terms[i].utcMs).toBeGreaterThan(terms[i - 1].utcMs);
     }
+  });
+
+  it('배열이 소한에서 시작하고 셋째가 입춘이다', () => {
+    // 구현 두 곳이 이 시작 위상에 기대고 있다.
+    // surroundingMonthTerms 의 하향 탐색은 첫 항목이 12절이라 반드시 멈추고,
+    // sajuYearOrNull 의 하한은 셋째 항목이 그 해 입춘이라는 것을 쓴다.
+    // 자동 생성 파일을 다시 구우면서 위상이 바뀌면 둘 다 조용히 어긋난다.
+    const terms = solarTerms();
+
+    expect(terms[0].name).toBe('소한');
+    expect(terms[1].name).toBe('대한');
+    expect(terms[2].name).toBe('입춘');
+    expect(terms[terms.length - 1].name).toBe('동지');
   });
 });
 
