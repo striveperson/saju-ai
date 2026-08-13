@@ -40,11 +40,12 @@ const DAY_MS = 86_400_000;
 /**
  * 생일 날짜를 읽는 프레임. docs/05 9.2 가 7.1 의 정규화 오프셋을 쓰기로 정했다.
  *
- * 비교 기준일 뿐 아니라 생일이 며칠인지를 정한다.
+ * 생일이 며칠로 읽히는지를 정한다.
  * UTC+8:30 시기의 현지 23:30 이후 출생은 이 프레임에서 날짜가 하루 뒤다.
+ * 되돌릴 때 같은 오프셋을 쓰므로 날짜 라벨만 옮겨가고 나오는 사주 연도는 같다.
  *
- * 같은 값을 여기 다시 적지 않고 `time.ts` 에서 가져온다.
- * 두 값이 갈리면 원국과 대운이 다른 프레임을 보게 되는데 그것을 잡는 테스트가 없다.
+ * 그래서 같은 값을 여기 다시 적지 않고 `time.ts` 에서 가져온다.
+ * 값을 가르지 않는 선택일수록 두 곳에 적어 두면 갈렸을 때 알아채기 어렵다.
  */
 const BIRTHDAY_FRAME_OFFSET_SECONDS = NORMALIZED_OFFSET_SECONDS;
 
@@ -64,7 +65,10 @@ const DAEUN_COUNT = 10;
  */
 function sajuYearAtAge(birth: CalendarDateTime, age: number): number | null {
   return sajuYearOrNull(
-    utcMsFromWall({ ...birth, year: birth.year + age }, BIRTHDAY_FRAME_OFFSET_SECONDS),
+    utcMsFromWall(
+      { ...birth, year: birth.year + age },
+      BIRTHDAY_FRAME_OFFSET_SECONDS,
+    ),
   );
 }
 

@@ -10,7 +10,7 @@ import {
   parseBirth,
 } from './fixtures/cases';
 import { indexFromPillar, monthPillar, sajuYear, yearPillar } from './pillars';
-import { correctBirthTime } from './time';
+import { NORMALIZED_OFFSET_SECONDS, correctBirthTime } from './time';
 import type { CaseInput } from './fixtures/cases';
 
 /** 케이스의 벽시계를 파이프라인에 태워 물리적 시각을 얻는다. docs/05 7장. */
@@ -20,7 +20,8 @@ function caseUtcMs(input: CaseInput): number {
 }
 
 /** KST 벽시계 문자열을 물리적 시각으로. 파이프라인을 태우지 않는다. */
-const kst = (text: string): number => utcMsFromWall(parseBirth(text), 32_400);
+const kst = (text: string): number =>
+  utcMsFromWall(parseBirth(text), NORMALIZED_OFFSET_SECONDS);
 
 describe('대운 방향', () => {
   it('년간 음양과 성별 네 조합이 docs/05 9장 1항대로 갈린다', () => {
@@ -306,6 +307,36 @@ describe('입춘 직전 출생의 대운 시작 연도', () => {
     for (const daeun of daeunList(at, 'F')) {
       expect(daeun.startYear).toBe(sajuYear(at) + daeun.startAge);
     }
+  });
+
+  it('표준시가 다르던 시기 출생도 세운이 입춘 경계에서 갈린다', () => {
+    // 표준시가 UTC+8:30 이던 1955년의 현지 23:45 출생이다.
+    // 정규화하면 다음날 00:15 이고 만 66세 생일이 2021 입춘(KST 02-03 23:59)을 16분 지난다.
+    // 파이프라인의 30분 정규화가 빠지면 이 16분이 뒤집혀 2020년이 된다.
+    //
+    // 생일을 어느 프레임에서 읽는지는 이 값을 가르지 않는다. docs/05 9.2.
+    // 읽을 때와 되돌릴 때 오프셋이 같아 날짜 라벨만 옮겨간다.
+    const { utcMs, normalized } = correctBirthTime(
+      parseBirth('1955-02-03T23:45:00'),
+      { longitude: 126.98 },
+    );
+
+    expect(normalized).toEqual({
+      year: 1955,
+      month: 2,
+      day: 4,
+      hour: 0,
+      minute: 15,
+    });
+
+    const daeun = daeunList(utcMs, 'M').find(
+      (d) => d.startAge <= 66 && 66 <= d.endAge,
+    );
+    if (!daeun) throw new Error('만 66세를 덮는 대운이 없다');
+
+    const sixtySix = sewoonList(utcMs, daeun).find((s) => s.age === 66);
+    expect(sixtySix?.year).toBe(2021);
+    expect(sixtySix?.pillar).toBe('신축');
   });
 });
 
