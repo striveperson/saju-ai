@@ -10,6 +10,7 @@
 | 작업                             | 문서                                                               |
 | -------------------------------- | ------------------------------------------------------------------ |
 | 사주 계산 규칙 (SSOT)            | [docs/05-saju-domain-rules.md](docs/05-saju-domain-rules.md)       |
+| 신살 판정 규칙 (SSOT)            | [docs/07-sinsal-rules.md](docs/07-sinsal-rules.md)                 |
 | 서비스 정의, 사용자 흐름, 용어집 | [docs/01-overview.md](docs/01-overview.md)                         |
 | 시스템 구조, 빌드 타깃, 데이터   | [docs/02-architecture.md](docs/02-architecture.md)                 |
 | 웹 패키지 규칙                   | [apps/web/CLAUDE.md](apps/web/CLAUDE.md)                           |
@@ -160,7 +161,7 @@ pnpm format           # oxfmt
 
 대운수 나머지 처리는 이 표에 있었으나 뺐다. 가르는 검증 케이스가 없어
 옵션으로 두면 근거 없이 다른 값을 내는 경로가 남는다. 근거는
-[docs/05](docs/05-saju-domain-rules.md) 9.6 이다.
+[docs/05](docs/05-saju-domain-rules.md) 9.1 이다.
 
 ## 문서와 마크다운 규칙
 
@@ -365,6 +366,7 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 - 균시차 보정. docs/05 7.3 이 유파 선택 옵션으로 둔 항목이다
 - 십신 10종. 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있다
 - 월운. docs/05 9장이 대운과 세운까지만 정의한다
+- 신살 17종. [docs/07](docs/07-sinsal-rules.md) 이 채택 등급과 판정표까지 정해 두었다
 - Supabase 스키마와 RLS
 - API 라우트와 화면
 - AI 해석 레이어
