@@ -873,6 +873,20 @@ export const CASES: readonly VerificationCase[] = [
   },
 
   // 대운 방향. 년간 음양 곱하기 성별 네 조합이 필요하다.
+  //
+  // 넷 다 포스텔러로 대조했다(2026-08-15). 원국 네 기둥과 대운수뿐 아니라
+  // 대운 열 개의 간지가 전부 일치한다. `first` 만 담는 것은 나머지가 60갑자 순환이라
+  // 첫 대운 간지와 방향이 정해지면 따라오기 때문이다.
+  // 열 개가 한 칸씩 나아가는지는 daeun.test.ts 가 따로 단언한다.
+  //
+  // 두 쌍 모두 생일이 같고 성별만 다르다. 그래서 쌍 안에서 팔자가 같고
+  // 방향과 첫 대운 간지가 갈린다.
+  //
+  // 네 건의 대운수가 모두 5 인 것은 규칙이 아니라 이 두 출생일의 성질이다.
+  // 순행 간격과 역행 간격이 우연히 같은 몫으로 떨어졌다.
+  // 순행과 역행 차례로 1996년이 15.23일과 15.50일, 1997년이 15.47일과 15.25일이라
+  // 3으로 나눈 몫이 넷 다 5 다.
+  // 대운수가 성별로 갈리는 자리는 아래 `daeun-on-term-day` 다.
   {
     id: 'daeun-yang-male',
     purpose: '대운 순행. 양간 년주 + 남자',
@@ -884,11 +898,22 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
-    notes: '1996년 년간은 병(양)이다. 순행이어야 한다',
+    expected: {
+      year: '병자',
+      month: '임진',
+      day: '정해',
+      hour: '갑진',
+      daeun: { direction: 'forward', startAge: 5, first: '계사' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-15, 서울특별시 지역시 -32분). ' +
+        '병자 임진 정해 갑진, 대운수 5, 순행 계사부터 95임인까지 열 개',
+      'KASI 음양력정보 kasi-lunar-months.json 코퍼스에서 유도 (2026-08-15). ' +
+        '1996 음3월 초하루 04-18 일진 을유에서 이틀 뒤라 일진 정해',
+    ],
+    notes: '1996년 년간은 병(양)이다. 9장 1항이 양간에 남자를 순행으로 정한다',
   },
   {
     id: 'daeun-yang-female',
@@ -901,10 +926,23 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
+    expected: {
+      year: '병자',
+      month: '임진',
+      day: '정해',
+      hour: '갑진',
+      daeun: { direction: 'backward', startAge: 5, first: '신묘' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-15, 서울특별시 지역시 -32분). ' +
+        '병자 임진 정해 갑진, 대운수 5, 역행 신묘부터 95임오까지 열 개',
+      'KASI 음양력정보 kasi-lunar-months.json 코퍼스에서 유도 (2026-08-15). ' +
+        '1996 음3월 초하루 04-18 일진 을유에서 이틀 뒤라 일진 정해',
+    ],
+    notes:
+      '같은 출생에 여자라 역행이다. 첫 대운 간지가 월주 임진에서 계사 대신 신묘로 간다',
   },
   {
     id: 'daeun-yin-male',
@@ -917,11 +955,24 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
-    notes: '1997년 년간은 정(음)이다. 역행이어야 한다',
+    expected: {
+      year: '정축',
+      month: '갑진',
+      day: '임진',
+      hour: '갑진',
+      daeun: { direction: 'backward', startAge: 5, first: '계묘' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-15, 서울특별시 지역시 -32분). ' +
+        '정축 갑진 임진 갑진, 대운수 5, 역행 계묘부터 95갑오까지 열 개',
+      'KASI 음양력정보 kasi-lunar-months.json 코퍼스에서 유도 (2026-08-15). ' +
+        '1997 음3월 초하루 04-07 일진 기묘에서 13일 뒤라 일진 임진',
+    ],
+    notes:
+      '1997년 년간은 정(음)이다. 9장 1항이 음간에 남자를 역행으로 정한다. ' +
+      '월주와 시주가 둘 다 갑진이라 월두법과 시두법이 같은 값을 내는 자리다',
   },
   {
     id: 'daeun-yin-female',
@@ -934,10 +985,24 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
+    expected: {
+      year: '정축',
+      month: '갑진',
+      day: '임진',
+      hour: '갑진',
+      daeun: { direction: 'forward', startAge: 5, first: '을사' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-15, 서울특별시 지역시 -32분). ' +
+        '정축 갑진 임진 갑진, 대운수 5, 순행 을사부터 95갑인까지 열 개',
+      'KASI 음양력정보 kasi-lunar-months.json 코퍼스에서 유도 (2026-08-15). ' +
+        '1997 음3월 초하루 04-07 일진 기묘에서 13일 뒤라 일진 임진',
+    ],
+    notes:
+      '같은 출생에 여자라 순행이다. 첫 대운 간지가 월주 갑진에서 계묘 대신 을사로 간다. ' +
+      '양간 쌍과 견주면 어느 성별이 순행을 받는지가 뒤집힌다',
   },
   {
     id: 'daeun-on-term-day',
@@ -950,14 +1015,27 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy:
-      '만세력 대운표 대조. 절입일 당일이라 순행 대운수가 상한 10 에 닿는지가 핵심이다',
+    expected: {
+      year: '갑진',
+      month: '기사',
+      day: '기사',
+      hour: '경오',
+      daeun: { direction: 'forward', startAge: 10, first: '경오' },
+      trueSolarOffsetMin: -32,
+    },
+    verified: true,
+    sources: [
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-15, 서울특별시 지역시 -32분). ' +
+        '갑진 기사 기사 경오, 대운수 10, 순행 경오부터 100기묘까지 열 개',
+      'KASI 음양력정보 kasi-lunar-months.json 코퍼스에서 유도 (2026-08-15). ' +
+        '2024 음3월 초하루 04-09 일진 계묘에서 26일 뒤라 일진 기사',
+    ],
     notes:
       '2024년 입하는 KST 05-05 09:10 이다. 역행이면 그 절입까지 세 시간이 채 안 되어 대운수가 0 이고 ' +
       '순행이면 망종까지 31일이 남아 10 이다. 같은 출생이 성별로 가장 크게 갈리는 자리이고 ' +
-      '대운수가 상한에 닿는 자리이기도 하다',
+      '대운수가 상한에 닿는 자리이기도 하다. ' +
+      '이 케이스는 남자라 순행 10 만 담는다. 역행 0 은 daeun.test.ts 가 같은 입력에 F 를 넣어 단언한다. ' +
+      '포스텔러가 대운을 100까지 내는 것도 여기서 확인했다',
   },
 
   // 신강약 등급 임계와 용신 대체.
