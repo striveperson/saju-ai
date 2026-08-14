@@ -26,46 +26,23 @@
 
 ## 모노레포 구조
 
-```
-saju-ai/
-├── docs/                   ADR 과 도메인 문서
-├── apps/
-│   ├── web/                TanStack Start. 사실상 앱 전체
-│   │   └── src/lib/saju/   계산 엔진 (외부 의존 0)
-│   └── mobile/             Capacitor 셸. 비즈니스 로직 없음
-├── .claude/hooks/          아래 훅 표 참고
-└── pnpm-workspace.yaml
-```
-
 `packages/` 공유 패키지를 두지 않는다. 계산 엔진의 소비자가 웹 하나뿐이기 때문이다
 ([ADR 0001](docs/adr/0001-monorepo-pnpm-workspaces.md)).
 
 ## 기술 스택
 
-- 웹: TanStack Start 1.168, TanStack Router 1.170, React 19.2 (+React Compiler),
-  Vite 8, Tailwind 4, TanStack Query 5
-- 도구: pnpm 10.33, TypeScript 7, oxlint (type-aware 켬), oxfmt, vitest 4
-- 모바일: Capacitor 7
-- 예정: Supabase (인증, Postgres, RLS), Gemini Flash Lite, Vercel 배포
+쓰는 것과 버전은 `package.json` 에 있다. 아직 붙이지 않은 것은 Supabase(인증, Postgres, RLS),
+Gemini Flash Lite, Vercel 배포다.
 
 의존성 버전은 고정되어 있다. `latest` 나 범위 지정으로 되돌리지 않는다.
 검증된 조합을 유지해야 문제가 생겼을 때 원인을 좁힐 수 있다.
 
 ## 명령어
 
-```bash
-pnpm install
-pnpm dev              # 웹 dev 서버 :3000 (점유되어 있으면 다음 포트)
-pnpm build            # SSR 빌드 -> apps/web/.output/
-pnpm build:spa        # 앱용 SPA 빌드 -> apps/web/dist-spa/
-pnpm mobile:sync      # SPA 빌드 후 Capacitor 네이티브 프로젝트에 반영
-pnpm test             # vitest (saju, web 두 프로젝트)
-pnpm lint             # oxlint
-pnpm typecheck        # tsc --noEmit
-pnpm format           # oxfmt
-```
+`package.json` 의 scripts 를 쓴다. 거기서 안 나오는 것이 둘이다.
 
 엔진만 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
+`pnpm test` 는 saju 와 web 두 프로젝트를 함께 돌린다.
 
 ## 훅 (`.claude/hooks/`, 설정은 `.claude/settings.json`)
 
@@ -254,66 +231,10 @@ PAT 이 필요하다. `gh` 의 OAuth 토큰은 keyring 에 있어 환경변수�
 
 ## 외부 에이전트 모음 (ECC)
 
-[affaan-m/ECC](https://github.com/affaan-m/ECC) 는 에이전트 66개, 커맨드 90여 개, 스킬 65여 개를 담은
-Claude Code 확장 모음이다. 필요한 것만 골라 우리 규약에 맞게 고쳐 가져온다.
-플러그인으로 통째 설치하지 않는다.
-
-통째 설치하지 않는 이유는 셋이다.
-
-- 에이전트 66개 중 우리와 무관한 것이 대부분이다. cpp, dart, flutter, go, java, rust, swift, vue 등.
-  에이전트와 스킬은 설명문이 매칭용으로 로드되므로 안 쓰는 것도 비용이다.
-- 규약이 다르다. `typescript-reviewer` 는 eslint 를, `tdd-guide` 는 `npm test` 와 커버리지 80퍼센트를
-  전제한다. 우리는 oxlint 와 pnpm 이고 커버리지 목표를 정한 적이 없다.
-- ECC 자체 `hooks.json` 과 `rules/` 가 우리 훅 6개, CLAUDE.md 와 충돌할 수 있다.
-
-가져올 시점은 대상이 생길 때다. 프로젝트가 완성된 뒤가 아니다.
-리뷰어 계열은 늦게 붙일수록 지적이 한꺼번에 쏟아져 손해다.
-
-| 우리 작업             | 가져올 것                                                       | 상태                                                      |
-| --------------------- | --------------------------------------------------------------- | --------------------------------------------------------- |
-| 계산 엔진 구현        | `silent-failure-hunter`                                         | 안 가져옴. `saju-engine-validator` 로 대신함              |
-| 계산 엔진 구현        | `tdd-guide`                                                     | 검토. 픽스처 선행이 이미 더 강해서 불필요할 수 있다       |
-| API 와 화면           | `typescript-reviewer`, `react-reviewer`, `react-build-resolver` | 그 다음                                                   |
-| Supabase 스키마와 RLS | `database-reviewer`                                             | 그 다음                                                   |
-| PR                    | `code-review`, `security-scan`                                  | 내장 `/code-review`, `/security-review` 와 중복 확인 먼저 |
-| 유지보수              | `refactor-clean`, `doc-updater`, `prune`                        | 한참 뒤                                                   |
-
-기획과 설계 단계 도구(`planner`, `architect`, `plan-prd`)는 쓰지 않았다.
-그 자리는 ADR 13편이 대신했고, 범용 도구가 낼 수 없는 이 프로젝트만의 결정을 근거와 함께 남겼다.
-
-`silent-failure-hunter` 를 첫 대상으로 잡았던 이유는 이 앱의 최악의 실패가 예외가 아니라
-조용히 틀린 간지를 돌려주는 것이기 때문이다.
-입춘 경계에서 년주가 하나 밀려도 프로그램은 멀쩡히 돌고 화면에는 여덟 글자가 그대로 뜬다.
-[docs/05](docs/05-saju-domain-rules.md) 7.3 의 진태양시 -30분 폴백 명시 조건과
-야자시 적용 방식 표기 조건이 정확히 이 유형이다.
-
-막상 이식하려니 남길 것이 거의 없었다.
-원본의 네트워크, 파일, DB, 트랜잭션 항목은 계산 엔진에 해당이 없고,
-정작 필요한 것은 전부 도메인 쪽이었다. 판정 함수가 어느 분기에도 걸리지 않았을 때
-기본값을 반환하는가, 검증 케이스가 없는 경계 조건을 조용히 통과시키는가 같은 것이다.
-그래서 가져오는 대신 `saju-engine-validator` 를 새로 썼다.
-
-### react-doctor (보류)
-
-React 진단 CLI 다. 한 번 붙였다가 뺐다. 화면 코드가 생기면 다시 판단한다.
-지금 React 코드가 107줄뿐이라 얻을 것이 없고, 도입 비용이 그보다 크다.
-
-tarball 을 받아 확인한 사실을 남긴다. 다시 조사하지 않도록.
-
-- 텔레메트리가 기본으로 켜져 있다. `@sentry/node` 가 런타임 의존성이고
-  `api.axiom.co` 가 dist 에 박혀 있다. `REACT_DOCTOR_NO_TELEMETRY=1` 로 끈다
-- 런타임 의존성 21개가 범위 지정이라 `npx react-doctor@0.9.6` 으로는 트리가 고정되지 않는다.
-  devDependency 로 넣어 lockfile 에 담아야 한다. `npx -y` 는 특히 피한다
-- 우리와 도구 버전이 어긋난다. `typescript >=5.0.4 <6`, `oxlint >=1.76.0 <1.77.0` 을 끌어온다.
-  우리는 7.0.2 와 1.77.0 이다. 빌드는 안 깨지지만 판정이 엇갈릴 수 있다
-- 원본 스킬이 `https://www.react.doctor/prompts/` 에서 플레이북을 받아 그대로 따르고
-  워킹트리를 고치라고 지시한다. 받지 않는다. 쓰게 되면 한 번 받아 커밋해 두고
-  로컬 파일로 읽는다. 업스트림 갱신은 수동 diff 로 PR 리뷰를 거친다
-- React Compiler 는 스스로 감지한다. `vite.config.ts` 의 `reactCompilerPreset` import 를 본다.
-  감지되면 수동 메모이제이션을 지적하므로 우리 규약과 같은 방향이다
-- 라이선스가 `SEE LICENSE IN LICENSE` 라 확인이 필요하다
-
-도입한다면 순서는 devDependency 고정, 텔레메트리 차단, 토큰 없는 셸에서 실행, 플레이북 벤더링이다.
+[affaan-m/ECC](https://github.com/affaan-m/ECC) 같은 확장 모음은 플러그인으로 통째 설치하지 않는다.
+필요한 것만 골라 우리 규약에 맞게 고쳐 가져온다.
+무엇을 언제 가져올지, react-doctor 를 왜 뺐는지는
+[ADR 0017](docs/adr/0017-external-agent-collections-selective-port.md) 에 있다.
 
 ## ADR
 
@@ -324,7 +245,7 @@ tarball 을 받아 확인한 사실을 남긴다. 다시 조사하지 않도록.
   새 ADR 을 쓰고 기존 것의 상태를 `대체됨`으로 바꾼다.
 - 채택하지 않기로 한 것도 기록한다. 같은 논의가 반복되는 것을 막는 것이 ADR 의 값어치다.
 
-현재 ADR 0001부터 0016까지 채택되어 있다. 목록은 [docs/adr/](docs/adr/) 에 있다.
+목록은 [docs/adr/](docs/adr/) 에 있다.
 
 ## Git
 
@@ -380,23 +301,11 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 - AI 해석 레이어
 - 네이티브 프로젝트 (`apps/mobile/ios`, `android`)
 
-만들어진 것은 이렇다.
+만들어진 것은 `apps/web/src/lib/saju` 를 열면 나온다. 파일마다 머리 주석이 담당 범위와
+근거가 되는 docs/05 장 번호를 적어 두었다.
 
-| 항목 | 위치 |
-| ---- | ---- |
-| 60갑자 테이블 | `apps/web/src/lib/saju/index.ts` |
-| 절기 데이터 1900~2100 | `apps/web/src/lib/saju/data/solar-terms.ts` |
-| 표준시 전환 이력 | `apps/web/src/lib/saju/data/korea-time.ts` |
-| 달력 산술 | `apps/web/src/lib/saju/calendar.ts` |
-| 시간 보정 파이프라인 | `apps/web/src/lib/saju/time.ts` |
-| 년주, 월주, 일주, 시주 | `apps/web/src/lib/saju/pillars.ts` |
-| 지장간, 상생상극, 십신 5분류 | `apps/web/src/lib/saju/tables.ts` |
-| 신강약과 억부용신 | `apps/web/src/lib/saju/strength.ts` |
-| 대운과 세운 | `apps/web/src/lib/saju/daeun.ts` |
-| 검증 케이스 38개 | `apps/web/src/lib/saju/fixtures/cases.ts` |
-
-검증 케이스는 38개 중 18개가 `verified` 다. 나머지 20개는 표준시 전환, 음력, 대운, 강약이라
-공인 만세력 대조가 붙어야 채운다. 각 케이스의 `blockedBy` 에 적혀 있다.
+검증 케이스 중 일부만 `verified` 다. 나머지는 표준시 전환, 음력, 대운, 강약이라
+공인 만세력 대조가 붙어야 채운다. 어느 것이 왜 막혀 있는지는 각 케이스의 `blockedBy` 에 있다.
 다만 표준시와 서머타임 케이스는 간지가 비어 있어도 파이프라인 출력이 검증된다.
 tz database 로 결정되는 값이라 만세력을 기다릴 이유가 없다.
 
