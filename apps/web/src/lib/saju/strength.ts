@@ -10,13 +10,12 @@
 
 import {
   BRANCH_ELEMENT,
-  EARTHLY_BRANCHES,
-  HEAVENLY_STEMS,
   STEM_ELEMENT,
+  branchOf,
+  stemOf,
   type EarthlyBranch,
   type Element,
-  type HeavenlyStem,
-  type Pillar,
+  type FourPillars,
 } from './index';
 import {
   ELEMENTS,
@@ -28,13 +27,6 @@ import {
 
 /** 신강약 5등급. docs/05 §11.4 */
 export type StrengthGrade = '태강' | '신강' | '중화' | '신약' | '태약';
-
-export interface FourPillars {
-  year: Pillar;
-  month: Pillar;
-  day: Pillar;
-  hour: Pillar;
-}
 
 /** 판정 4요소. docs/05 §11.3 */
 export interface StrengthFlags {
@@ -119,22 +111,6 @@ export interface StrengthOptions {
 
 /** 11.2 의 지원 세력 */
 const SUPPORT_GROUPS: readonly TenGodGroup[] = ['비겁', '인성'];
-
-function stemOf(pillar: Pillar): HeavenlyStem {
-  const stem = pillar[0];
-  if (!(HEAVENLY_STEMS as readonly string[]).includes(stem)) {
-    throw new Error(`천간이 아니다: ${pillar}`);
-  }
-  return stem as HeavenlyStem;
-}
-
-function branchOf(pillar: Pillar): EarthlyBranch {
-  const branch = pillar[1];
-  if (!(EARTHLY_BRANCHES as readonly string[]).includes(branch)) {
-    throw new Error(`지지가 아니다: ${pillar}`);
-  }
-  return branch as EarthlyBranch;
-}
 
 /**
  * 통근(通根). 해당 오행이 네 지지의 지장간 어디에든 있으면 유근이다. docs/05 §11.5

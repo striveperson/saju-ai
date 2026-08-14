@@ -54,6 +54,32 @@ export type Polarity = '양' | '음';
  */
 export type Pillar = `${HeavenlyStem}${EarthlyBranch}`;
 
+/** 사주팔자 네 기둥. 판정 모듈들이 시각 대신 이것만 받는다. */
+export interface FourPillars {
+  year: Pillar;
+  month: Pillar;
+  day: Pillar;
+  hour: Pillar;
+}
+
+/** 기둥의 천간. 실재하지 않는 글자면 던진다. */
+export function stemOf(pillar: Pillar): HeavenlyStem {
+  const stem = pillar[0];
+  if (!(HEAVENLY_STEMS as readonly string[]).includes(stem)) {
+    throw new Error(`천간이 아니다: ${pillar}`);
+  }
+  return stem as HeavenlyStem;
+}
+
+/** 기둥의 지지. 실재하지 않는 글자면 던진다. */
+export function branchOf(pillar: Pillar): EarthlyBranch {
+  const branch = pillar[1];
+  if (!(EARTHLY_BRANCHES as readonly string[]).includes(branch)) {
+    throw new Error(`지지가 아니다: ${pillar}`);
+  }
+  return branch as EarthlyBranch;
+}
+
 /** 천간 오행. docs/05 §1 */
 export const STEM_ELEMENT: Record<HeavenlyStem, Element> = {
   갑: '목',
