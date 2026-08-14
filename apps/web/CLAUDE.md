@@ -77,5 +77,8 @@ React Compiler 가 켜져 있다.
 
 ## 커밋 전
 
-`pre-commit-check.sh` 훅이 `git commit` 직전에 타입체크, lint, 테스트를 돌리고
-하나라도 실패하면 커밋을 차단한다. 미리 확인하려면 세 개를 직접 돌린다.
+`pre-commit-check.sh` 훅이 `git commit` 직전에 타입체크, lint, 데이터 대조, 테스트를 돌리고
+하나라도 실패하면 커밋을 차단한다. 미리 확인하려면 네 개를 직접 돌린다.
+
+데이터 대조는 `verify:data` 다. 번들된 음력표가 원본 KASI 표에서 다시 재현되는지,
+초하루가 계산한 합삭과 맞는지 본다. 순수 node 라 python 이나 네트워크를 타지 않는다.

@@ -44,6 +44,12 @@ Gemini Flash Lite, Vercel 배포다.
 엔진만 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
 `pnpm test` 는 saju 와 web 두 프로젝트를 함께 돌린다.
 
+번들된 만세력 데이터가 원본과 어긋나는지는 `pnpm --filter web verify:data` 가 본다.
+음력표를 다시 구웠을 때 한 해 안에서 상쇄되는 오류는 vitest 가 잡지 못한다.
+접힌 표에서는 달 크기가 해 단위 합으로만 확인되기 때문이다.
+`pre-commit-check.sh` 가 커밋 직전에 이 스크립트를 부른다.
+표준시 이력을 고쳤을 때 쓰는 `dump-tzdb-seoul.mjs --check` 는 아직 여기 붙지 않았다.
+
 ## 훅 (`.claude/hooks/`, 설정은 `.claude/settings.json`)
 
 | 훅                      | 시점                         | 하는 일                                                      |
@@ -51,7 +57,7 @@ Gemini Flash Lite, Vercel 배포다.
 | `protect-env.sh`        | PreToolUse (Read/Edit/Write) | `.env*` 와 `.claude/settings.local.json` 접근 차단           |
 | `protect-routetree.sh`  | PreToolUse (Edit/Write)      | `routeTree.gen.ts` 편집 차단. 자동 생성 파일이다             |
 | `protect-main.sh`       | PreToolUse (Bash)            | `main` 에서의 커밋과 push, `main` 대상 push 차단             |
-| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 테스트. 실패하면 커밋 차단 |
+| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 데이터 대조, 테스트. 실패하면 커밋 차단 |
 | `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
 | `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
 | `md-style-guard.sh`     | PostToolUse (Edit/Write)     | 문서 스타일 규칙 검사                                        |

@@ -60,6 +60,12 @@ $(head -15 "$log")"
     deny "[pre-commit-check] 커밋 차단: apps/web lint 실패. 오류를 고친 뒤 다시 커밋하세요:
 $(grep -vE "^>|^$" "$log" | head -15)"
   fi
+  # 번들된 만세력 데이터가 원본과 어긋나는지 본다. 순수 node 라 python 이나 네트워크를 타지 않고
+  # 둘이 합쳐 0.2초다. 데이터가 다시 구워졌을 때 상쇄되는 오류는 vitest 가 잡지 못한다.
+  if ! pnpm --filter web verify:data >"$log" 2>&1; then
+    deny "[pre-commit-check] 커밋 차단: 만세력 데이터 대조 실패. 번들된 표가 원본과 어긋납니다:
+$(grep -vE "^>|^$" "$log" | tail -15)"
+  fi
   if ! pnpm --filter web exec vitest run >"$log" 2>&1; then
     deny "[pre-commit-check] 커밋 차단: apps/web 테스트 실패. 실패한 테스트를 고친 뒤 다시 커밋하세요:
 $(grep -E "FAIL|✕|Tests" "$log" | head -10)"
