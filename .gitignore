@@ -12,7 +12,7 @@ apps/web/.tanstack/
 # 파이썬 환경과 천체력 파일은 스크립트가 만들고 내려받는다. 커밋하지 않는다.
 apps/web/scripts/.venv/
 apps/web/scripts/*.bsp
-apps/web/scripts/computed-terms-*.json
+apps/web/scripts/computed-*.json
 
 # mobile (Capacitor)
 # ios/ 와 android/ 는 커밋한다.

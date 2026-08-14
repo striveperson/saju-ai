@@ -70,6 +70,7 @@ pnpm --filter web exec vitest run --project saju
 | `index.ts` | 천간, 지지, 오행, 음양 기본 테이블 |
 | `calendar.ts` | 율리우스 적일과 벽시계 왕복. 도메인 규칙이 없는 바닥이다 |
 | `data/solar-terms.ts` | 절기 1900~2100. 자동 생성 |
+| `data/lunar-months.ts` | 음력 달력표 1900~2050. 자동 생성 |
 | `data/korea-time.ts` | 표준시 전환 이력. 손으로 옮긴 표 |
 | `time.ts` | 시간 보정 파이프라인 |
 | `pillars.ts` | 년주, 월주, 일주, 시주 |
@@ -78,8 +79,12 @@ pnpm --filter web exec vitest run --project saju
 | `daeun.ts` | 대운과 세운 |
 | `fixtures/` | 검증 케이스 |
 
-`data/` 두 파일의 성격이 다르다.
-`solar-terms.ts` 는 자동 생성이라 직접 고치지 않고, `korea-time.ts` 는 손으로 고치는 표다.
+`data/` 세 파일의 성격이 갈린다.
+`solar-terms.ts` 와 `lunar-months.ts` 는 자동 생성이라 직접 고치지 않는다.
+`build-terms-table.mjs` 와 `build-lunar-table.mjs` 가 만들고,
+음력 쪽은 `node apps/web/scripts/build-lunar-table.mjs --check` 로 재현되는지 볼 수 있다.
+
+`korea-time.ts` 는 손으로 고치는 표다.
 고쳤으면 `node apps/web/scripts/dump-tzdb-seoul.mjs --check` 로 정답지와 대조한다.
 
 ## 아직 없는 것
