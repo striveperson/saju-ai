@@ -137,7 +137,7 @@ Gemini Flash Lite, Vercel 배포다.
 
 | 지점               | 옵션                      | 기본값         |
 | ------------------ | ------------------------- | -------------- |
-| 야자시 정책        | `ziPolicy`                | 제품 결정 사항 |
+| 야자시 정책        | `ziPolicy`                | 정자시설       |
 | 서머타임 기록 성격 | `dstAssumption`           | `unknown`      |
 | 모호한 벽시계 해석 | `ambiguityChoice`         | `earlier`      |
 | 지원 세력 범위     | `supportIncludesResource` | true           |
@@ -282,7 +282,6 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 ## 아직 정해지지 않은 것
 
-- 야자시 정책 기본값
 - 이상 구간 경고와 절입 근처 경고의 화면 문구 체계
 - MVP 화면 디자인
 - 앱 푸시 알림 내용과 발송 시점
