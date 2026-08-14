@@ -34,18 +34,25 @@ describe('음력 달력표', () => {
     }
   });
 
-  it('앞 달 초하루에 그 달의 크기를 더하면 다음 달 초하루다', () => {
-    // 달 사이에 빈 날이 생기면 변환이 조용히 하루씩 밀린다
+  it('앞 해의 마지막 달에 크기를 더하면 다음 해 정월 초하루다', () => {
+    // 한 해 안의 초하루는 lunarMonths 가 앞 달에 크기를 더해 만들므로 항상 맞는다.
+    // 실효가 있는 것은 해 경계뿐이다. YEARS 는 해마다 정월 적일을 따로 담고 있어
+    // 그 값이 앞 해의 달 크기 합과 어긋나면 변환이 그 해부터 조용히 밀린다.
+    const boundaries: string[] = [];
     const broken: string[] = [];
 
     for (let i = 1; i < months.length; i++) {
       const prev = months[i - 1];
+      if (prev.year === months[i].year) continue;
+
+      boundaries.push(`${prev.year}`);
       if (prev.startJdn + prev.days !== months[i].startJdn) {
-        broken.push(`${prev.year}-${prev.month}${prev.leap ? '윤' : ''}`);
+        broken.push(`${prev.year} 끝에서 ${months[i].year} 정월`);
       }
     }
 
-    expect(broken.slice(0, 5)).toEqual([]);
+    expect(broken).toEqual([]);
+    expect(boundaries).toHaveLength(LUNAR_LAST_YEAR - LUNAR_FIRST_YEAR);
   });
 
   it('달 크기가 29 또는 30 이다', () => {
@@ -58,8 +65,8 @@ describe('음력 달력표', () => {
 
     for (const [year, count] of perYear) {
       const leaps = months.filter((m) => m.year === year && m.leap).length;
-      // 마지막 해는 데이터가 끝나는 자리라 달 수가 모자라다
-      const expected = year === LUNAR_LAST_YEAR ? count : 12 + leaps;
+      // 마지막 해는 11월에서 끊긴다. 윤3월이 있는데도 13달이 아니라 12달이다(docs/05 8.2)
+      const expected = year === LUNAR_LAST_YEAR ? 12 : 12 + leaps;
       expect(count, `${year}년`).toBe(expected);
     }
   });

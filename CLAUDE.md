@@ -44,6 +44,12 @@ Gemini Flash Lite, Vercel 배포다.
 엔진만 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
 `pnpm test` 는 saju 와 web 두 프로젝트를 함께 돌린다.
 
+번들된 만세력 데이터가 원본과 어긋나는지는 `pnpm --filter web verify:data` 가 본다.
+음력표를 다시 구웠을 때 한 해 안에서 상쇄되는 오류는 vitest 가 잡지 못한다.
+접힌 표에서는 달 크기가 해 단위 합으로만 확인되기 때문이다.
+`pre-commit-check.sh` 가 커밋 직전에 이 스크립트를 부른다.
+표준시 이력을 고쳤을 때 쓰는 `dump-tzdb-seoul.mjs --check` 는 아직 여기 붙지 않았다.
+
 ## 훅 (`.claude/hooks/`, 설정은 `.claude/settings.json`)
 
 | 훅                      | 시점                         | 하는 일                                                      |
@@ -51,7 +57,7 @@ Gemini Flash Lite, Vercel 배포다.
 | `protect-env.sh`        | PreToolUse (Read/Edit/Write) | `.env*` 와 `.claude/settings.local.json` 접근 차단           |
 | `protect-routetree.sh`  | PreToolUse (Edit/Write)      | `routeTree.gen.ts` 편집 차단. 자동 생성 파일이다             |
 | `protect-main.sh`       | PreToolUse (Bash)            | `main` 에서의 커밋과 push, `main` 대상 push 차단             |
-| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 테스트. 실패하면 커밋 차단 |
+| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 데이터 대조, 테스트. 실패하면 커밋 차단 |
 | `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
 | `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
 | `md-style-guard.sh`     | PostToolUse (Edit/Write)     | 문서 스타일 규칙 검사                                        |
@@ -131,7 +137,7 @@ Gemini Flash Lite, Vercel 배포다.
 
 | 지점               | 옵션                      | 기본값         |
 | ------------------ | ------------------------- | -------------- |
-| 야자시 정책        | `ziPolicy`                | 제품 결정 사항 |
+| 야자시 정책        | `ziPolicy`                | 정자시설       |
 | 서머타임 기록 성격 | `dstAssumption`           | `unknown`      |
 | 모호한 벽시계 해석 | `ambiguityChoice`         | `earlier`      |
 | 지원 세력 범위     | `supportIncludesResource` | true           |
@@ -146,7 +152,7 @@ Gemini Flash Lite, Vercel 배포다.
 canonical 목록은 [docs/00-documentation-guide.md](docs/00-documentation-guide.md) 5장이다.
 
 기계적으로 검사되는 것은 `md-style-guard.sh` 훅이 저장할 때 잡는다.
-em dash, 이모지, 번호 목록 안의 굵은 강조 셋이다.
+em dash, 이모지, 번호 목록 안의 굵은 강조, 취소선, 한 줄에 짝을 이루는 물결표 다섯이다.
 규칙을 설명하느라 그 문자를 써야 하는 줄에는 `<!-- md-allow -->` 를 붙인다.
 
 굵은 강조(`**`)는 어겨서는 안 되는 규칙에만 쓴다. 한 문서에 두세 번을 넘기면 남용이다.
@@ -276,7 +282,6 @@ MCP 의 `push_files` 로 커밋하지 않는다.
 
 ## 아직 정해지지 않은 것
 
-- 야자시 정책 기본값
 - 이상 구간 경고와 절입 근처 경고의 화면 문구 체계
 - MVP 화면 디자인
 - 앱 푸시 알림 내용과 발송 시점
