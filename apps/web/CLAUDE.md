@@ -5,35 +5,14 @@
 
 ## 디렉토리
 
-```
-apps/web/
-├── src/
-│   ├── routes/           파일 기반 라우트. __root.tsx 가 HTML 셸
-│   ├── lib/saju/         계산 엔진 (외부 의존 0). README 를 먼저 읽는다
-│   │   ├── data/         절기와 표준시 이력 데이터 모듈
-│   │   └── fixtures/     검증 케이스와 정답지
-│   ├── test/             vitest 셋업과 하네스 테스트
-│   ├── router.tsx        라우터와 QueryClient 구성
-│   ├── styles.css        Tailwind 진입점
-│   └── routeTree.gen.ts  자동 생성. 직접 수정하지 않는다
-├── scripts/              SPA 변환, 절기 계산, tz 정답지 생성
-├── vite.config.ts        빌드 타깃 두 개를 환경변수로 분기
-└── vitest.config.ts      saju(node) 와 web(jsdom) 두 프로젝트
-```
+`src/routes/` 가 파일 기반 라우트, `src/lib/saju/` 가 계산 엔진,
+`scripts/` 가 SPA 변환과 절기 계산과 tz 정답지 생성이다.
 
 경로 별칭은 `@saju`, `@saju/*`, `@components/*`, `@features/*` 다.
 
 ## 명령어
 
-```bash
-pnpm dev              # :3000. 점유되어 있으면 다음 포트로 뜬다
-pnpm build            # SSR 빌드. .output/ 생성
-pnpm build:spa        # 앱용 SPA 빌드. dist-spa/ 생성
-pnpm test             # vitest run (두 프로젝트)
-pnpm lint             # oxlint
-pnpm typecheck        # tsc --noEmit
-pnpm --filter web generate-routes   # routeTree.gen.ts 재생성
-```
+`package.json` 의 scripts 를 쓴다.
 
 엔진만 빠르게 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
 node 환경이라 jsdom 을 띄우지 않는다.
