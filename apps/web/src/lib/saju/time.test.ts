@@ -6,7 +6,12 @@ import { describe, expect, it } from 'vitest';
 
 import { utcMsFromWall, wallFromUtcMs } from './calendar';
 import type { CalendarDateTime } from './calendar';
-import { caseById, correctionOptions, parseBirth } from './fixtures/cases';
+import {
+  caseById,
+  correctionOptions,
+  parseBirth,
+  recordedWallClock,
+} from './fixtures/cases';
 import { FALLBACK_MERIDIAN, correctBirthTime, instantCandidates } from './time';
 import type { DstAssumption } from './time';
 
@@ -250,7 +255,7 @@ describe('진태양시 보정', () => {
     const baseline = caseById('verified-19950127-1439-F-seoul');
     if (!baseline.verified) throw new Error('기준 케이스가 verified 가 아니다');
 
-    const r = correctBirthTime(parseBirth(baseline.input.birth), {
+    const r = correctBirthTime(recordedWallClock(baseline.input), {
       longitude: baseline.input.longitude,
     });
 
@@ -318,7 +323,7 @@ describe('진태양시 보정', () => {
 describe('표준시 전환 경계', () => {
   it('1954-03-20 23:30 은 두 번 존재한다', () => {
     const r = correctBirthTime(
-      parseBirth(caseById('tz-19540321-before').input.birth),
+      recordedWallClock(caseById('tz-19540321-before').input),
       { longitude: seoul },
     );
 
@@ -350,7 +355,7 @@ describe('표준시 전환 경계', () => {
 
   it('1954-03-21 00:30 은 UTC+8:30 하나다', () => {
     const r = correctBirthTime(
-      parseBirth(caseById('tz-19540321-after').input.birth),
+      recordedWallClock(caseById('tz-19540321-after').input),
       { longitude: seoul },
     );
 
@@ -367,7 +372,7 @@ describe('표준시 전환 경계', () => {
 
   it('1961-08-10 00:30 은 존재하고 00:10 은 존재하지 않는다', () => {
     const exists = correctBirthTime(
-      parseBirth(caseById('tz-19610810-boundary').input.birth),
+      recordedWallClock(caseById('tz-19610810-boundary').input),
       { longitude: seoul },
     );
     expect(exists.disclosure.resolution.kind).toBe('unique');

@@ -14,6 +14,7 @@ import {
   correctionOptions,
   engineZiPolicy,
   parseBirth,
+  recordedWallClock,
 } from './fixtures/cases';
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from './index';
 import type { HeavenlyStem, Pillar } from './index';
@@ -36,13 +37,13 @@ import type { CaseInput } from './fixtures/cases';
 
 /** 케이스의 벽시계를 파이프라인에 태워 물리적 시각을 얻는다. docs/05 7장. */
 function caseUtcMs(input: CaseInput): number {
-  return correctBirthTime(parseBirth(input.birth), correctionOptions(input))
+  return correctBirthTime(recordedWallClock(input), correctionOptions(input))
     .utcMs;
 }
 
 /** 같은 파이프라인의 보정된 벽시계. 일주와 시주가 쓰는 값이다. */
 function caseWallClock(input: CaseInput): CalendarDateTime {
-  return correctBirthTime(parseBirth(input.birth), correctionOptions(input))
+  return correctBirthTime(recordedWallClock(input), correctionOptions(input))
     .corrected;
 }
 
@@ -129,7 +130,7 @@ describe('60갑자 인덱스', () => {
 describe('일주', () => {
   const withDay = VERIFIED_CASES.filter((c) => c.expected.day);
 
-  it('검증 케이스가 넷 이상 있다', () => {
+  it('검증 케이스가 셋 이상 있다', () => {
     // docs/05 4장이 앵커 확정에 요구하는 최소 조건이다.
     expect(withDay.length).toBeGreaterThanOrEqual(3);
   });
@@ -138,7 +139,7 @@ describe('일주', () => {
     for (const c of withDay) {
       // 일주는 보정이 끝난 벽시계를 받는다. docs/05 4장
       const at = correctBirthTime(
-        parseBirth(c.input.birth),
+        recordedWallClock(c.input),
         correctionOptions(c.input),
       ).corrected;
       const policy = engineZiPolicy(c.input.options.ziPolicy);
@@ -303,7 +304,9 @@ const kst = (text: string): number =>
 describe('년주', () => {
   const withYear = VERIFIED_CASES.filter((c) => c.expected.year);
 
-  it('검증 케이스가 셋 이상 있다', () => {
+  it('검증 케이스가 있다', () => {
+    // 아래 재현 단언이 이 목록을 돈다. 비면 조용히 통과한다.
+    // 하한 3 은 어림수다. docs/05 4장의 3 은 일주 앵커 조건이고 년주에는 그 요구가 없다
     expect(withYear.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -436,6 +439,11 @@ describe('월 경계를 감싸는 두 절입', () => {
 
 describe('월주', () => {
   const withMonth = VERIFIED_CASES.filter((c) => c.expected.month);
+
+  it('검증 케이스가 있다', () => {
+    // 년주 쪽과 같은 이유의 하한이다. 목록이 비어 조용히 통과하는 것만 막는다
+    expect(withMonth.length).toBeGreaterThanOrEqual(3);
+  });
 
   it('모든 verified 케이스의 월주를 재현한다', () => {
     for (const c of withMonth) {
@@ -595,7 +603,7 @@ describe('시지', () => {
   it('진태양시 보정이 시지를 넘긴다', () => {
     // 부산 129.08 도는 -24분이라 13:10 이 12:46 이 되어 미시에서 오시로 넘어온다.
     const busan = caseById('true-solar-busan').input;
-    const at = parseBirth(busan.birth);
+    const at = recordedWallClock(busan);
 
     // 보정을 넣지 않은 기록 시계로는 미시다. 보정이 항상 걸리므로 결과는 오시다. ADR 0016
     expect(hourBranch(at)).toBe('미');
@@ -608,7 +616,7 @@ describe('시지', () => {
 
   it('서머타임을 풀면 시지가 넘어온다', () => {
     // dst-1988 의 notes 가 예고한 값이다. 13:20 을 풀면 12:20 이라 오시다.
-    const at = parseBirth(caseById('dst-1988').input.birth);
+    const at = recordedWallClock(caseById('dst-1988').input);
 
     expect(hourBranch(at)).toBe('미');
     expect(
@@ -666,6 +674,7 @@ describe('시주', () => {
 
   it('모든 verified 케이스의 시주를 재현한다', () => {
     const withHour = VERIFIED_CASES.filter((c) => c.expected.hour);
+    // 목록이 비어 조용히 통과하는 것을 막는 하한이다
     expect(withHour.length).toBeGreaterThanOrEqual(3);
 
     for (const c of withHour) {

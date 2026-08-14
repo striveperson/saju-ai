@@ -10,6 +10,7 @@
 
 import type { CalendarDateTime } from '../calendar';
 import type { EarthlyBranch, Element, HeavenlyStem } from '../index';
+import { lunarToSolar } from '../lunar';
 import type { ZiPolicy as EngineZiPolicy } from '../pillars';
 import type { TimeCorrectionOptions } from '../time';
 
@@ -34,19 +35,26 @@ export interface StrengthFlags {
 /** 야자시 정책. zheng 은 정자시설(23시부터 익일), ye 는 야자시설(자정까지 당일). */
 export type ZiPolicy = 'zheng' | 'ye';
 
-export interface CaseInput {
+/**
+ * 달력 구분. 음력이면 윤달 여부를 반드시 적는다.
+ *
+ * 선택 필드로 두면 빠뜨린 것과 평달을 고른 것이 구분되지 않는다.
+ * 엔진의 `LunarDate.leap` 이 같은 이유로 필수이고 여기서 그 계약을 되돌리지 않는다.
+ */
+export type CaseCalendar =
+  | { calendar: 'solar' }
+  | { calendar: 'lunar'; leapMonth: boolean };
+
+export type CaseInput = CaseCalendar & {
   /** 출생 당시 벽시계 시각. 표준시와 서머타임 보정은 엔진이 한다 */
   birth: string;
-  calendar: 'solar' | 'lunar';
-  /** 음력 입력일 때만 의미가 있다 */
-  leapMonth?: boolean;
   gender: 'M' | 'F';
   /** 진태양시 보정에 쓰는 경도 */
   longitude: number;
   options: {
     ziPolicy: ZiPolicy;
   };
-}
+};
 
 export interface ExpectedDaeun {
   direction: 'forward' | 'backward';
@@ -478,7 +486,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
   },
   {
     id: 'tz-19540321-after',
@@ -493,7 +502,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
   },
   {
     id: 'tz-19610810-boundary',
@@ -509,7 +519,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
   },
   {
     id: 'tz-utc830-era',
@@ -524,7 +535,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
     notes:
       '서머타임 밖의 순수한 UTC+8:30 구간이다. 1958년 서머타임은 05-04 에 시작한다',
   },
@@ -541,7 +553,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
     notes:
       '1987~1988 과 달리 한 시간이 아니라 30분만 풀어야 06:15 가 05:45 가 된다',
   },
@@ -723,7 +736,9 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조와 모호 구간 해석 관행 확인',
+    blockedBy:
+      '두 해석 중 만세력이 어느 쪽을 쓰는지 확인, 그 뒤 간지 대조. ' +
+      '보정 시각과 모호 구간 분류는 tz database 로 이미 검증된다',
     notes:
       '앞의 해석이면 22:45 라 해시에 20일 일주, 뒤의 해석이면 23:45 라 자시에 21일 일주다',
   },
@@ -740,7 +755,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
     notes: '1961-08-10 00:00~00:30 은 시계가 건너뛰어 존재한 적이 없다',
   },
   {
@@ -756,7 +772,9 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '1905년을 다루는 만세력 확보와 간지 대조. ' +
+      '지방평균태양시 구간 판정 자체는 이미 검증된다',
     notes:
       '당시 기록된 시각이 어느 시계를 본 것인지 알 수 없다는 한계가 이 케이스에 남는다',
   },
@@ -775,7 +793,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
   },
   {
     id: 'dst-1988',
@@ -790,7 +809,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 보정 시각은 tz database 로 이미 검증된다',
     notes: '서머타임을 풀면 12:20 이 되어 시지가 오시(11~13)로 넘어와야 한다',
   },
 
@@ -808,7 +828,9 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '간지 기대값의 만세력 대조. 부산 좌표를 넣을 수 있는 곳이어야 한다. ' +
+      '보정 시각은 ADR 0016 으로 확정되어 있다',
     notes:
       '부산은 129.08 도라 -24분이다. 13:10 이 12:46 이 되어 시지가 미에서 오로 넘어온다',
   },
@@ -826,9 +848,28 @@ export const CASES: readonly VerificationCase[] = [
       longitude: 126.98,
       options: { ziPolicy: 'zheng' },
     },
-    expected: null,
-    verified: false,
-    blockedBy: 'KASI 음력 데이터로 1993년 윤3월 존재 여부부터 확인',
+    expected: {
+      solarDate: '1993-05-06',
+      year: '계유',
+      month: '정사',
+      day: '정해',
+      hour: '을사',
+    },
+    verified: true,
+    sources: [
+      'KASI 음양력정보 getSolCalInfo 실측 (2026-08-14). ' +
+        '1993년 윤3월 초하루가 양력 04-22, 29일. 윤3월 15일이 적일 2449114 = 05-06',
+      'KASI 음양력정보 getLunCalInfo 실측 (2026-08-14). 1993-05-06 의 일진 정해',
+      '포스텔러 만세력 pro.forceteller.com 실측 (2026-08-14, 서울특별시 지역시 -32분). ' +
+        '음(윤달) 입력을 양력 1993/05/06 으로 환산하고 계유 정사 정해 을사',
+      '플러스만세력 manse.sajuplus.net 실측 (2026-08-14, 서울시 -2분 06초 선택). ' +
+        '같은 음력 입력을 양력 1993/05/06 으로 환산하고 계유 정사 정해 을사',
+    ],
+    notes:
+      '변환에 출처가 셋이다. KASI 표와 만세력 두 곳의 자체 환산이 같은 양력을 낸다. ' +
+      '보정으로 10:00 이 09:28 이 되지만 우리 시지는 정각 기준(5.1)이라 둘 다 사시다. ' +
+      '플러스만세력은 시지를 30분 기준으로 안내하는데 어느 시각으로 판정했는지는 ' +
+      '화면에 보정 시각이 뜨지 않아 이 케이스로 갈리지 않는다. 시주 값은 두 곳이 같다',
   },
 
   // 대운 방향. 년간 음양 곱하기 성별 네 조합이 필요하다.
@@ -845,7 +886,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
     notes: '1996년 년간은 병(양)이다. 순행이어야 한다',
   },
   {
@@ -861,7 +903,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
   },
   {
     id: 'daeun-yin-male',
@@ -876,7 +919,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
     notes: '1997년 년간은 정(음)이다. 역행이어야 한다',
   },
   {
@@ -892,7 +936,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '만세력 대운표 대조. 원국 네 기둥과 대운수, 첫 대운 간지를 함께 받는다',
   },
   {
     id: 'daeun-on-term-day',
@@ -907,7 +952,8 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '만세력 대운표 대조. 절입일 당일이라 순행 대운수가 상한 10 에 닿는지가 핵심이다',
     notes:
       '2024년 입하는 KST 05-05 09:10 이다. 역행이면 그 절입까지 세 시간이 채 안 되어 대운수가 0 이고 ' +
       '순행이면 망종까지 31일이 남아 10 이다. 같은 출생이 성별로 가장 크게 갈리는 자리이고 ' +
@@ -933,7 +979,9 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '네 기둥의 만세력 대조. ' +
+      '등급과 용신은 docs/05 11.3~11.5 로 산출하며 만세력을 기준으로 삼지 않는다',
     notes:
       '득지, 득시, 득세가 참이라 1.0 + 0.5 + 1.5 다. 3.0 은 신강에 포함된다',
   },
@@ -951,7 +999,9 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '네 기둥의 만세력 대조. ' +
+      '등급과 용신은 docs/05 11.3~11.5 로 산출하며 만세력을 기준으로 삼지 않는다',
     notes: '득세만 참이라 1.5 다. 1.5 는 중화에 포함된다',
   },
   {
@@ -968,7 +1018,9 @@ export const CASES: readonly VerificationCase[] = [
     },
     expected: null,
     verified: false,
-    blockedBy: '공인 만세력 대조',
+    blockedBy:
+      '네 기둥의 만세력 대조. ' +
+      '등급과 용신은 docs/05 11.3~11.5 로 산출하며 만세력을 기준으로 삼지 않는다',
     notes:
       '대체가 일어나면 결과에 사유가 남아야 한다. ' +
       '유파가 갈리는 지점이므로 만세력이 극제 노선을 내놓아도 그 자체로는 어긋난 것이 아니다',
@@ -1004,6 +1056,25 @@ export function parseBirth(birth: string): CalendarDateTime {
     hour: Number(m[4]),
     minute: Number(m[5]),
   };
+}
+
+/**
+ * 케이스가 주장하는 기록 벽시계. 음력 입력이면 양력으로 옮긴 뒤의 값이다.
+ *
+ * `parseBirth` 는 달력을 구분하지 않으므로 음력 케이스에 그대로 쓰면
+ * 음력 날짜를 양력으로 읽는다. 파이프라인에 태울 때는 이 함수를 쓴다. docs/05 8장.
+ */
+export function recordedWallClock(input: CaseInput): CalendarDateTime {
+  const wall = parseBirth(input.birth);
+  if (input.calendar === 'solar') return wall;
+
+  const solar = lunarToSolar({
+    year: wall.year,
+    month: wall.month,
+    day: wall.day,
+    leap: input.leapMonth,
+  });
+  return { ...solar, hour: wall.hour, minute: wall.minute };
 }
 
 /** 픽스처는 원본 JSON 의 어휘를 쓴다. 대응은 docs/05 6장에 있다. */
