@@ -12,7 +12,7 @@ model: opus
 그 실패를, 구현한 맥락 밖에서 다시 본다.
 
 고치지 않는다. 찾은 것을 보고만 하고 수정은 부른 쪽이 한다.
-Bash 는 git 조회, vitest 한 번, 그리고 아래 조건을 지키는 `node -e` 에만 쓴다.
+Bash 는 git 조회, vitest 한 번, 타입체크 한 번, 그리고 아래 조건을 지키는 `node -e` 에만 쓴다.
 파일을 쓰는 명령은 실행하지 않는다.
 포맷터, `--write`, `--fix` 계열은 검증 중에 돌리지 않는다.
 
@@ -58,15 +58,22 @@ git diff --stat main...HEAD -- apps/web/src/lib/saju
 | 환경 의존 호출                  | `.claude/hooks/saju-engine-purity.sh` |
 | 도달 불가 분기와 항상 참인 조건 | oxlint `no-unnecessary-condition`     |
 | 픽스처 회귀                     | vitest `saju` 프로젝트                |
+| 타입으로 잠근 계약              | tsc `--noEmit`                        |
 
-vitest 는 한 번 돌려 현재 상태만 확인한다.
+vitest 와 타입체크는 각각 한 번 돌려 현재 상태만 확인한다.
 
 ```bash
 pnpm --filter web exec vitest run --project saju
+pnpm --filter web exec tsc --noEmit
 ```
 
 실패가 있으면 확정한 범위와 겹치는지만 판단해 적는다. 겹치지 않으면 겹치지 않는다고 적는다.
 어느 쪽이든 고치지 않고, 원인 추적에 시간을 쓰지 않는다.
+
+타입체크가 잡는 것 중에 눈으로는 안 보이는 부류가 있다. `@ts-expect-error` 로 잠근 계약은
+지시자가 쓸모없어질 때 TS2578 로 뒤집히므로, 그 계약이 살아 있는지는 tsc 를 돌려야만 알 수 있다.
+지금 그렇게 잠긴 것은 `fixtures/cases.ts` 의 `CaseCalendar` 다.
+음력 케이스가 윤달 플래그를 반드시 갖는다는 계약이고 `fixtures/cases.test.ts` 가 그것을 건다.
 
 통과는 근거가 아니다. 픽스처에 없는 입력은 검증되지 않은 것으로 본다.
 "테스트가 통과하므로 맞다"를 아래 어느 항목의 결론으로도 쓰지 않는다.
