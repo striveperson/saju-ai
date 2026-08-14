@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import { EARTHLY_BRANCHES, HEAVENLY_STEMS } from '../index';
 import { correctBirthTime } from '../time';
-import type { Pillar, Requirement } from './cases';
+import type { CaseInput, Pillar, Requirement } from './cases';
 import {
   CASES,
   PENDING_CASES,
   VERIFIED_CASES,
   caseById,
   correctionOptions,
-  parseBirth,
+  recordedWallClock,
 } from './cases';
 
 /**
@@ -54,7 +54,11 @@ describe('검증 케이스 목록', () => {
   });
 
   it('verified 와 pending 이 전체를 남김없이 나눈다', () => {
-    expect(VERIFIED_CASES.length + PENDING_CASES.length).toBe(CASES.length);
+    // 수만 맞추면 한쪽이 통째로 비고 다른 쪽이 전부를 담아도 통과한다. id 로 맞춘다.
+    // 겹침은 따로 보지 않는다. 겹치려면 CASES 에 같은 id 가 둘 있어야 하고 그것은 위가 막는다
+    const ids = [...VERIFIED_CASES, ...PENDING_CASES].map((c) => c.id);
+
+    expect(ids.sort()).toEqual(CASES.map((c) => c.id).sort());
   });
 
   it('모든 케이스에 목적이 적혀 있다', () => {
@@ -74,6 +78,11 @@ describe('검증 케이스 목록', () => {
 });
 
 describe('verified 케이스', () => {
+  it('verified 케이스가 있다', () => {
+    // 아래 단언들이 전부 이 목록을 돈다. 비면 조용히 통과한다
+    expect(VERIFIED_CASES.length).toBeGreaterThan(0);
+  });
+
   it('출처 없이 verified 를 붙이지 않는다', () => {
     for (const c of VERIFIED_CASES) {
       expect(c.sources.length, c.id).toBeGreaterThan(0);
@@ -177,10 +186,75 @@ describe('pending 케이스', () => {
   });
 });
 
+describe('음력 케이스', () => {
+  const lunarCases = CASES.filter((c) => c.input.calendar === 'lunar');
+
+  it('음력 케이스가 있다', () => {
+    expect(lunarCases.length).toBeGreaterThan(0);
+  });
+
+  it('윤달 플래그를 타입이 요구한다', () => {
+    // 런타임이 아니라 tsc 가 지키는 계약이다. 아래 줄이 컴파일되면 @ts-expect-error 가 실패한다.
+    // 선택 필드로 되돌리면 빠뜨린 것과 평달을 고른 것이 구분되지 않는다. docs/05 8장
+    const missingLeap = {
+      birth: '1993-03-15T10:00:00',
+      calendar: 'lunar',
+      gender: 'M',
+      longitude: 126.98,
+      options: { ziPolicy: 'zheng' },
+    } as const;
+
+    // 양성 대조. 윤달만 더하면 컴파일된다. 다른 필드가 깨지면 이 줄이 먼저 tsc 를 세운다.
+    // 이것이 없으면 아래 지시자가 엉뚱한 사유를 덮은 채 계약이 검사되지 않는다
+    const withLeap: CaseInput = { ...missingLeap, leapMonth: true };
+
+    // @ts-expect-error 음력인데 leapMonth 가 없다
+    const asInput: CaseInput = missingLeap;
+
+    expect(withLeap.calendar).toBe('lunar');
+    expect(asInput.calendar).toBe('lunar');
+  });
+
+  it('확정된 케이스의 solarDate 가 변환 결과와 같다', () => {
+    // 픽스처의 양력 날짜는 만세력이 환산한 값이고 변환표는 KASI 에서 왔다.
+    // 둘이 갈리면 표가 잘못 들어왔거나 만세력이 다른 윤달 배치를 쓰는 것이다
+    const withSolarDate = lunarCases.filter(
+      (c) => c.verified && c.expected.solarDate,
+    );
+    expect(withSolarDate.length).toBeGreaterThan(0);
+
+    for (const c of withSolarDate) {
+      const wall = recordedWallClock(c.input);
+      const converted = `${wall.year}-${String(wall.month).padStart(2, '0')}-${String(wall.day).padStart(2, '0')}`;
+
+      expect(converted, c.id).toBe(c.expected?.solarDate);
+    }
+  });
+
+  it('윤달 입력이 평달과 다른 날로 간다', () => {
+    // leapMonth 를 흘리면 한 달 앞 평달로 조용히 가고 팔자가 통째로 갈린다
+    const leapCases = lunarCases.filter(
+      (c) => c.input.calendar === 'lunar' && c.input.leapMonth,
+    );
+    expect(leapCases.length).toBeGreaterThan(0);
+
+    for (const c of leapCases) {
+      const leap = recordedWallClock(c.input);
+      const plain = recordedWallClock({
+        ...c.input,
+        calendar: 'lunar',
+        leapMonth: false,
+      });
+
+      expect(leap, c.id).not.toEqual(plain);
+    }
+  });
+});
+
 describe('케이스가 주장하는 시간 구간', () => {
   /** 케이스 입력을 파이프라인에 태운 결과. 무엇을 겨냥한 케이스인지 여기서 드러난다. */
   const correctionOf = (c: (typeof CASES)[number]) =>
-    correctBirthTime(parseBirth(c.input.birth), correctionOptions(c.input))
+    correctBirthTime(recordedWallClock(c.input), correctionOptions(c.input))
       .disclosure;
 
   it('dst 케이스는 실제로 서머타임 구간 안에 있다', () => {
@@ -198,9 +272,10 @@ describe('케이스가 주장하는 시간 구간', () => {
 
   it('timezone-transition 케이스는 서머타임 밖이다', () => {
     // 표준시 이력을 겨냥한 케이스인데 서머타임이 섞이면 무엇이 틀렸는지 갈라지지 않는다.
-    for (const c of CASES.filter(
-      (c) => c.requirement === 'timezone-transition',
-    )) {
+    const cases = CASES.filter((c) => c.requirement === 'timezone-transition');
+    expect(cases.length).toBeGreaterThan(0);
+
+    for (const c of cases) {
       expect(
         correctionOf(c).daylightUnwound,
         `${c.id} (${c.input.birth})`,
@@ -230,7 +305,7 @@ describe('케이스가 주장하는 시간 구간', () => {
     for (const [id, hhmm] of Object.entries(intended)) {
       const input = caseById(id).input;
       const { corrected } = correctBirthTime(
-        parseBirth(input.birth),
+        recordedWallClock(input),
         correctionOptions(input),
       );
       const actual = `${String(corrected.hour).padStart(2, '0')}:${String(corrected.minute).padStart(2, '0')}`;

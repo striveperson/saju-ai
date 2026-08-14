@@ -8,6 +8,7 @@ import {
   caseById,
   correctionOptions,
   parseBirth,
+  recordedWallClock,
 } from './fixtures/cases';
 import { indexFromPillar, monthPillar, sajuYear, yearPillar } from './pillars';
 import { NORMALIZED_OFFSET_SECONDS, correctBirthTime } from './time';
@@ -15,7 +16,7 @@ import type { CaseInput } from './fixtures/cases';
 
 /** 케이스의 벽시계를 파이프라인에 태워 물리적 시각을 얻는다. docs/05 7장. */
 function caseUtcMs(input: CaseInput): number {
-  return correctBirthTime(parseBirth(input.birth), correctionOptions(input))
+  return correctBirthTime(recordedWallClock(input), correctionOptions(input))
     .utcMs;
 }
 
