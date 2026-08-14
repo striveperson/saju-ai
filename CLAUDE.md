@@ -152,7 +152,7 @@ Gemini Flash Lite, Vercel 배포다.
 canonical 목록은 [docs/00-documentation-guide.md](docs/00-documentation-guide.md) 5장이다.
 
 기계적으로 검사되는 것은 `md-style-guard.sh` 훅이 저장할 때 잡는다.
-em dash, 이모지, 번호 목록 안의 굵은 강조 셋이다.
+em dash, 이모지, 번호 목록 안의 굵은 강조, 취소선, 한 줄에 짝을 이루는 물결표 다섯이다.
 규칙을 설명하느라 그 문자를 써야 하는 줄에는 `<!-- md-allow -->` 를 붙인다.
 
 굵은 강조(`**`)는 어겨서는 안 되는 규칙에만 쓴다. 한 문서에 두세 번을 넘기면 남용이다.

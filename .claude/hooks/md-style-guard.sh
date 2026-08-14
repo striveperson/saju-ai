@@ -61,6 +61,21 @@ lines.forEach((line, i) => {
     if (skipInTable && isTableRow) continue;
     if (re.test(line)) hits.push(`  ${i + 1}행  ${label}`);
   }
+
+  // 물결표 하나짜리도 GFM 취소선 구분자다. 한 줄에 둘이 남으면 짝을 지어
+  // 그 사이가 통째로 그어진다. 범위 표기 둘이 한 문장에 오면 여기 걸린다.
+  // 백틱 안, escape 한 것, 위에서 이미 잡은 ~~ 는 세지 않는다.
+  const bare = line
+    .replace(/`[^`]*`/g, '')
+    .replace(/\\~/g, '')
+    .replace(/~~/g, '');
+
+  if ((bare.match(/~/g) ?? []).length >= 2) {
+    hits.push(
+      `  ${i + 1}행  물결표 짝. GFM 이 취소선으로 읽는다. ` +
+        '범위 표기는 \\~ 로 escape 하고, 물결표 자체를 보이려면 백틱으로 감싼다',
+    );
+  }
 });
 
 if (hits.length === 0) process.exit(0);
