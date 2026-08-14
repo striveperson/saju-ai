@@ -31,7 +31,7 @@ import {
   surroundingMonthTerms,
   yearPillar,
 } from './pillars';
-import { correctBirthTime } from './time';
+import { NORMALIZED_OFFSET_SECONDS, correctBirthTime } from './time';
 import type { CaseInput } from './fixtures/cases';
 
 /** 케이스의 벽시계를 파이프라인에 태워 물리적 시각을 얻는다. docs/05 7장. */
@@ -297,7 +297,8 @@ describe('야자시 정책', () => {
  * 파이프라인을 태우지 않는다. 여기 쓰는 시각은 절기 경계를 겨냥해 지어낸 값이고
  * 1899년과 2101년처럼 파이프라인이 먼저 거부할 값도 있다.
  */
-const kst = (text: string): number => utcMsFromWall(parseBirth(text), 32_400);
+const kst = (text: string): number =>
+  utcMsFromWall(parseBirth(text), NORMALIZED_OFFSET_SECONDS);
 
 describe('년주', () => {
   const withYear = VERIFIED_CASES.filter((c) => c.expected.year);
@@ -348,7 +349,10 @@ describe('년주', () => {
     expect(pillarOfSajuYear(2160)).toBe(pillarOfSajuYear(2100));
 
     // 순간을 받는 쪽과 답이 같아야 한다. 입춘을 지난 시각으로 대조한다.
-    expect(pillarOfSajuYear(2024)).toBe(yearPillar(kst('2024-06-01T12:00:00')));
+    // 양쪽을 값으로 적는다. yearPillar 가 내부에서 pillarOfSajuYear 를 부르므로
+    // 둘을 직접 비교하면 같은 길을 두 번 지나 사주 연도 판정만 확인하게 된다.
+    expect(pillarOfSajuYear(2024)).toBe('갑진');
+    expect(yearPillar(kst('2024-06-01T12:00:00'))).toBe('갑진');
   });
 });
 
@@ -395,13 +399,22 @@ describe('월 경계를 감싸는 두 절입', () => {
     // 2024년 곡우는 04-19 23:00 이고 청명은 04-04 16:02, 입하는 05-05 09:10 이다.
     const terms = surroundingMonthTerms(kst('2024-04-25T12:00:00'));
 
-    expect(wallFromUtcMs(terms.previousUtcMs, 32_400)).toMatchObject({
+    // 연도와 시각까지 본다. 월일만 보면 엉뚱한 해의 4월 4일도 통과한다.
+    expect(
+      wallFromUtcMs(terms.previousUtcMs, NORMALIZED_OFFSET_SECONDS),
+    ).toEqual({
+      year: 2024,
       month: 4,
       day: 4,
+      hour: 16,
+      minute: 2,
     });
-    expect(wallFromUtcMs(terms.nextUtcMs, 32_400)).toMatchObject({
+    expect(wallFromUtcMs(terms.nextUtcMs, NORMALIZED_OFFSET_SECONDS)).toEqual({
+      year: 2024,
       month: 5,
       day: 5,
+      hour: 9,
+      minute: 10,
     });
   });
 
@@ -521,6 +534,20 @@ describe('절기 데이터와 월 경계', () => {
     for (let i = 1; i < terms.length; i++) {
       expect(terms[i].utcMs).toBeGreaterThan(terms[i - 1].utcMs);
     }
+  });
+
+  it('배열이 소한에서 시작하고 셋째가 입춘이다', () => {
+    // 구현 두 곳이 이 시작 위상에 기댄다. 자동 생성 파일을 다시 구우면서
+    // START_INDEX 가 밀리면 둘 다 어긋나는데 어긋나는 방식이 다르다.
+    //
+    // surroundingMonthTerms 의 하향 탐색은 첫 항목이 12절이라 멈춘다.
+    // 첫 항목이 중기가 되면 terms[-1] 을 읽어 TypeError 로 죽는다.
+    // sajuYear 계열은 셋째가 그 해 입춘이라는 것을 쓰고, 밀리면 조용히 틀린 연도를 낸다.
+    const terms = solarTerms();
+
+    expect(terms[0].name).toBe('소한');
+    expect(terms[1].name).toBe('대한');
+    expect(terms[2].name).toBe('입춘');
   });
 });
 

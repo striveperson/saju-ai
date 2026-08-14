@@ -10,7 +10,7 @@ import {
   parseBirth,
 } from './fixtures/cases';
 import { indexFromPillar, monthPillar, sajuYear, yearPillar } from './pillars';
-import { correctBirthTime } from './time';
+import { NORMALIZED_OFFSET_SECONDS, correctBirthTime } from './time';
 import type { CaseInput } from './fixtures/cases';
 
 /** 케이스의 벽시계를 파이프라인에 태워 물리적 시각을 얻는다. docs/05 7장. */
@@ -20,7 +20,8 @@ function caseUtcMs(input: CaseInput): number {
 }
 
 /** KST 벽시계 문자열을 물리적 시각으로. 파이프라인을 태우지 않는다. */
-const kst = (text: string): number => utcMsFromWall(parseBirth(text), 32_400);
+const kst = (text: string): number =>
+  utcMsFromWall(parseBirth(text), NORMALIZED_OFFSET_SECONDS);
 
 describe('대운 방향', () => {
   it('년간 음양과 성별 네 조합이 docs/05 9장 1항대로 갈린다', () => {
@@ -295,9 +296,8 @@ describe('입춘 직전 출생의 대운 시작 연도', () => {
     expect(twenty.startYear).not.toBe(sajuYear(at) + twenty.startAge);
 
     // 세운 열 해가 통째로 한 칸 밀린다. 조용히 틀리는 유형이라 간지까지 본다.
-    expect(sewoonList(at, twenty)[0].pillar).toBe(
-      yearPillar(kst('1921-06-01T12:00:00')),
-    );
+    // 1921년은 신유다. yearPillar 와 맞대면 년주 앵커가 흔들릴 때 양쪽이 함께 흔들린다.
+    expect(sewoonList(at, twenty)[0].pillar).toBe('신유');
   });
 
   it('입춘에서 먼 출생은 산술값과 같다', () => {
@@ -306,6 +306,38 @@ describe('입춘 직전 출생의 대운 시작 연도', () => {
     for (const daeun of daeunList(at, 'F')) {
       expect(daeun.startYear).toBe(sajuYear(at) + daeun.startAge);
     }
+  });
+
+  it('기록 날짜가 아니라 정규화 날짜를 생일로 쓴다', () => {
+    // docs/05 9.2. 표준시가 UTC+8:30 이던 1955년의 현지 23:45 출생이다.
+    // 정규화하면 다음날 00:15 이라 생일이 하루 뒤로 가고, 만 66세 생일이
+    // 2021 입춘(KST 02-03 23:59)을 16분 지난다. 기록 날짜로 읽으면 14분 전이라 2020년이다.
+    const { utcMs, normalized } = correctBirthTime(
+      parseBirth('1955-02-03T23:45:00'),
+      { longitude: 126.98 },
+    );
+
+    expect(normalized).toEqual({
+      year: 1955,
+      month: 2,
+      day: 4,
+      hour: 0,
+      minute: 15,
+    });
+
+    // 경계가 살아 있는지 함께 고정한다. 절기 데이터가 갱신되어 입춘이 23:45 이전으로
+    // 움직이면 두 날짜가 같은 답을 내고 이 테스트는 조용히 경계를 잃는다.
+    expect(sajuYear(kst('2021-02-03T23:45:00'))).toBe(2020);
+    expect(sajuYear(kst('2021-02-04T00:15:00'))).toBe(2021);
+
+    const daeun = daeunList(utcMs, 'M').find(
+      (d) => d.startAge <= 66 && 66 <= d.endAge,
+    );
+    if (!daeun) throw new Error('만 66세를 덮는 대운이 없다');
+
+    const sixtySix = sewoonList(utcMs, daeun).find((s) => s.age === 66);
+    expect(sixtySix?.year).toBe(2021);
+    expect(sixtySix?.pillar).toBe('신축');
   });
 });
 
@@ -382,10 +414,25 @@ describe('세운', () => {
     expect(sewoon.map((s) => s.year)).toEqual([
       1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
     ]);
+    // 간지도 값으로 적는다. 년주와 세운이 같은 앵커에서 나오므로
+    // 둘을 맞대면 앵커가 흔들릴 때 양쪽이 함께 흔들려 통과한다.
+    expect(sewoon.map((s) => s.pillar)).toEqual([
+      '정축',
+      '무인',
+      '기묘',
+      '경진',
+      '신사',
+      '임오',
+      '계미',
+      '갑신',
+      '을유',
+      '병술',
+    ]);
   });
 
   it('세운 간지가 그 해의 년주와 같다', () => {
     // docs/05 9장 5항. 세운은 년주와 같은 규칙이라 따로 정할 것이 없다.
+    // 값 자체는 위 테스트가 리터럴로 잡는다. 여기는 두 경로가 같은 답을 내는지만 본다.
     const at = kst('1990-05-15T14:30:00');
 
     for (const s of sewoonList(at, daeunList(at, 'M')[0])) {

@@ -24,6 +24,7 @@ import {
   surroundingMonthTerms,
   yearPillar,
 } from './pillars';
+import { NORMALIZED_OFFSET_SECONDS } from './time';
 
 /** 대운 방향을 가르는 입력. 년간 음양과 짝지어 순행과 역행을 정한다. docs/05 9장 1항 */
 export type Gender = 'M' | 'F';
@@ -37,12 +38,15 @@ const DAYS_PER_DAEUN_YEAR = 3;
 const DAY_MS = 86_400_000;
 
 /**
- * 생일 날짜를 읽는 프레임. docs/05 7.1 의 정규화 오프셋이고 9.2 이 이 선택을 적었다.
+ * 생일 날짜를 읽는 프레임. docs/05 9.2 가 7.1 의 정규화 오프셋을 쓰기로 정했다.
  *
- * 비교 기준일 뿐 아니라 생일이 며칠인지를 정한다.
+ * 생일이 며칠로 읽히는지를 정한다.
  * UTC+8:30 시기의 현지 23:30 이후 출생은 이 프레임에서 날짜가 하루 뒤다.
+ * 기록 날짜를 대신 쓰면 그 날짜를 생일 해의 오프셋으로 다시 읽게 되어 값이 갈린다.
+ *
+ * 9.2 가 이 프레임을 7.1 의 정규화 오프셋으로 지정했으므로 그 값을 `time.ts` 에서 가져온다.
  */
-const KST_OFFSET_SECONDS = 32_400;
+const BIRTHDAY_FRAME_OFFSET_SECONDS = NORMALIZED_OFFSET_SECONDS;
 
 /** 대운 하나가 덮는 햇수. */
 const DAEUN_SPAN_YEARS = 10;
@@ -60,7 +64,10 @@ const DAEUN_COUNT = 10;
  */
 function sajuYearAtAge(birth: CalendarDateTime, age: number): number | null {
   return sajuYearOrNull(
-    utcMsFromWall({ ...birth, year: birth.year + age }, KST_OFFSET_SECONDS),
+    utcMsFromWall(
+      { ...birth, year: birth.year + age },
+      BIRTHDAY_FRAME_OFFSET_SECONDS,
+    ),
   );
 }
 
@@ -138,7 +145,7 @@ export function daeunList(utcMs: number, gender: Gender): Daeun[] {
   const start = daeunStart(utcMs, gender);
   const step = start.direction === 'forward' ? 1 : -1;
   const month = indexFromPillar(monthPillar(utcMs));
-  const birth = wallFromUtcMs(utcMs, KST_OFFSET_SECONDS);
+  const birth = wallFromUtcMs(utcMs, BIRTHDAY_FRAME_OFFSET_SECONDS);
 
   return Array.from({ length: DAEUN_COUNT }, (_, index) => {
     const startAge = start.startAge + index * DAEUN_SPAN_YEARS;
@@ -181,7 +188,7 @@ export interface Sewoon {
  * 세운 간지는 그 해의 년주와 같은 규칙이라 따로 정할 것이 없다.
  */
 export function sewoonList(utcMs: number, daeun: Daeun): Sewoon[] {
-  const birth = wallFromUtcMs(utcMs, KST_OFFSET_SECONDS);
+  const birth = wallFromUtcMs(utcMs, BIRTHDAY_FRAME_OFFSET_SECONDS);
 
   return Array.from({ length: DAEUN_SPAN_YEARS }, (_, offset) => {
     const age = daeun.startAge + offset;
