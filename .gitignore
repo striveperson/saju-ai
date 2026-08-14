@@ -13,6 +13,8 @@ apps/web/.tanstack/
 apps/web/scripts/.venv/
 apps/web/scripts/*.bsp
 apps/web/scripts/computed-*.json
+# 굽는 중에만 있는 후보 모듈. 중간에 끊기면 남는다
+apps/web/scripts/lunar-months.candidate.ts
 
 # mobile (Capacitor)
 # ios/ 와 android/ 는 커밋한다.

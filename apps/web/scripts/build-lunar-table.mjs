@@ -7,14 +7,22 @@
  * 절기와 달리 base64 바이너리로 담지 않는다. 151행은 diff 로 읽히므로
  * 리뷰용 JSON 사본을 따로 둘 이유가 없다. 근거는 docs/05 8장.
  *
+ * 접은 표가 원본으로 되돌아오는지는 생성된 모듈을 직접 불러 확인한다.
+ * 펼치는 규칙을 여기에 한 벌 더 두면 한쪽만 고쳤을 때 대조가 통과하면서
+ * 런타임이 다른 값을 낸다.
+ *
+ * node 가 `.ts` 를 부르는 것은 타입 스트리핑에 기댄다(v22.18 이상).
+ * 거기에 더해 lunar-months.ts 는 import 가 0 이라 확장자 해석이 필요 없다.
+ * 확장자 없는 상대 import 를 쓰는 다른 엔진 모듈은 이 방법으로 부르지 못한다.
+ *
  * 실행:
  *   node apps/web/scripts/build-lunar-table.mjs           굽는다
  *   node apps/web/scripts/build-lunar-table.mjs --check   쓰지 않고 커밋된 파일과 대조만 한다
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const checkOnly = process.argv.includes('--check');
@@ -90,52 +98,36 @@ const rows = years.map((year) => {
   ];
 });
 
-/** 접은 행을 다시 달 목록으로 펼친다. 생성되는 모듈도 같은 규칙을 쓴다. */
-function expand(rows, firstYear) {
-  const out = [];
-  for (const [index, [startJdn, leapMonth, count, mask]] of rows.entries()) {
-    let jdn = startJdn;
-    let month = 1;
-    let leap = false;
+/**
+ * 그 모듈이 펼치는 달 목록이 원본과 같은지 본다.
+ *
+ * 접는 것은 이 스크립트가 하고 펼치는 것은 모듈이 한다.
+ * 둘이 마주 보게 두어야 한쪽만 바뀌었을 때 여기서 걸린다.
+ */
+async function verifyModule(path) {
+  // 경로마다 한 번씩만 부른다. 굽기는 후보 경로를, --check 는 커밋된 경로를 본다
+  const { lunarMonths } = await import(pathToFileURL(path).href);
+  const restored = lunarMonths();
 
-    for (let i = 0; i < count; i++) {
-      const days = (mask >> i) & 1 ? 30 : 29;
-      out.push({ year: firstYear + index, month, leap, days, startJdn: jdn });
-      jdn += days;
-
-      if (!leap && month === leapMonth) {
-        leap = true;
-      } else {
-        leap = false;
-        month++;
-      }
-    }
-  }
-  return out;
-}
-
-// ---- 접었다 펼치기 대조 ----
-// 접는 과정에서 잃는 것이 없어야 한다. 한 값이라도 다르면 굽지 않는다.
-
-const restored = expand(rows, firstYear);
-if (restored.length !== months.length) {
-  throw new Error(
-    `펼친 달이 ${restored.length}개다. 원본은 ${months.length}개다`,
-  );
-}
-for (const [i, m] of months.entries()) {
-  const r = restored[i];
-  if (
-    r.year !== m.lunYear ||
-    r.month !== m.lunMonth ||
-    r.leap !== m.leap ||
-    r.days !== m.days ||
-    r.startJdn !== m.jdn
-  ) {
+  if (restored.length !== months.length) {
     throw new Error(
-      `${i}번째가 어긋난다: ${m.lunYear}-${m.lunMonth}${m.leap ? '윤' : ''} ${m.jdn} 대 ` +
-        `${r.year}-${r.month}${r.leap ? '윤' : ''} ${r.startJdn}`,
+      `모듈이 펼친 달이 ${restored.length}개다. 원본은 ${months.length}개다`,
     );
+  }
+  for (const [i, m] of months.entries()) {
+    const r = restored[i];
+    if (
+      r.year !== m.lunYear ||
+      r.month !== m.lunMonth ||
+      r.leap !== m.leap ||
+      r.days !== m.days ||
+      r.startJdn !== m.jdn
+    ) {
+      throw new Error(
+        `${i}번째가 어긋난다: ${m.lunYear}-${m.lunMonth}${m.leap ? '윤' : ''} ${m.jdn} 대 ` +
+          `${r.year}-${r.month}${r.leap ? '윤' : ''} ${r.startJdn}`,
+      );
+    }
   }
 }
 
@@ -244,9 +236,24 @@ if (checkOnly) {
     );
     process.exit(1);
   }
+
+  // 텍스트가 같아도 펼치기까지 본다. 커밋된 모듈이 실제로 무엇을 내는지가 남은 물음이다
+  await verifyModule(outPath);
   console.log(`대조 통과. ${months.length}달, ${rows.length}행.`);
 } else {
-  writeFileSync(outPath, tsSource);
+  // 먼저 덮고 나서 검사하면 실패했을 때 깨진 파일이 남는다. 후보를 세워 통과한 것만 옮긴다
+  const candidatePath = resolve(here, 'lunar-months.candidate.ts');
+  writeFileSync(candidatePath, tsSource);
+
+  try {
+    await verifyModule(candidatePath);
+  } catch (error) {
+    rmSync(candidatePath, { force: true });
+    throw error;
+  }
+
+  renameSync(candidatePath, outPath);
+
   const kb = (n) => `${(n / 1024).toFixed(1)}KB`;
   console.log(
     `${months.length}달을 ${rows.length}행으로 접었다. lunar-months.ts ${kb(tsSource.length)}`,

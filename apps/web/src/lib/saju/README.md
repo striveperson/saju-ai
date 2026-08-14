@@ -72,6 +72,7 @@ pnpm --filter web exec vitest run --project saju
 | `data/solar-terms.ts` | 절기 1900~2100. 자동 생성 |
 | `data/lunar-months.ts` | 음력 달력표 1900~2050. 자동 생성 |
 | `data/korea-time.ts` | 표준시 전환 이력. 손으로 옮긴 표 |
+| `lunar.ts` | 음력 입력을 양력으로. 표를 읽기만 한다 |
 | `time.ts` | 시간 보정 파이프라인 |
 | `pillars.ts` | 년주, 월주, 일주, 시주 |
 | `tables.ts` | 지장간, 오행 상생상극, 십성 5분류 |
@@ -89,7 +90,8 @@ pnpm --filter web exec vitest run --project saju
 
 ## 아직 없는 것
 
-균시차 보정, 월운, 신살, 음력 입력이다.
+균시차 보정, 월운, 신살이다.
+음력은 변환과 범위 검증까지 있고, 그 결과를 받아 팔자까지 내는 상위 경로와 화면이 없다.
 십신은 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있고 음양으로 가르는 10종은 없다.
 
 `fixtures/` 에는 공인 만세력 대조를 거친 검증 케이스가 들어간다.
