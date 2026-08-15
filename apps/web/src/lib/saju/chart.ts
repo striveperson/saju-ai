@@ -23,7 +23,7 @@ import {
 import { correctBirthTime, type TimeCorrection } from './time';
 
 import type { CalendarDateTime } from './calendar';
-import type { FourPillars } from './index';
+import type { FourPillars, Pillar } from './index';
 import type {
   AmbiguityChoice,
   AppliedTimeOptions,
@@ -45,7 +45,11 @@ export type ChartInput = ChartCalendar & {
 };
 
 /**
- * 적용한 유파 값. 결과 화면이 이것을 표시한다. 루트 CLAUDE.md 유파 표.
+ * 적용한 유파 값. 루트 CLAUDE.md 유파 표.
+ *
+ * 화면 표시용이 아니다. 같은 팔자라도 이 값이 다르면 판정이 갈리므로
+ * 해석 캐시가 둘을 같은 것으로 보면 안 된다. 캐시 키가 계산 옵션을 포함한다.
+ * 화면에 띄우지 않기로 한 근거는 docs/01 5장이다.
  *
  * 시간 쪽 둘은 `time.ts` 가 채운 것을 그대로 받는다. 여기서 다시 적지 않는다.
  */
@@ -59,6 +63,7 @@ export interface Chart {
   correction: TimeCorrection; // 시간 보정 내역과 표기 의무
   daeun: readonly Daeun[]; // 대운 열 개. 세운은 없다. docs/05 12.3
   applied: AppliedChartOptions; // 적용한 유파 값
+  ziBoundary: Pillar | null; // 반대 야자시 정책의 일주. 경계가 아니면 null. docs/05 6장
 }
 
 /** 완성된 팔자를 받는 판정. docs/05 11장과 docs/07 */
@@ -106,17 +111,26 @@ export function computeChart(input: ChartInput): Chart {
   const correction = correctBirthTime(solar, timeOptions);
   const { utcMs, corrected } = correction;
 
+  const day = dayPillar(corrected, input.ziPolicy);
+  // 반대 정책으로 한 번 더 뽑는다. 같으면 경계가 아니다. 시각을 따로 보지 않는 이유는
+  // 경계 규칙이 화면과 엔진 두 벌이 되는 것을 막기 위해서다. docs/05 6장.
+  const opposite = dayPillar(
+    corrected,
+    input.ziPolicy === 'nextDay' ? 'sameDay' : 'nextDay',
+  );
+
   return {
     pillars: {
       year: yearPillar(utcMs),
       month: monthPillar(utcMs),
-      day: dayPillar(corrected, input.ziPolicy),
+      day,
       hour: hourPillar(corrected),
     },
     solar,
     correction,
     daeun: daeunList(utcMs, input.gender),
     applied: { ziPolicy: input.ziPolicy, ...correction.disclosure.applied },
+    ziBoundary: opposite === day ? null : opposite,
   };
 }
 
