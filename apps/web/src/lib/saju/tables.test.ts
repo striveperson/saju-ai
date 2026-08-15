@@ -383,6 +383,20 @@ describe('년지 기준 신살 판정표 (docs/07 3장)', () => {
     });
   });
 
+  it('고신살이 다음 그룹 첫 글자이고 과숙살이 이전 그룹 끝 글자다', () => {
+    // docs/07 11장의 방어선이다. 전사만으로는 네 값을 통째로 한 칸씩 돌려도 통과한다.
+    // 그래서 관계를 여기서 다시 계산해 대조한다.
+    const 순서 = ['해자축', '인묘진', '사오미', '신유술'] as const;
+
+    for (const [i, group] of 순서.entries()) {
+      const 다음 = 순서[(i + 1) % 4];
+      const 이전 = 순서[(i + 3) % 4];
+
+      expect(GOSIN[group], `${group} 의 다음은 ${다음}`).toBe(다음[0]);
+      expect(GWASUK[group], `${group} 의 이전은 ${이전}`).toBe(이전[2]);
+    }
+  });
+
   it('고신살은 생지이고 과숙살은 고지다', () => {
     for (const group of Object.keys(GOSIN) as (keyof typeof GOSIN)[]) {
       expect(['인', '사', '신', '해'], group).toContain(GOSIN[group]);
@@ -470,6 +484,13 @@ describe('삼합 기준 신살 판정표 (docs/07 5장)', () => {
     for (const [name, table] of 다섯) {
       const values = Object.values(table);
       expect(new Set(values).size, name).toBe(values.length);
+    }
+  });
+
+  it('화개살이 그룹의 셋째 글자다', () => {
+    // docs/07 11장의 방어선이다. 그룹 안에 있는지만 보면 둘째 글자로 적어도 통과한다.
+    for (const group of Object.keys(HWAGAE) as (keyof typeof HWAGAE)[]) {
+      expect(HWAGAE[group], group).toBe(group[2]);
     }
   });
 
