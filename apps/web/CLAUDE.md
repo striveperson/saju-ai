@@ -5,12 +5,15 @@
 
 ## 디렉토리
 
-`src/routes/` 가 파일 기반 라우트, `src/features/` 가 지면 단위 화면,
-`src/components/` 가 지면 공통 컴포넌트, `src/lib/saju/` 가 계산 엔진,
+`src/routes/` 가 파일 기반 라우트, `src/routes/api/` 가 서버 라우트,
+`src/features/` 가 지면 단위 화면, `src/components/` 가 지면 공통 컴포넌트,
+`src/shared/` 가 지면 사이로 넘기는 값의 타입, `src/lib/saju/` 가 계산 엔진,
 `scripts/` 가 SPA 변환과 절기 계산과 tz 정답지 생성이다.
 
-경로 별칭은 `@saju`, `@saju/*`, `@components/*`, `@features/*` 다.
+경로 별칭은 `@saju`, `@saju/*`, `@components/*`, `@features/*`, `@shared/*` 다.
 `tsconfig.json` 의 `paths` 가 단일 소스이고 vite 와 vitest 가 `tsconfigPaths` 로 읽는다.
+
+시크릿은 `src/routes/api/` 안에서만 읽는다. `VITE_` 접두사를 붙이면 클라이언트 번들에 실린다.
 
 지면을 가르는 기준, 컴포넌트 선언 규칙, 경계 배치는
 [docs/03-frontend-rules.md](../../docs/03-frontend-rules.md) 에 있다.
