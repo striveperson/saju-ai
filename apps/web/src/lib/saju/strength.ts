@@ -78,7 +78,7 @@ export interface StrengthResult {
   /** 희신(2순위). 중화는 null 이다 */
   huisin: Element | null;
   flags2: StrengthReviewFlags;
-  /** 적용한 유파 값. 결과 화면이 이것을 표시한다 */
+  /** 적용한 유파 값. 해석 캐시 키가 쓴다. 화면 표시용이 아니다(docs/01 5장) */
   applied: { supportIncludesResource: boolean };
 }
 
