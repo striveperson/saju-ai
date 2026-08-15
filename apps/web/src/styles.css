@@ -32,6 +32,10 @@
   --color-geum: #9aa3ab;
   --color-su: #3b5f9e;
 
+  /* 상생과 상극. 노드 색과 겹치면 선이 무엇인지 색으로 구분되지 않는다 */
+  --color-sheng: #4a7ad6;
+  --color-keug: #d1494a;
+
   --radius-card: 14px;
   --radius-sheet: 20px;
 

@@ -167,6 +167,45 @@ describe('computeChart', () => {
     expect(직접.because).toBe('option');
   });
 
+  it('야자시 경계에서는 반대 정책의 일주를 함께 낸다', () => {
+    // 검증 케이스 zi-2301. 기록 23:33 이 보정 후 23:01 이라 정책이 갈린다.
+    // docs/05 6장이 그 구간에서 두 해석을 함께 보여주라고 요구한다.
+    const chart = computeChart({
+      ...기준,
+      birth: { year: 1990, month: 3, day: 10, hour: 23, minute: 33 },
+      gender: 'M',
+    });
+
+    expect(chart.pillars.day).toBe('을해');
+    expect(chart.ziBoundary).toBe('갑술');
+  });
+
+  it('경계가 아니면 ziBoundary 가 null 이다', () => {
+    // 검증 케이스 zi-2259. 2분 앞이라 보정 후 22:59 이고 두 정책이 같다.
+    const 해시 = computeChart({
+      ...기준,
+      birth: { year: 1990, month: 3, day: 10, hour: 23, minute: 31 },
+      gender: 'M',
+    });
+
+    expect(해시.pillars.day).toBe('갑술');
+    expect(해시.ziBoundary).toBeNull();
+    // 낮 출생은 애초에 자시가 아니다.
+    expect(computeChart(기준).ziBoundary).toBeNull();
+  });
+
+  it('야자시설로 부르면 반대쪽인 정자시설 일주를 낸다', () => {
+    const 야자시 = computeChart({
+      ...기준,
+      birth: { year: 1990, month: 3, day: 10, hour: 23, minute: 33 },
+      gender: 'M',
+      ziPolicy: 'sameDay',
+    });
+
+    expect(야자시.pillars.day).toBe('갑술');
+    expect(야자시.ziBoundary).toBe('을해');
+  });
+
   it('세운을 담지 않는다. 어느 대운의 것인지는 소비자가 고른다', () => {
     // docs/05 12.3. 대운을 고르는 기준이 현재 시각이고 엔진은 그것을 읽지 않는다.
     expect(computeChart(기준)).not.toHaveProperty('sewoon');

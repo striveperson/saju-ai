@@ -147,12 +147,13 @@ grep -rn "<바꾼 값이나 이름>" CLAUDE.md docs/ apps/web/CLAUDE.md .claude/
 | 바꾼 것 | 같이 낡는 곳 |
 | --- | --- |
 | 도메인 규칙의 값 | `docs/mockups/` 의 HTML. 목업이 SSOT 를 베낀 자리다 |
+| 경고 종류를 더함 | `docs/01` 5.1 문구 표, 화면의 `NOTICE_TEXT` |
 | 엔진 함수를 더하거나 뺌 | 엔진 README 의 파일 표와 "아직 없는 것", CLAUDE.md "아직 만들지 않은 것" |
 | 디렉토리를 더함 | `docs/02` 4장 트리, `docs/03` 3장 트리, `apps/web/CLAUDE.md` 디렉토리 절 |
 | 경로 별칭을 더함 | `tsconfig.json`, `docs/03` 3장 표, `docs/02` 4장 |
 | 스킬이나 에이전트를 더함 | CLAUDE.md 의 두 목록, `docs/06` 4장 |
 | 훅을 더함 | CLAUDE.md 훅 표, `docs/03` 14장 |
-| 유파 옵션을 더함 | CLAUDE.md 유파 표, `docs/05` 해당 절, 결과 화면의 표시 자리 |
+| 유파 옵션을 더함 | CLAUDE.md 유파 표, `docs/01` 5장 표, `docs/05` 해당 절 |
 | 결정을 뒤집음 | 새 ADR. 기존 것의 상태를 대체됨으로 바꾼다. 기존 ADR 을 고치지 않는다 |
 
 낡은 것을 지울 때는 파생인지 원본인지 본다.
