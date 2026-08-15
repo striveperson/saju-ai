@@ -8,7 +8,8 @@
       "@components/*": ["./src/components/*"],
       "@features/*": ["./src/features/*"],
       "@saju": ["./src/lib/saju/index.ts"],
-      "@saju/*": ["./src/lib/saju/*"]
+      "@saju/*": ["./src/lib/saju/*"],
+      "@shared/*": ["./src/shared/*"]
     },
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
@@ -16,7 +17,7 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": true, // import type 이라고 명시
     "noEmit": true,
 
     /* Linting */

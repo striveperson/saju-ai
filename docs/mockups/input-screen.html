@@ -261,6 +261,30 @@
     padding-top: 3px;
   }
 
+  .toggles:empty,
+  .toggle[hidden] {
+    display: none;
+  }
+
+  .hint {
+    margin: 0;
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* 비어 있으면 자리를 잡지 않는다. 채워질 때만 나타나 필드가 밀리지 않게 한다 */
+  .error {
+    margin: 0;
+    color: #c0392b;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .error:empty {
+    display: none;
+  }
+
   .toggle {
     display: flex;
     align-items: center;
@@ -540,13 +564,26 @@
         <input type="text" id="birth-date" class="num" inputmode="numeric" placeholder="1995/01/27" aria-labelledby="birth-label" />
         <input type="text" id="birth-time" class="num" inputmode="numeric" placeholder="14:39" aria-label="태어난 시각" />
       </div>
+      <p class="error" id="birth-error" role="alert"></p>
       <div class="toggles">
-        <label class="toggle">
+        <!-- 음력이고 그 해에 윤달이 있고 입력한 달이 그 달일 때만 나온다. ChartCalendar 가
+             음력이면 leapMonth 를 타입으로 강제한다 -->
+        <label class="toggle" id="leap-toggle" hidden>
+          <input type="checkbox" id="leap-month" />
+          <span class="dot"></span>
+          <span class="toggle-text">윤달</span>
+        </label>
+        <!-- 아직 안 붙었다. docs/05 12.1 이 "시 미상은 규칙 자체가 아직 없다" 로 적었고
+             시주를 안 세울 때 득시와 신살의 시지와 대운수를 어떻게 할지가 별도 ADR 이다 -->
+        <label class="toggle" hidden>
           <input type="checkbox" id="no-time" />
           <span class="dot"></span>
           <span class="toggle-text">시간 모름</span>
         </label>
-        <label class="toggle">
+        <!-- 아직 안 붙었다. 이것이 서면 사용자가 유파 옵션을 처음으로 고르게 되고
+             docs/01 5장의 "고를 수단이 아직 없어 기본값 고정" 전제가 깨진다.
+             설정 지면과 함께 정한다 -->
+        <label class="toggle" hidden>
           <input type="checkbox" id="zi-policy" />
           <span class="dot"></span>
           <span class="toggle-text">야자시/조자시</span>
@@ -557,19 +594,22 @@
     <div class="field">
       <label class="label" for="city">도시</label>
       <div class="search-row">
-        <input type="text" id="city" placeholder="시도를 검색해 선택하세요" readonly />
-        <button type="button" class="search-btn" id="open-search" aria-label="시도 검색">
+        <input type="text" id="city" placeholder="도나 시를 검색해 선택하세요" readonly />
+        <button type="button" class="search-btn" id="open-search" aria-label="출생지 검색">
           <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
             <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5" />
             <path d="M12.8 12.8L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
         </button>
       </div>
+      <p class="hint" id="city-hint">태어난 곳의 경도로 시각을 보정합니다. 서울과 부산이 8분 다릅니다.</p>
     </div>
 
     <div class="actions">
       <button type="submit" class="primary" id="submit" disabled>사주보러가기</button>
-      <button type="button" class="secondary">사주 불러오기</button>
+      <!-- 아직 안 붙었다. 저장한 사주를 부르려면 소셜 로그인과 Supabase 가 있어야 한다
+           (ADR 0008, ADR 0010) -->
+      <button type="button" class="secondary" disabled>사주 불러오기</button>
     </div>
   </form>
 </div>
@@ -578,10 +618,11 @@
   <div class="sheet">
     <div class="sheet-head">
       <div class="sheet-title">
-        <span id="sheet-title">시도 검색</span>
+        <span id="sheet-title">출생지 검색</span>
         <button type="button" id="close-search" aria-label="닫기">×</button>
       </div>
-      <input type="text" id="query" placeholder="시도명을 입력하세요" aria-label="시도명 검색" />
+      <!-- 검색 버튼의 이름이 "출생지 검색" 이라 그대로 두면 접근 이름이 겹친다 -->
+      <input type="text" id="query" placeholder="도나 시 이름을 입력하세요" aria-label="출생지 검색어" />
     </div>
     <ul class="sheet-list" id="result-list"></ul>
   </div>
@@ -589,80 +630,89 @@
 
 <script>
   /**
-   * 시도 17개와 대표 경도.
-   * 목업 전용 임시값이다. 출처를 확인하기 전에는 계산 엔진으로 옮기지 않는다.
-   * 실제 앱에서는 searchSido 를 주소 API 호출로 바꾼다.
+   * 출생지 검색. 실제 앱은 /api/regions 가 카카오 로컬 주소 검색을 중계한다.
+   * 결과는 도와 시까지이고 구와 읍면동은 서버가 거른다(ADR 0019).
+   * 목업은 네트워크를 타지 않으려고 몇 개만 흉내낸다. 이 값들은 코드로 옮기지 않는다.
    */
-  const SIDO = [
-    { name: '서울특별시', lon: 126.98 },
-    { name: '부산광역시', lon: 129.08 },
-    { name: '대구광역시', lon: 128.6 },
-    { name: '인천광역시', lon: 126.71 },
-    { name: '광주광역시', lon: 126.85 },
-    { name: '대전광역시', lon: 127.38 },
-    { name: '울산광역시', lon: 129.31 },
-    { name: '세종특별자치시', lon: 127.29 },
-    { name: '경기도', lon: 127.01 },
-    { name: '강원특별자치도', lon: 127.73 },
-    { name: '충청북도', lon: 127.49 },
-    { name: '충청남도', lon: 126.67 },
-    { name: '전북특별자치도', lon: 127.11 },
-    { name: '전라남도', lon: 126.46 },
-    { name: '경상북도', lon: 128.73 },
-    { name: '경상남도', lon: 128.69 },
-    { name: '제주특별자치도', lon: 126.53 },
+  const SAMPLE = [
+    { name: '서울특별시', longitude: 126.9784 },
+    { name: '경기도', longitude: 127.0095 },
+    { name: '의왕시', longitude: 126.9683 },
+    { name: '전주시', longitude: 127.148 },
+    { name: '세종특별자치시', longitude: 127.2892 },
+    { name: '양평군', longitude: 127.4875 },
   ];
 
-  /** 주소 API 를 붙일 자리. 지금은 내장 목록을 거른다 */
-  function searchSido(query) {
+  async function searchRegions(query) {
     const q = query.trim();
-    if (q === '') return SIDO;
-    return SIDO.filter((sido) => sido.name.includes(q));
+    if (q === '') return [];
+    return SAMPLE.filter((region) => region.name.includes(q));
   }
 
   const form = document.getElementById('saju-form');
   const submit = document.getElementById('submit');
-  const noTime = document.getElementById('no-time');
   const time = document.getElementById('birth-time');
   const city = document.getElementById('city');
   const modal = document.getElementById('search-modal');
   const query = document.getElementById('query');
   const list = document.getElementById('result-list');
 
-  // 이름, 생년월일, 도시가 채워져야 사주를 낼 수 있다. 시각은 시간 모름으로 대신할 수 있다
+  // 넷 다 채워져야 사주를 낼 수 있다.
+  // 시각은 ChartInput.birth 가 필수로 받고(docs/05 12.1),
+  // 도시는 경도가 없으면 서울 관례값이 답으로 나가서다(ADR 0019 3항)
   function refresh() {
     const filled =
       document.getElementById('name').value.trim() !== '' &&
       document.getElementById('birth-date').value.trim() !== '' &&
+      time.value.trim() !== '' &&
       city.value.trim() !== '';
     submit.disabled = !filled;
   }
 
-  function render() {
-    const found = searchSido(query.value);
-    list.replaceChildren();
+  /** 검색어가 비었을 때, 찾는 중일 때, 결과가 없을 때, 실패했을 때의 문구 */
+  const SHEET_MESSAGE = {
+    idle: '도나 시 이름을 입력하면 목록이 나옵니다.',
+    pending: '찾는 중입니다.',
+    empty: '검색 결과가 없습니다. 도나 시 이름을 다시 확인해 주세요.',
+    failed: '출생지를 찾지 못했습니다. 연결을 확인하고 다시 시도해 주세요.',
+  };
 
-    if (found.length === 0) {
-      const empty = document.createElement('li');
-      empty.className = 'sheet-empty';
-      empty.textContent = '검색 결과가 없습니다. 시도명을 다시 확인해 주세요.';
-      list.append(empty);
+  function 안내(key) {
+    const li = document.createElement('li');
+    li.className = 'sheet-empty';
+    li.textContent = SHEET_MESSAGE[key];
+    list.replaceChildren(li);
+  }
+
+  async function render() {
+    if (query.value.trim() === '') {
+      안내('idle');
       return;
     }
 
-    for (const sido of found) {
+    // 실제 앱은 여기서 서버를 부르므로 pending 과 failed 를 함께 그린다
+    안내('pending');
+    const found = await searchRegions(query.value);
+    list.replaceChildren();
+
+    if (found.length === 0) {
+      안내('empty');
+      return;
+    }
+
+    for (const region of found) {
       const item = document.createElement('li');
       const button = document.createElement('button');
       button.type = 'button';
       const name = document.createElement('span');
-      name.textContent = sido.name;
+      name.textContent = region.name;
       const lon = document.createElement('span');
       lon.className = 'lon';
-      lon.textContent = sido.lon.toFixed(2) + '°E';
+      lon.textContent = region.longitude.toFixed(2) + '°E';
       button.append(name, lon);
       button.addEventListener('click', () => {
-        city.value = sido.name;
-        city.dataset.lon = String(sido.lon);
+        city.value = region.name;
+        city.dataset.lon = String(region.longitude);
         modal.close();
         refresh();
       });
@@ -688,9 +738,11 @@
     if (event.target === modal) modal.close();
   });
 
-  noTime.addEventListener('change', () => {
-    time.disabled = noTime.checked;
-    if (noTime.checked) time.value = '';
+  // 음력을 고르고 그 해에 윤달이 있고 입력한 달이 그 달이면 윤달 토글이 나온다.
+  // 목업은 그 판정을 못 하므로 음력을 고른 것까지만 흉내낸다.
+  // 실제 앱은 leapMonthOf(year) 로 판정한다
+  document.getElementById('calendar').addEventListener('change', (event) => {
+    document.getElementById('leap-toggle').hidden = event.target.value !== '음력';
   });
 
   form.addEventListener('input', refresh);

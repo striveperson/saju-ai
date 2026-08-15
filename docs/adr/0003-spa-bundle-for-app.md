@@ -1,6 +1,6 @@
 # ADR 0003. 앱은 SPA 정적 번들, 서버는 API 로만 호출
 
-- 상태: 채택(Accepted)
+- 상태: 채택(Accepted). 3항의 입력 부분은 대체됨(Superseded by ADR 0019)
 - 날짜: 2026-08-05
 
 ## 배경

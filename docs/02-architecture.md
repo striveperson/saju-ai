@@ -23,12 +23,14 @@ flowchart TB
   end
 
   gemini[Gemini Flash Lite]
+  kakao[카카오 로컬<br/>주소 검색]
 
   web --> ssr
   web --> api
   app -->|절대 URL| api
   api --> db
   api --> gemini
+  api --> kakao
   web --> auth
   app -->|시스템 브라우저 + PKCE| auth
   auth --> db
@@ -37,6 +39,10 @@ flowchart TB
 
 핵심은 사주 계산이 이 그림에 없다는 점이다.
 계산은 클라이언트 안에서 끝나므로 서버를 거치지 않는다.
+
+서버를 거치는 것은 출생지 검색이다.
+경도를 고르는 단계만 네트워크를 타고, 고르지 않으면 서울 기준 폴백으로 계산이 진행된다
+([ADR 0019](adr/0019-region-lookup-via-address-api.md)).
 
 ## 2. 계산과 해석의 분리
 
@@ -98,13 +104,15 @@ saju-ai/
 │   ├── 06-code-working-rules.md     코드 작업 방식
 │   ├── 07-sinsal-rules.md           신살 SSOT
 │   ├── mockups/                     화면 목업 HTML
-│   └── adr/                         0001 ~ 0018
+│   └── adr/                         0001 ~ 0019
 ├── apps/
 │   ├── web/                          TanStack Start
 │   │   └── src/
-│   │       ├── routes/               라우트 정의와 API 라우트
+│   │       ├── routes/               라우트 정의
+│   │       │   └── api/              서버 라우트. 시크릿과 외부 API 호출
 │   │       ├── features/             지면 단위 화면 조립
 │   │       ├── components/           지면 공통 컴포넌트
+│   │       ├── shared/               지면 사이로 넘기는 값의 타입과 스키마
 │   │       ├── lib/saju/             계산 엔진 (외부 의존 0)
 │   │       │   └── fixtures/         검증 케이스
 │   │       └── server/               Supabase 접근, LLM 공급자

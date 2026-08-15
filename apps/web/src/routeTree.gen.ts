@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResultRouteImport } from './routes/result'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiRegionsRouteImport } from './routes/api/regions'
 
 const ResultRoute = ResultRouteImport.update({
   id: '/result',
@@ -22,31 +23,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRegionsRoute = ApiRegionsRouteImport.update({
+  id: '/api/regions',
+  path: '/api/regions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/api/regions': typeof ApiRegionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/api/regions': typeof ApiRegionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/result': typeof ResultRoute
+  '/api/regions': typeof ApiRegionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/result'
+  fullPaths: '/' | '/result' | '/api/regions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/result'
-  id: '__root__' | '/' | '/result'
+  to: '/' | '/result' | '/api/regions'
+  id: '__root__' | '/' | '/result' | '/api/regions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResultRoute: typeof ResultRoute
+  ApiRegionsRoute: typeof ApiRegionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/regions': {
+      id: '/api/regions'
+      path: '/api/regions'
+      fullPath: '/api/regions'
+      preLoaderRoute: typeof ApiRegionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResultRoute: ResultRoute,
+  ApiRegionsRoute: ApiRegionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
