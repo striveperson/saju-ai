@@ -1,0 +1,1239 @@
+<meta charset="utf-8" />
+<title>사주 결과 화면</title>
+
+<style>
+  :root {
+    --ground: #e5e2d8;
+    --frame: #fcfbf9;
+    --field: #ffffff;
+    --ink: #23312f;
+    --ink-mid: #5f6b66;
+    --ink-soft: #a0a096;
+    --line: #e9e6dd;
+    --line-strong: #d0ccc0;
+    --accent: #1e7360;
+    --accent-ink: #ffffff;
+    --accent-soft: #e8f4ef;
+    --header-bg: #e4ede7;
+    --header-ink: #16453b;
+    --header-line: #c6d8ce;
+    --el-mok: #0d938a;
+    --el-hwa: #d1494a;
+    --el-to: #d59a1f;
+    --el-geum: #9aa3ab;
+    --el-su: #3b5f9e;
+    --sheng: #4a7ad6;
+    --keug: #d1494a;
+    --shadow: 0 1px 2px rgba(35, 49, 47, 0.03), 0 24px 48px -28px rgba(35, 49, 47, 0.22);
+    --radius: 14px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --ground: #0e1614;
+      --frame: #16211f;
+      --field: #1e2a27;
+      --ink: #eaf1ed;
+      --ink-mid: #adbcb6;
+      --ink-soft: #7c8d86;
+      --line: #2b3833;
+      --line-strong: #43534e;
+      --accent: #62c4a9;
+      --accent-ink: #062720;
+      --accent-soft: #1c3a32;
+      --header-bg: #21332e;
+      --header-ink: #dcece5;
+      --header-line: #35463f;
+      --el-mok: #28a396;
+      --el-hwa: #cd534f;
+      --el-to: #d9b14a;
+      --el-geum: #c3cad0;
+      --el-su: #5a86d4;
+      --sheng: #7ba3e8;
+      --keug: #e0716c;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  :root[data-theme='dark'] {
+    --ground: #0e1614;
+    --frame: #16211f;
+    --field: #1e2a27;
+    --ink: #eaf1ed;
+    --ink-mid: #adbcb6;
+    --ink-soft: #7c8d86;
+    --line: #2b3833;
+    --line-strong: #43534e;
+    --accent: #62c4a9;
+    --accent-ink: #062720;
+    --accent-soft: #1c3a32;
+    --header-bg: #21332e;
+    --header-ink: #dcece5;
+    --header-line: #35463f;
+    --el-mok: #28a396;
+    --el-hwa: #cd534f;
+    --el-to: #d9b14a;
+    --el-geum: #c3cad0;
+    --el-su: #5a86d4;
+    --sheng: #7ba3e8;
+    --keug: #e0716c;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: ui-rounded, 'Apple SD Gothic Neo', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .phone {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 402px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--frame);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    body {
+      padding: 32px 16px;
+    }
+
+    .phone {
+      min-height: calc(100vh - 64px);
+      border-radius: 26px;
+    }
+  }
+
+  .topbar {
+    display: grid;
+    place-items: center;
+    height: 54px;
+    padding: 0 16px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-line);
+    color: var(--header-ink);
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 16px 0;
+  }
+
+  section {
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--field);
+  }
+
+  h2 {
+    margin: 0 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* 오행 관계도 ------------------------------------------------------------ */
+
+  .legend {
+    display: flex;
+    gap: 14px;
+    margin: 16px 0 2px;
+  }
+
+  .key {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--ink-mid);
+    font-size: 11.5px;
+  }
+
+  .key svg line {
+    stroke-width: 1.6;
+  }
+
+  .key.sheng svg {
+    stroke: var(--sheng);
+    fill: var(--sheng);
+  }
+
+  .key.keug svg {
+    stroke: var(--keug);
+    fill: var(--keug);
+  }
+
+  #ohaeng-map {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  #ohaeng-map .sheng-line {
+    stroke: var(--sheng);
+    stroke-width: 2;
+  }
+
+  #ohaeng-map .keug-line {
+    stroke: var(--keug);
+    stroke-width: 1.6;
+    stroke-dasharray: 5 4;
+  }
+
+  #ohaeng-map .node-ring {
+    fill: var(--field);
+    stroke: color-mix(in oklab, var(--el) 45%, var(--field));
+    stroke-width: 1.5;
+  }
+
+  #ohaeng-map .node-fill {
+    fill: color-mix(in oklab, var(--el) 32%, var(--field));
+  }
+
+  #ohaeng-map .node-name {
+    fill: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  #ohaeng-map .node-pct {
+    fill: var(--ink-mid);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 오행 색 ------------------------------------------------------------- */
+
+  .mok {
+    --el: var(--el-mok);
+  }
+
+  .hwa {
+    --el: var(--el-hwa);
+  }
+
+  .to {
+    --el: var(--el-to);
+  }
+
+  .geum {
+    --el: var(--el-geum);
+  }
+
+  .su {
+    --el: var(--el-su);
+  }
+
+  /* 프로필 -------------------------------------------------------------- */
+
+  .profile .name {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .profile .name strong {
+    font-size: 19px;
+    font-weight: 600;
+  }
+
+  .profile .ilju {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 4px 10px;
+    margin: 0;
+    font-size: 12.5px;
+  }
+
+  .meta dt {
+    color: var(--ink-soft);
+  }
+
+  .meta dd {
+    margin: 0;
+    color: var(--ink-mid);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 명식 ---------------------------------------------------------------- */
+
+  .palja {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 3px;
+    table-layout: fixed;
+  }
+
+  .palja col.label-col {
+    width: 34px;
+  }
+
+  .palja th {
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+
+  .palja th.row-label {
+    text-align: right;
+    padding-right: 3px;
+  }
+
+  .palja td {
+    padding: 7px 2px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-align: center;
+  }
+
+  .palja td.glyph-cell {
+    background: color-mix(in oklab, var(--el) 10%, var(--field));
+    border-color: color-mix(in oklab, var(--el) 26%, var(--field));
+  }
+
+  .glyph {
+    color: var(--el);
+    font-size: 25px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .el-badge {
+    color: var(--el);
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  .palja td.plain {
+    border-color: transparent;
+    color: var(--ink-mid);
+    font-size: 12px;
+  }
+
+  .palja td.stems {
+    border-color: transparent;
+    color: var(--ink-soft);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  /* 오행과 십신 ----------------------------------------------------------- */
+
+  .rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 62px 1fr;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .row-name {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    color: var(--el, var(--ink));
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .row-name em {
+    color: var(--ink-mid);
+    font-size: 11.5px;
+    font-style: normal;
+    font-weight: 500;
+  }
+
+  .row-bar {
+    position: relative;
+    height: 18px;
+    border-radius: 5px;
+    background: color-mix(in oklab, var(--ink-soft) 14%, var(--field));
+    overflow: hidden;
+  }
+
+  .row-fill {
+    height: 100%;
+    border-radius: 0 5px 5px 0;
+    background: var(--el);
+  }
+
+  .row-pct {
+    position: absolute;
+    top: 0;
+    right: 7px;
+    color: var(--ink-mid);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    line-height: 18px;
+  }
+
+  /* 신강약 --------------------------------------------------------------- */
+
+  .grade {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+    margin-bottom: 10px;
+  }
+
+  .grade strong {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .grade span {
+    color: var(--ink-soft);
+    font-size: 12px;
+  }
+
+  .scale {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    margin-bottom: 10px;
+  }
+
+  .step {
+    padding: 7px 0;
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--ink-soft) 12%, var(--field));
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    text-align: center;
+  }
+
+  /* 등급 색으로 오행색을 쓰지 않는다. 등급은 오행이 아니다 */
+  .step.on {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+  }
+
+  .flags {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+
+  .flag {
+    padding: 6px 0;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 11.5px;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .yongshin {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in oklab, var(--el) 34%, var(--field));
+    border-radius: 12px;
+    background: color-mix(in oklab, var(--el) 12%, var(--field));
+  }
+
+  .yongshin .element {
+    color: var(--el);
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .yongshin .method {
+    color: var(--ink-mid);
+    font-size: 12.5px;
+  }
+
+  /* 운 ------------------------------------------------------------------ */
+
+  .track {
+    display: flex;
+    gap: 5px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+  }
+
+  .chip {
+    flex: 0 0 50px;
+    padding: 6px 0 7px;
+    border: 1px solid color-mix(in oklab, var(--el) 26%, var(--field));
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--el) 10%, var(--field));
+    text-align: center;
+  }
+
+  .chip.now {
+    border-color: var(--el);
+    border-width: 1.5px;
+    background: color-mix(in oklab, var(--el) 22%, var(--field));
+  }
+
+  .chip-top {
+    color: var(--ink-soft);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+  }
+
+  .chip-pillar {
+    margin-top: 2px;
+    color: var(--el);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* 일진 달력 ------------------------------------------------------------- */
+
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .cal-nav button {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--field);
+    color: var(--ink-mid);
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .cal-nav button:hover:not(:disabled) {
+    border-color: var(--line-strong);
+  }
+
+  .cal-nav button:disabled {
+    color: var(--ink-soft);
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .cal-nav button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .cal-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.35;
+  }
+
+  .cal-title strong {
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cal-title span {
+    color: var(--ink-soft);
+    font-size: 11.5px;
+  }
+
+  .cal-head,
+  .cal {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+
+  .cal-head {
+    margin-bottom: 4px;
+    color: var(--ink-soft);
+    font-size: 10.5px;
+    text-align: center;
+  }
+
+  .cal-head .sun {
+    color: var(--el-hwa);
+  }
+
+  .cal-head .sat {
+    color: var(--el-su);
+  }
+
+  .day {
+    padding: 5px 0 6px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--el) 10%, var(--field));
+    text-align: center;
+  }
+
+  .day.today {
+    border-color: var(--el);
+  }
+
+  .day-num {
+    color: var(--ink-mid);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+  }
+
+  .day-pillar {
+    color: var(--el);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .day.blank {
+    background: none;
+  }
+
+  /* 신살 ----------------------------------------------------------------- */
+
+  .sinsal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .sinsal-tag {
+    padding: 4px 9px;
+    border: 1px solid color-mix(in oklab, var(--cat) 34%, var(--field));
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--cat) 12%, var(--field));
+    color: var(--cat);
+    font-size: 11.5px;
+    font-weight: 600;
+  }
+
+  .gil {
+    --cat: var(--accent);
+  }
+
+  .hyung {
+    --cat: var(--el-hwa);
+  }
+
+  .jung {
+    --cat: var(--ink-mid);
+  }
+
+  .sinsal-grid {
+    display: grid;
+    grid-template-columns: 34px repeat(4, 1fr);
+    gap: 4px;
+    align-items: stretch;
+  }
+
+  .sinsal-grid .col-head {
+    color: var(--ink-soft);
+    font-size: 11.5px;
+    text-align: center;
+  }
+
+  .sinsal-grid .row-head {
+    align-self: center;
+    color: var(--ink-soft);
+    font-size: 11px;
+    text-align: right;
+  }
+
+  .sinsal-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 6px 2px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .sinsal-cell.empty-cell {
+    color: var(--ink-soft);
+    font-size: 12px;
+  }
+
+  .sinsal-name {
+    color: var(--cat);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.04em;
+  }
+
+  /* 비어 있는 자리 --------------------------------------------------------- */
+
+  .empty {
+    padding: 22px 14px;
+    border: 1px dashed var(--line-strong);
+    border-radius: 12px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: center;
+  }
+
+  /* 하단 버튼 ------------------------------------------------------------- */
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.1fr;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+    background: var(--frame);
+    border-top: 1px solid var(--line);
+  }
+
+  .actions button {
+    height: 50px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--field);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .actions .primary {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .actions button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
+
+<div class="phone">
+  <header class="topbar">AI 사주해석</header>
+
+  <main>
+    <section class="profile">
+      <div class="name">
+        <strong>김하늘</strong>
+        <span class="ilju">무오 일주</span>
+      </div>
+      <dl class="meta">
+        <dt>양력</dt>
+        <dd>1995-01-27 14:39 여자 서울</dd>
+        <dt>보정</dt>
+        <dd>1995-01-27 14:07 (진태양시 -32분)</dd>
+      </dl>
+    </section>
+
+    <section>
+      <h2>사주팔자</h2>
+      <table class="palja">
+        <colgroup>
+          <col class="label-col" />
+          <col />
+          <col />
+          <col />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th></th>
+            <th>시</th>
+            <th>일</th>
+            <th>월</th>
+            <th>년</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th class="row-label">천간</th>
+            <td class="glyph-cell to"><div class="glyph">기</div><div class="el-badge">-토</div></td>
+            <td class="glyph-cell to"><div class="glyph">무</div><div class="el-badge">+토</div></td>
+            <td class="glyph-cell hwa"><div class="glyph">정</div><div class="el-badge">-화</div></td>
+            <td class="glyph-cell mok"><div class="glyph">갑</div><div class="el-badge">+목</div></td>
+          </tr>
+          <tr>
+            <th class="row-label">십신</th>
+            <td class="plain">비겁</td>
+            <td class="plain">일간</td>
+            <td class="plain">인성</td>
+            <td class="plain">관성</td>
+          </tr>
+          <tr>
+            <th class="row-label">지지</th>
+            <td class="glyph-cell to"><div class="glyph">미</div><div class="el-badge">-토</div></td>
+            <td class="glyph-cell hwa"><div class="glyph">오</div><div class="el-badge">+화</div></td>
+            <td class="glyph-cell to"><div class="glyph">축</div><div class="el-badge">-토</div></td>
+            <td class="glyph-cell to"><div class="glyph">술</div><div class="el-badge">+토</div></td>
+          </tr>
+          <tr>
+            <th class="row-label">십신</th>
+            <td class="plain">비겁</td>
+            <td class="plain">인성</td>
+            <td class="plain">비겁</td>
+            <td class="plain">비겁</td>
+          </tr>
+          <tr>
+            <th class="row-label">지장간</th>
+            <td class="stems">정을기</td>
+            <td class="stems">병기정</td>
+            <td class="stems">계신기</td>
+            <td class="stems">신정무</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>오행과 십신</h2>
+      <div class="rows">
+        <div class="row mok">
+          <span class="row-name">목<em>관성</em></span>
+          <div class="row-bar"><div class="row-fill" style="width: 14.3%"></div><span class="row-pct">14.3%</span></div>
+        </div>
+        <div class="row hwa">
+          <span class="row-name">화<em>인성</em></span>
+          <div class="row-bar"><div class="row-fill" style="width: 28.6%"></div><span class="row-pct">28.6%</span></div>
+        </div>
+        <div class="row to">
+          <span class="row-name">토<em>비겁</em></span>
+          <div class="row-bar"><div class="row-fill" style="width: 57.1%"></div><span class="row-pct">57.1%</span></div>
+        </div>
+        <div class="row geum">
+          <span class="row-name">금<em>식상</em></span>
+          <div class="row-bar"><span class="row-pct">0.0%</span></div>
+        </div>
+        <div class="row su">
+          <span class="row-name">수<em>재성</em></span>
+          <div class="row-bar"><span class="row-pct">0.0%</span></div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="key sheng"><svg width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="15" y2="4" /><path d="M15 1L21 4L15 7Z" /></svg>생(生)</span>
+        <span class="key keug"><svg width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="15" y2="4" stroke-dasharray="4 3" /><path d="M15 1L21 4L15 7Z" /></svg>극(剋)</span>
+      </div>
+      <svg id="ohaeng-map" viewBox="0 0 340 316" role="img" aria-label="오행 상생 상극 관계도"></svg>
+    </section>
+
+    <section>
+      <h2>신강/신약 지수</h2>
+      <div class="grade">
+        <strong>태강</strong>
+        <span>지원 세력 여섯 글자 / 일곱 글자</span>
+      </div>
+      <div class="scale">
+        <span class="step">태약</span>
+        <span class="step">신약</span>
+        <span class="step">중화</span>
+        <span class="step">신강</span>
+        <span class="step on">태강</span>
+      </div>
+      <div class="flags">
+        <span class="flag">득령</span>
+        <span class="flag">득지</span>
+        <span class="flag">득시</span>
+        <span class="flag">득세</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>용신</h2>
+      <div class="yongshin geum">
+        <span class="element">금</span>
+        <span class="method">억부(설기). 태강이라 기운을 빼는 쪽으로 간다</span>
+      </div>
+    </section>
+
+    <section>
+      <h2>대운</h2>
+      <div class="track" id="daeun"></div>
+    </section>
+
+    <section>
+      <h2>연운</h2>
+      <div class="track" id="sewoon"></div>
+    </section>
+
+    <section>
+      <h2>월운</h2>
+      <div class="track" id="wolwoon"></div>
+    </section>
+
+    <section>
+      <h2>일진 달력</h2>
+      <div class="cal-nav">
+        <button type="button" id="cal-prev" aria-label="이전 달">‹</button>
+        <div class="cal-title">
+          <strong id="cal-month"></strong>
+          <span id="cal-pillars"></span>
+        </div>
+        <button type="button" id="cal-next" aria-label="다음 달">›</button>
+      </div>
+      <div class="cal-head">
+        <span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span>
+      </div>
+      <div class="cal" id="cal"></div>
+    </section>
+
+    <section>
+      <h2>신살과 길성</h2>
+      <div class="sinsal-tags" id="sinsal-tags"></div>
+      <div class="sinsal-grid" id="sinsal-grid"></div>
+    </section>
+
+    <section>
+      <h2>AI 해석</h2>
+      <div class="empty">아직 해석을 만들지 않았다.<br />아래 AI 해석을 누르면 위 판정만 넣어 만든다.</div>
+    </section>
+  </main>
+
+  <div class="actions">
+    <button type="button">저장하기</button>
+    <button type="button">프로필 재입력</button>
+    <button type="button" class="primary">AI 해석</button>
+  </div>
+</div>
+
+<script>
+  /**
+   * 값은 전부 계산 엔진에서 뽑았다. 검증 케이스 verified-19950127-1439-F-seoul 이다.
+   * daeunList, sewoonList, monthPillar, dayPillar 의 출력을 그대로 옮겼다.
+   */
+  const DAEUN = [
+    [7, '병자', 2001], [17, '을해', 2011], [27, '갑술', 2021], [37, '계유', 2031],
+    [47, '임신', 2041], [57, '신미', 2051], [67, '경오', 2061], [77, '기사', 2071],
+    [87, '무진', 2081], [97, '정묘', 2091],
+  ];
+
+  const SEWOON = [
+    [27, 2021, '신축'], [28, 2022, '임인'], [29, 2023, '계묘'], [30, 2024, '갑진'],
+    [31, 2025, '을사'], [32, 2026, '병오'], [33, 2027, '정미'], [34, 2028, '무신'],
+    [35, 2029, '기유'], [36, 2030, '경술'],
+  ];
+
+  const WOLWOON = [
+    [1, '기축'], [2, '경인'], [3, '신묘'], [4, '임진'], [5, '계사'], [6, '갑오'],
+    [7, '을미'], [8, '병신'], [9, '정유'], [10, '무술'], [11, '기해'], [12, '경자'],
+  ];
+
+  /**
+   * 일진 달력. dayPillar 를 날마다 돌린 출력이다.
+   * monthFirst 와 monthLast 가 다르면 그 달 안에서 절입이 지나 월주가 넘어간 것이다.
+   */
+  const CAL_MONTHS = [
+    {
+      year: 2026, month: 6, firstWeekday: 1, yearPillar: '병오', monthFirst: '계사', monthLast: '갑오',
+      days: ['병오', '정미', '무신', '기유', '경술', '신해', '임자', '계축', '갑인', '을묘', '병진', '정사', '무오', '기미', '경신', '신유', '임술', '계해', '갑자', '을축', '병인', '정묘', '무진', '기사', '경오', '신미', '임신', '계유', '갑술', '을해'],
+    },
+    {
+      year: 2026, month: 7, firstWeekday: 3, yearPillar: '병오', monthFirst: '갑오', monthLast: '을미',
+      days: ['병자', '정축', '무인', '기묘', '경진', '신사', '임오', '계미', '갑신', '을유', '병술', '정해', '무자', '기축', '경인', '신묘', '임진', '계사', '갑오', '을미', '병신', '정유', '무술', '기해', '경자', '신축', '임인', '계묘', '갑진', '을사', '병오'],
+    },
+    {
+      year: 2026, month: 8, firstWeekday: 6, yearPillar: '병오', monthFirst: '을미', monthLast: '병신',
+      days: ['정미', '무신', '기유', '경술', '신해', '임자', '계축', '갑인', '을묘', '병진', '정사', '무오', '기미', '경신', '신유', '임술', '계해', '갑자', '을축', '병인', '정묘', '무진', '기사', '경오', '신미', '임신', '계유', '갑술', '을해', '병자', '정축'],
+    },
+    {
+      year: 2026, month: 9, firstWeekday: 2, yearPillar: '병오', monthFirst: '병신', monthLast: '정유',
+      days: ['무인', '기묘', '경진', '신사', '임오', '계미', '갑신', '을유', '병술', '정해', '무자', '기축', '경인', '신묘', '임진', '계사', '갑오', '을미', '병신', '정유', '무술', '기해', '경자', '신축', '임인', '계묘', '갑진', '을사', '병오', '정미'],
+    },
+    {
+      year: 2026, month: 10, firstWeekday: 4, yearPillar: '병오', monthFirst: '정유', monthLast: '무술',
+      days: ['무신', '기유', '경술', '신해', '임자', '계축', '갑인', '을묘', '병진', '정사', '무오', '기미', '경신', '신유', '임술', '계해', '갑자', '을축', '병인', '정묘', '무진', '기사', '경오', '신미', '임신', '계유', '갑술', '을해', '병자', '정축', '무인'],
+    },
+  ];
+
+  /**
+   * 오행 관계도. 상생 순서로 시계 방향에 놓는다.
+   * 일간 무토가 맨 위이고, 이웃한 둘은 상생(i 에서 i+1), 건너뛴 둘은 상극(i 에서 i+2)이다.
+   */
+  const WHEEL = [
+    { cls: 'to', name: '토', sipsin: '비겁', pct: 57.1 },
+    { cls: 'geum', name: '금', sipsin: '식상', pct: 0 },
+    { cls: 'su', name: '수', sipsin: '재성', pct: 0 },
+    { cls: 'mok', name: '목', sipsin: '관성', pct: 14.3 },
+    { cls: 'hwa', name: '화', sipsin: '인성', pct: 28.6 },
+  ];
+
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const CENTER = { x: 170, y: 158 };
+  const ORBIT = 112;
+  const NODE_R = 41;
+
+  function node(index) {
+    const angle = (-90 + index * 72) * (Math.PI / 180);
+    return { x: CENTER.x + ORBIT * Math.cos(angle), y: CENTER.y + ORBIT * Math.sin(angle) };
+  }
+
+  function make(tag, attrs) {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, String(value));
+    return el;
+  }
+
+  /** 원 둘레에서 시작하고 끝나는 화살표. 원 안으로 파고들지 않게 반지름만큼 물린다 */
+  function arrow(from, to, className) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    const len = Math.hypot(dx, dy);
+    const ux = dx / len;
+    const uy = dy / len;
+    const gap = NODE_R + 7;
+    const x1 = from.x + ux * gap;
+    const y1 = from.y + uy * gap;
+    const x2 = to.x - ux * (gap + 3);
+    const y2 = to.y - uy * (gap + 3);
+
+    const group = document.createElementNS(SVG_NS, 'g');
+    group.append(make('line', { x1, y1, x2, y2, class: className + '-line', 'stroke-linecap': 'round' }));
+    // 화살촉은 선 끝에서 진행 방향으로 돌려 붙인다
+    const deg = (Math.atan2(uy, ux) * 180) / Math.PI;
+    group.append(
+      make('path', {
+        d: 'M0 0L-8 -4L-8 4Z',
+        fill: `var(--${className})`,
+        transform: `translate(${x2} ${y2}) rotate(${deg})`,
+      }),
+    );
+    return group;
+  }
+
+  const map = document.getElementById('ohaeng-map');
+  const points = WHEEL.map((_, index) => node(index));
+
+  // 상극이 안쪽에 깔리고 상생이 바깥을 돈다
+  WHEEL.forEach((_, index) => {
+    map.append(arrow(points[index], points[(index + 2) % 5], 'keug'));
+  });
+  WHEEL.forEach((_, index) => {
+    map.append(arrow(points[index], points[(index + 1) % 5], 'sheng'));
+  });
+
+  WHEEL.forEach((element, index) => {
+    const { x, y } = points[index];
+    const group = make('g', { class: element.cls });
+    const clipId = 'clip-' + element.cls;
+
+    const clip = make('clipPath', { id: clipId });
+    clip.append(make('circle', { cx: x, cy: y, r: NODE_R }));
+    group.append(clip);
+
+    group.append(make('circle', { cx: x, cy: y, r: NODE_R, class: 'node-ring' }));
+
+    // 비율만큼 아래에서 차오른다
+    const height = (NODE_R * 2 * element.pct) / 100;
+    if (height > 0) {
+      group.append(
+        make('rect', {
+          x: x - NODE_R,
+          y: y + NODE_R - height,
+          width: NODE_R * 2,
+          height,
+          class: 'node-fill',
+          'clip-path': `url(#${clipId})`,
+        }),
+      );
+    }
+
+    const name = make('text', { x, y: y - 3, class: 'node-name', 'text-anchor': 'middle' });
+    name.textContent = element.name + '(' + element.sipsin + ')';
+    const pct = make('text', { x, y: y + 15, class: 'node-pct', 'text-anchor': 'middle' });
+    pct.textContent = element.pct.toFixed(1) + '%';
+    group.append(name, pct);
+
+    map.append(group);
+  });
+
+  /**
+   * 신살 판정. computeSinsal 을 이 팔자로 돌린 출력이다.
+   * 등급과 분류는 docs/07 10장의 채택 목록을 따른다.
+   */
+  const SINSAL = [
+    { name: '천을귀인', cat: 'gil', hits: [['month', 'branch'], ['hour', 'branch']] },
+    { name: '태극귀인', cat: 'gil', hits: [['year', 'branch'], ['month', 'branch'], ['hour', 'branch']] },
+    { name: '금여성', cat: 'gil', hits: [['hour', 'branch']] },
+    { name: '양인', cat: 'hyung', hits: [['day', 'branch']] },
+    { name: '과숙살', cat: 'hyung', hits: [['hour', 'branch']] },
+    { name: '백호대살', cat: 'hyung', hits: [['month', 'stem'], ['month', 'branch']] },
+    { name: '화개살', cat: 'jung', hits: [['year', 'branch']] },
+  ];
+
+  const tags = document.getElementById('sinsal-tags');
+  for (const sinsal of SINSAL) {
+    const tag = document.createElement('span');
+    tag.className = 'sinsal-tag ' + sinsal.cat;
+    tag.textContent = sinsal.name;
+    tags.append(tag);
+  }
+
+  // 명식 표와 같은 자리에 놓는다. 천간에 붙는 것은 주 간지 기준 둘뿐이고 나머지 열다섯은 지지다
+  const PILLARS = [['hour', '시'], ['day', '일'], ['month', '월'], ['year', '년']];
+  const grid = document.getElementById('sinsal-grid');
+
+  grid.append(document.createElement('div'));
+  for (const [, label] of PILLARS) {
+    const head = document.createElement('div');
+    head.className = 'col-head';
+    head.textContent = label;
+    grid.append(head);
+  }
+
+  for (const [position, rowLabel] of [['stem', '천간'], ['branch', '지지']]) {
+    const label = document.createElement('div');
+    label.className = 'row-head';
+    label.textContent = rowLabel;
+    grid.append(label);
+
+    for (const [key] of PILLARS) {
+      const cell = document.createElement('div');
+      cell.className = 'sinsal-cell';
+      const here = SINSAL.filter((sinsal) =>
+        sinsal.hits.some(([pillar, at]) => pillar === key && at === position),
+      );
+
+      if (here.length === 0) {
+        cell.classList.add('empty-cell');
+        cell.textContent = '×';
+      }
+      for (const sinsal of here) {
+        const name = document.createElement('div');
+        name.className = 'sinsal-name ' + sinsal.cat;
+        name.textContent = sinsal.name;
+        cell.append(name);
+      }
+      grid.append(cell);
+    }
+  }
+
+  /** 천간 오행. 색을 고르는 데만 쓴다 */
+  const STEM_CLASS = {
+    갑: 'mok', 을: 'mok', 병: 'hwa', 정: 'hwa', 무: 'to',
+    기: 'to', 경: 'geum', 신: 'geum', 임: 'su', 계: 'su',
+  };
+
+  /** 위에 쌓을 줄들과 간지. 줄은 세로로 나열한다 */
+  function chip(tops, pillar, now) {
+    const el = document.createElement('div');
+    el.className = 'chip ' + STEM_CLASS[pillar[0]] + (now ? ' now' : '');
+    for (const line of tops) {
+      const t = document.createElement('div');
+      t.className = 'chip-top';
+      t.textContent = line;
+      el.append(t);
+    }
+    const p = document.createElement('div');
+    p.className = 'chip-pillar';
+    p.textContent = pillar;
+    el.append(p);
+    return el;
+  }
+
+  document.getElementById('daeun').append(
+    ...DAEUN.map(([age, pillar, year]) => chip([year + '년', age + '세'], pillar, age === 27)),
+  );
+
+  document.getElementById('sewoon').append(
+    ...SEWOON.map(([age, year, pillar]) => chip([year + '년', age + '세'], pillar, year === 2026)),
+  );
+
+  document.getElementById('wolwoon').append(
+    ...WOLWOON.map(([month, pillar]) => chip([month + '월'], pillar, month === 8)),
+  );
+
+  const cal = document.getElementById('cal');
+  const calMonth = document.getElementById('cal-month');
+  const calPillars = document.getElementById('cal-pillars');
+  const prev = document.getElementById('cal-prev');
+  const next = document.getElementById('cal-next');
+  const TODAY = { year: 2026, month: 8, day: 15 };
+  let shown = CAL_MONTHS.findIndex((m) => m.year === TODAY.year && m.month === TODAY.month);
+
+  function renderCalendar() {
+    const data = CAL_MONTHS[shown];
+    calMonth.textContent = data.year + '년 ' + data.month + '월';
+    calPillars.textContent =
+      data.yearPillar +
+      '년 ' +
+      (data.monthFirst === data.monthLast
+        ? data.monthFirst
+        : data.monthFirst + '-' + data.monthLast) +
+      '월';
+
+    cal.replaceChildren();
+    for (let i = 0; i < data.firstWeekday; i += 1) {
+      const blank = document.createElement('div');
+      blank.className = 'day blank';
+      cal.append(blank);
+    }
+    data.days.forEach((pillar, index) => {
+      const day = index + 1;
+      const isToday =
+        data.year === TODAY.year && data.month === TODAY.month && day === TODAY.day;
+      const el = document.createElement('div');
+      el.className = 'day ' + STEM_CLASS[pillar[0]] + (isToday ? ' today' : '');
+      const n = document.createElement('div');
+      n.className = 'day-num';
+      n.textContent = String(day);
+      const p = document.createElement('div');
+      p.className = 'day-pillar';
+      p.textContent = pillar;
+      el.append(n, p);
+      cal.append(el);
+    });
+
+    prev.disabled = shown === 0;
+    next.disabled = shown === CAL_MONTHS.length - 1;
+  }
+
+  prev.addEventListener('click', () => {
+    shown -= 1;
+    renderCalendar();
+  });
+  next.addEventListener('click', () => {
+    shown += 1;
+    renderCalendar();
+  });
+  renderCalendar();
+</script>
