@@ -105,6 +105,9 @@ describe('기준 케이스 재현 (docs/05 11.7)', () => {
     });
 
     expect(result.supportRatio).toBe(0.875);
+    // supportCount 는 분모가 다르다. 일간 무토를 뺀 7글자 중 6개가 지원 세력이다.
+    // 11.7 이 "지원 6/7 득세" 로 적은 그 수이고 deukSeMinCount(4) 와 비교된다.
+    expect(result.supportCount).toBe(6);
     expect(result.elementDistribution.토).toEqual({ count: 5, ratio: 0.625 });
     expect(result.elementDistribution.화).toEqual({ count: 2, ratio: 0.25 });
     expect(result.elementDistribution.목).toEqual({ count: 1, ratio: 0.125 });

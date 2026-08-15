@@ -332,6 +332,11 @@ describe('표준시 전환 경계', () => {
 
     expect(resolution.chosen).toBe('earlier');
     expect(resolution.because).toBe('default');
+    // 채운 값도 함께 낸다. 부르는 쪽이 같은 기본값을 다시 적지 않게 하려는 것이다.
+    expect(r.disclosure.applied).toEqual({
+      dstAssumption: 'unknown',
+      ambiguityChoice: 'earlier',
+    });
     expect(r.disclosure.offsetSeconds).toBe(32_400);
     expect(resolution.alternative.offsetSeconds).toBe(30_600);
     // 30분 차이가 정규화 뒤 벽시계에 그대로 나타난다.

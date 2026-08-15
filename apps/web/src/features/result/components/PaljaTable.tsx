@@ -1,3 +1,4 @@
+import { ELEMENT_CELL, POLARITY_SIGN } from '@features/result/utils/element';
 import {
   BRANCH_ELEMENT,
   STEM_ELEMENT,
@@ -9,7 +10,6 @@ import {
   type HeavenlyStem,
 } from '@saju';
 import { BRANCH_HIDDEN_STEMS, tenGodGroup } from '@saju/tables';
-import { ELEMENT_CELL, POLARITY_SIGN } from '@features/result/utils/element';
 
 type PaljaTableProps = {
   pillars: FourPillars;
