@@ -315,14 +315,15 @@ describe('일간 기준 신살 판정표 (docs/07 2장)', () => {
   it('금여성이 정록에서 두 칸 뒤다', () => {
     // docs/07 2장이 두 표가 항상 이 관계를 만족해야 한다고 적었다.
     for (const stem of HEAVENLY_STEMS) {
-      const 정록자리 = EARTHLY_BRANCHES.indexOf(JEONGNOK[stem][0]);
+      // 표가 비면 indexOf 가 -1 을 주고 기대값이 축이 된다.
+      // 금여성 임 이 축이라 정록 임 이 비어도 조용히 통과할 자리다.
+      const 정록자리 = 지지자리(JEONGNOK[stem][0], `정록 ${stem}`);
       const 기대 = EARTHLY_BRANCHES[(정록자리 + 2) % 12];
       expect(GEUMYEO_SEONG[stem][0], stem).toBe(기대);
     }
   });
 
   it('양인은 양간 다섯에만 있고 지지가 전부 왕지다', () => {
-    const 왕지 = ['자', '묘', '오', '유'];
     for (const stem of HEAVENLY_STEMS) {
       const 양간 = STEM_POLARITY[stem] === '양';
       expect(YANGIN[stem].length, stem).toBe(양간 ? 1 : 0);
@@ -346,17 +347,30 @@ describe('일간 기준 신살 판정표 (docs/07 2장)', () => {
 });
 
 /**
+ * 지지 삼분류. 삼합 그룹이 이 셋을 하나씩 갖는다.
+ *
+ * 지지 인덱스를 3으로 나눈 나머지로 갈린다. 생지 2, 왕지 0, 고지 1 이다.
+ * 여러 단언이 쓰므로 한 곳에 둔다.
+ */
+const 생지 = ['인', '신', '사', '해'];
+const 왕지 = ['자', '묘', '오', '유'];
+const 고지 = ['진', '술', '축', '미'];
+
+/** 지지의 순환 자리. 지지가 아니면 던진다. */
+function 지지자리(branch: string, where: string): number {
+  const at = EARTHLY_BRANCHES.indexOf(branch as never);
+  if (at < 0) throw new Error(`지지가 아니다: ${branch} (${where})`);
+  return at;
+}
+
+/**
  * 라벨 세 글자의 지지 순환 자리.
  *
  * indexOf 가 돌려주는 -1 을 그대로 쓰면 X자축 같은 라벨이 간격 단언을 통과한다.
  * 여기서 먼저 막아 아래 단언이 자리 계산만 보게 한다.
  */
 function 라벨자리(group: string): readonly number[] {
-  return group.split('').map((b) => {
-    const at = EARTHLY_BRANCHES.indexOf(b as never);
-    if (at < 0) throw new Error(`지지가 아니다: ${b} (${group})`);
-    return at;
-  });
+  return group.split('').map((b) => 지지자리(b, group));
 }
 
 describe('지지 그룹 (docs/07 3장, 5장)', () => {
@@ -396,8 +410,6 @@ describe('지지 그룹 (docs/07 3장, 5장)', () => {
     // 간격만 보면 셋이 등간격이라 순환 회전이 단언을 통과한다.
     // 신자진 을 진신자 로 돌려도 간격은 그대로이고, 그러면 셋째 글자가 자 가 되어
     // 화개살 방어선이 틀린 값을 요구하게 된다. 시작점을 생지로 고정해 회전을 막는다.
-    const 생지 = ['인', '신', '사', '해'];
-
     for (const group of new Set(Object.values(TRIAD_OF_BRANCH))) {
       const 자리 = 라벨자리(group);
 
@@ -440,8 +452,8 @@ describe('년지 기준 신살 판정표 (docs/07 3장)', () => {
 
   it('고신살은 생지이고 과숙살은 고지다', () => {
     for (const group of Object.keys(GOSIN) as (keyof typeof GOSIN)[]) {
-      expect(['인', '사', '신', '해'], group).toContain(GOSIN[group]);
-      expect(['진', '술', '축', '미'], group).toContain(GWASUK[group]);
+      expect(생지, group).toContain(GOSIN[group]);
+      expect(고지, group).toContain(GWASUK[group]);
       expect(GOSIN[group]).not.toBe(GWASUK[group]);
     }
   });
