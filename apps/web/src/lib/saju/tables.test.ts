@@ -365,6 +365,31 @@ describe('지지 그룹 (docs/07 3장, 5장)', () => {
       }
     }
   });
+
+  // 라벨 안의 글자 순서를 지지 순환에서 유도해 잠근다.
+  // 위 커버리지는 sort 로 비교해 집합만 보므로 라벨이 신진자 여도 통과한다.
+  // 그런데 고신살과 화개살 방어선이 라벨의 몇 번째 글자인지에 기대고 있다.
+  it('방위 그룹 라벨이 지지 순환의 연속 세 칸이다', () => {
+    for (const group of new Set(Object.values(DIRECTION_OF_BRANCH))) {
+      const 자리 = group
+        .split('')
+        .map((b) => EARTHLY_BRANCHES.indexOf(b as never));
+
+      expect(자리[1], group).toBe((자리[0] + 1) % 12);
+      expect(자리[2], group).toBe((자리[0] + 2) % 12);
+    }
+  });
+
+  it('삼합 그룹 라벨이 네 칸 간격 세 글자다', () => {
+    for (const group of new Set(Object.values(TRIAD_OF_BRANCH))) {
+      const 자리 = group
+        .split('')
+        .map((b) => EARTHLY_BRANCHES.indexOf(b as never));
+
+      expect(자리[1], group).toBe((자리[0] + 4) % 12);
+      expect(자리[2], group).toBe((자리[0] + 8) % 12);
+    }
+  });
 });
 
 describe('년지 기준 신살 판정표 (docs/07 3장)', () => {
