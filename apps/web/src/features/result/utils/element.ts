@@ -1,12 +1,7 @@
 import type { Element } from '@saju';
 
 /**
- * 오행별 셀 클래스. 목업 result-screen.html 의 `--el-*` 을 Tailwind 토큰으로 옮긴 것이다.
- *
- * 클래스 이름을 실행 시점에 조립하지 않는다. `bg-${element}` 로 쓰면 Tailwind 가
- * 빌드 때 스캔하지 못해 CSS 를 만들지 않는다. 색이 빠진 채로 렌더되고 오류는 나지 않는다.
- * 온전한 문자열을 오행마다 적어 둔다.
- *
+ * 오행별 셀 클래스
  * `Record<Element, string>` 이라 오행이 빠지면 타입체크가 잡는다.
  */
 export const ELEMENT_CELL: Record<Element, string> = {
