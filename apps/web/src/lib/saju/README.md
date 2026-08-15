@@ -79,6 +79,7 @@ pnpm --filter web exec vitest run --project saju
 | `strength.ts` | 신강약과 억부용신 |
 | `sinsal.ts` | 신살 17종 판정 |
 | `daeun.ts` | 대운과 세운 |
+| `chart.ts` | 조립 진입점. 위 모듈을 잇기만 한다 |
 | `fixtures/` | 검증 케이스 |
 
 `data/` 세 파일의 성격이 갈린다.
@@ -92,7 +93,8 @@ pnpm --filter web exec vitest run --project saju
 ## 아직 없는 것
 
 균시차 보정과 월운이다.
-음력은 변환과 범위 검증까지 있고, 그 결과를 받아 팔자까지 내는 상위 경로와 화면이 없다.
+음력 입력에서 팔자까지 가는 경로는 `chart.ts` 가 잇는다. 화면은 아직 그것을 부르지 않는다.
+시 미상 입력은 없다. `hourPillar` 가 항상 시주를 낸다.
 신살은 17종 판정이 있고 화면에서 이름 단위로 접는 표시 단계가 없다(docs/07 6장).
 십신은 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있고 음양으로 가르는 10종은 없다.
 

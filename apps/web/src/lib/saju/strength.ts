@@ -63,6 +63,13 @@ export interface StrengthResult {
   grade: StrengthGrade;
   flags: StrengthFlags;
   score: number;
+  /**
+   * 일간을 뺀 7글자 중 지원 세력 글자 수. 득세 판정의 축이다.
+   *
+   * `supportRatio` 와 분모가 다르다. 화면이 등급의 근거를 보여줄 때 쓰는 값이라
+   * 결과에 담는다. 어느 쪽을 센 것인지는 화면이 이름을 붙인다. docs/05 §11.6
+   */
+  supportCount: number;
   /** 일간 포함 8글자 균등(각 12.5퍼센트) 기준 지원 비율 */
   supportRatio: number;
   elementDistribution: Record<Element, { count: number; ratio: number }>;
@@ -290,6 +297,7 @@ export function computeStrength(
     grade,
     flags,
     score,
+    supportCount: supportCountExcludingDay,
     supportRatio: chartElements.filter(isSupport).length / chartElements.length,
     elementDistribution,
     yongshin,

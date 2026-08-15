@@ -54,12 +54,16 @@ export type DstAssumption = 'daylight' | 'standard' | 'unknown';
 /** 벽시계가 두 번 존재할 때 어느 쪽을 고르는가. docs/05 7.4. */
 export type AmbiguityChoice = 'earlier' | 'later';
 
+/** 안 주면 이 값으로 채운다. docs/05 7.4, 7.5 */
+export const DEFAULT_DST_ASSUMPTION: DstAssumption = 'unknown';
+export const DEFAULT_AMBIGUITY_CHOICE: AmbiguityChoice = 'earlier';
+
 export interface TimeCorrectionOptions {
   /** 출생지 경도. 동경이 양수다. 생략하면 폴백을 쓰고 그 사실을 남긴다 */
   longitude?: number;
-  /** 기본값 `unknown` */
+  /** 안 주면 `DEFAULT_DST_ASSUMPTION` 으로 채우고 그 값을 `disclosure.applied` 로 낸다 */
   dstAssumption?: DstAssumption;
-  /** 기본값 `earlier` */
+  /** 안 주면 `DEFAULT_AMBIGUITY_CHOICE` 로 채운다. 채운 것인지는 `resolution.because` 다 */
   ambiguityChoice?: AmbiguityChoice;
 }
 
@@ -117,7 +121,24 @@ export type TimeNotice =
   | 'nonexistent-wall-clock'
   | 'true-solar-fallback';
 
+/**
+ * 이 보정에 쓰인 유파 값. 안 준 인자는 여기서 기본값으로 채워진다.
+ *
+ * 기본값을 아는 자리를 이 모듈 하나로 묶으려고 낸다.
+ * 부르는 쪽이 같은 기본값을 다시 적으면 한쪽만 바뀌었을 때 조용히 갈린다.
+ *
+ * `ambiguityChoice` 는 벽시계가 두 번 존재할 때만 실제로 쓰인다.
+ * 나머지 경로에서는 쓰였다면 골랐을 값이고, 실제로 골랐는지는 `resolution.kind` 가 말한다.
+ * 사용자가 준 것인지 우리가 채운 것인지는 `resolution.because` 가 가른다(docs/05 7.4).
+ */
+export interface AppliedTimeOptions {
+  dstAssumption: DstAssumption; // 서머타임 기록 성격
+  ambiguityChoice: AmbiguityChoice; // 모호한 벽시계 해석
+}
+
 export interface TimeDisclosure {
+  /** 채운 값을 포함해 실제로 적용한 것 */
+  applied: AppliedTimeOptions;
   /** 기록을 읽을 때 쓴 오프셋(초) */
   offsetSeconds: number;
   /** 서머타임을 뺀 기준 오프셋(초) */
@@ -177,7 +198,7 @@ export function offsetPeriodAt(utcMs: number): OffsetPeriod {
  */
 export function instantCandidates(
   at: CalendarDateTime,
-  dstAssumption: DstAssumption = 'unknown',
+  dstAssumption: DstAssumption = DEFAULT_DST_ASSUMPTION,
 ): readonly InstantCandidate[] {
   // 오프셋 0 으로 읽으면 벽시계 자체가 하나의 수가 된다. 여기서 오프셋을 빼면 후보다.
   const wallAsUtc = utcMsFromWall(at, 0);
@@ -216,16 +237,31 @@ function gapAt(
   throw new Error(`존재하지 않는 시각인데 전환을 찾지 못했다: ${wallAsUtc}`);
 }
 
-/** 벽시계 해석. 후보 개수에 따라 셋으로 갈린다. */
+/**
+ * 벽시계 해석. 후보 개수에 따라 셋으로 갈린다.
+ *
+ * 채운 `ambiguityChoice` 를 함께 낸다. 부르는 쪽이 같은 식을 다시 쓰면
+ * 여기서 고른 값과 표기하는 값이 갈릴 수 있다.
+ */
 function resolve(
   at: CalendarDateTime,
   dstAssumption: DstAssumption,
-  ambiguityChoice: AmbiguityChoice | undefined,
-): { utcMs: number; period: OffsetPeriod; resolution: WallClockResolution } {
+  given: AmbiguityChoice | undefined,
+): {
+  utcMs: number;
+  period: OffsetPeriod;
+  resolution: WallClockResolution;
+  ambiguityChoice: AmbiguityChoice;
+} {
+  const chosen = given ?? DEFAULT_AMBIGUITY_CHOICE;
   const candidates = instantCandidates(at, dstAssumption);
 
   if (candidates.length === 1) {
-    return { ...candidates[0], resolution: { kind: 'unique' } };
+    return {
+      ...candidates[0],
+      resolution: { kind: 'unique' },
+      ambiguityChoice: chosen,
+    };
   }
 
   if (candidates.length === 0) {
@@ -238,10 +274,10 @@ function resolve(
         gapSeconds: gap.gapSeconds,
         shiftedSeconds: (gap.firstWallAsUtc - utcMsFromWall(at, 0)) / 1000,
       },
+      ambiguityChoice: chosen,
     };
   }
 
-  const chosen = ambiguityChoice ?? 'earlier';
   const [earlier, later] = candidates;
   const picked = chosen === 'earlier' ? earlier : later;
   const other = chosen === 'earlier' ? later : earlier;
@@ -249,10 +285,11 @@ function resolve(
   return {
     utcMs: picked.utcMs,
     period: picked.period,
+    ambiguityChoice: chosen,
     resolution: {
       kind: 'ambiguous',
       chosen,
-      because: ambiguityChoice === undefined ? 'default' : 'option',
+      because: given === undefined ? 'default' : 'option',
       alternative: {
         offsetSeconds: frameOffset(other.period, dstAssumption),
         utcMs: other.utcMs,
@@ -280,8 +317,8 @@ export function correctBirthTime(
     );
   }
 
-  const dstAssumption = options.dstAssumption ?? 'unknown';
-  const { utcMs, period, resolution } = resolve(
+  const dstAssumption = options.dstAssumption ?? DEFAULT_DST_ASSUMPTION;
+  const { utcMs, period, resolution, ambiguityChoice } = resolve(
     recorded,
     dstAssumption,
     options.ambiguityChoice,
@@ -317,6 +354,7 @@ export function correctBirthTime(
     normalized: wallFromUtcMs(utcMs, NORMALIZED_OFFSET_SECONDS),
     recorded,
     disclosure: {
+      applied: { dstAssumption, ambiguityChoice },
       offsetSeconds,
       baseOffsetSeconds: period.baseOffsetSeconds,
       abbreviation: period.abbreviation,
