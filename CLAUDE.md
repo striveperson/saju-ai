@@ -13,6 +13,7 @@
 | 신살 판정 규칙 (SSOT)            | [docs/07-sinsal-rules.md](docs/07-sinsal-rules.md)                 |
 | 서비스 정의, 사용자 흐름, 용어집 | [docs/01-overview.md](docs/01-overview.md)                         |
 | 시스템 구조, 빌드 타깃, 데이터   | [docs/02-architecture.md](docs/02-architecture.md)                 |
+| 화면 코드 규칙 (SSOT)            | [docs/03-frontend-rules.md](docs/03-frontend-rules.md)             |
 | 웹 패키지 규칙                   | [apps/web/CLAUDE.md](apps/web/CLAUDE.md)                           |
 | 계산 엔진 규칙                   | [apps/web/src/lib/saju/README.md](apps/web/src/lib/saju/README.md) |
 | 모바일 셸                        | [apps/mobile/README.md](apps/mobile/README.md)                     |
@@ -165,6 +166,8 @@ em dash, 이모지, 번호 목록 안의 굵은 강조, 취소선, 한 줄에 �
 
 - `feature`: 기능 구현을 계획, 설계, 테스트, 품질, 보안 다섯 단계로 돈다.
   단계마다 담당과 넘어가는 조건이 있다. 부를 때만 적용되고 오타나 한 줄 변경에는 쓰지 않는다.
+- `frontend`: 화면 코드의 고치기 전후 예시와 체크리스트.
+  규칙 목록은 [docs/03](docs/03-frontend-rules.md) 이고 이 스킬은 적용을 담당한다.
 - `writing-style`: 문장 규칙과 고치기 전후 예시. 훅이 잡지 못하는 항목을 담당한다.
 - `commit`: 커밋 메시지 규칙과 scope 목록. 메시지만 만들고 커밋은 하지 않는다.
 - `pr`: PR 본문을 쓰고 github MCP 로 올린다. 병합은 하지 않는다.
