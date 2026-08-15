@@ -1,0 +1,699 @@
+<meta charset="utf-8" />
+<title>AI 사주해석</title>
+
+<style>
+  :root {
+    --ground: #e5e2d8;
+    --frame: #fcfbf9;
+    --field: #ffffff;
+    --ink: #23312f;
+    --ink-mid: #5f6b66;
+    --ink-soft: #a0a096;
+    --line: #e9e6dd;
+    --line-strong: #d0ccc0;
+    --accent: #1e7360;
+    --accent-ink: #ffffff;
+    --accent-soft: #e8f4ef;
+    --header-bg: #e4ede7;
+    --header-ink: #16453b;
+    --header-line: #c6d8ce;
+    --scrim: rgba(35, 49, 47, 0.3);
+    --shadow: 0 1px 2px rgba(20, 35, 42, 0.03), 0 24px 48px -28px rgba(20, 35, 42, 0.22);
+    --radius: 14px;
+    --radius-lg: 20px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --ground: #0e1614;
+      --frame: #16211f;
+      --field: #1e2a27;
+      --ink: #eaf1ed;
+      --ink-mid: #adbcb6;
+      --ink-soft: #7c8d86;
+      --line: #2b3833;
+      --line-strong: #43534e;
+      --accent: #62c4a9;
+      --accent-ink: #062720;
+      --accent-soft: #1c3a32;
+      --header-bg: #21332e;
+      --header-ink: #dcece5;
+      --header-line: #35463f;
+      --scrim: rgba(0, 0, 0, 0.6);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  :root[data-theme='dark'] {
+    --ground: #0e1614;
+    --frame: #16211f;
+    --field: #1e2a27;
+    --ink: #eaf1ed;
+    --ink-mid: #adbcb6;
+    --ink-soft: #7c8d86;
+    --line: #2b3833;
+    --line-strong: #43534e;
+    --accent: #62c4a9;
+    --accent-ink: #062720;
+    --accent-soft: #1c3a32;
+    --header-bg: #21332e;
+    --header-ink: #dcece5;
+    --header-line: #35463f;
+    --scrim: rgba(0, 0, 0, 0.6);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 24px 48px -24px rgba(0, 0, 0, 0.7);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--ground);
+    color: var(--ink);
+    /* ui-rounded 가 라틴과 숫자를 둥근 활자로 받고, 한글은 산돌 계열 시스템 고딕으로 떨어진다 */
+    font-family: ui-rounded, 'Apple SD Gothic Neo', Pretendard, 'Noto Sans KR', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.55;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 프레임 --------------------------------------------------------------- */
+
+  .phone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 402px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background: var(--frame);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    body {
+      padding: 32px 16px;
+    }
+
+    .phone {
+      min-height: calc(100vh - 64px);
+      border-radius: 26px;
+    }
+  }
+
+  .topbar {
+    display: grid;
+    place-items: center;
+    height: 54px;
+    padding: 0 16px;
+    background: var(--header-bg);
+    border-bottom: 1px solid var(--header-line);
+    color: var(--header-ink);
+  }
+
+  .wordmark {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  /* 본문 ----------------------------------------------------------------- */
+
+  form {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 26px;
+    padding: 22px 18px 0;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  /* fieldset 은 legend 때문에 flex 컨테이너로 두지 않는다. legend 가 gap 밖으로 나간다 */
+  fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  legend {
+    margin-bottom: 9px;
+  }
+
+  legend,
+  .label {
+    padding: 0;
+    color: var(--ink);
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+
+  input[type='text'] {
+    width: 100%;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--field);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+  }
+
+  input[type='text']::placeholder {
+    color: var(--ink-soft);
+  }
+
+  input[type='text']:focus-visible,
+  select:focus-visible {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent-soft);
+    outline-offset: 0;
+  }
+
+  input[type='text']:disabled {
+    color: var(--ink-soft);
+    opacity: 0.55;
+  }
+
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 성별 세그먼트 --------------------------------------------------------- */
+
+  .segment {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .segment label {
+    display: grid;
+    place-items: center;
+    height: 48px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--field);
+    color: var(--ink-soft);
+    font-size: 15px;
+    cursor: pointer;
+    transition: border-color 0.12s, color 0.12s, background 0.12s;
+  }
+
+  .segment input:checked + label {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .segment input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .segment input:focus-visible + label {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* 생년월일시 ------------------------------------------------------------ */
+
+  .birth-row {
+    display: grid;
+    grid-template-columns: 78px 1fr 86px;
+    gap: 8px;
+  }
+
+  select {
+    height: 48px;
+    padding: 0 24px 0 13px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background-color: var(--field);
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'><path d='M1 1.5L5 5.5L9 1.5' fill='none' stroke='%23a0a096' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    appearance: none;
+  }
+
+  .toggles {
+    display: flex;
+    gap: 20px;
+    padding-top: 3px;
+  }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ink-mid);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .toggle input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .toggle .dot {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 50%;
+    transition: border-color 0.12s;
+  }
+
+  .toggle .dot::after {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--accent);
+    content: '';
+    transform: scale(0);
+    transition: transform 0.12s;
+  }
+
+  .toggle input:checked + .dot {
+    border-color: var(--accent);
+  }
+
+  .toggle input:checked + .dot::after {
+    transform: scale(1);
+  }
+
+  .toggle input:checked ~ .toggle-text {
+    color: var(--ink);
+  }
+
+  .toggle input:focus-visible + .dot {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* 도시 검색 ------------------------------------------------------------- */
+
+  .search-row {
+    position: relative;
+  }
+
+  .search-row input {
+    padding-right: 50px;
+    cursor: pointer;
+  }
+
+  .search-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    color: var(--ink-mid);
+    cursor: pointer;
+  }
+
+  .search-btn:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .search-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+
+  /* 하단 버튼 ------------------------------------------------------------- */
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: auto -18px 0;
+    padding: 14px 18px calc(18px + env(safe-area-inset-bottom));
+    background: var(--frame);
+    border-top: 1px solid var(--line);
+  }
+
+  .actions button {
+    height: 52px;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  .primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .primary:disabled {
+    background: var(--field);
+    color: var(--ink-soft);
+    cursor: not-allowed;
+  }
+
+  .secondary {
+    border-color: var(--line-strong);
+    background: var(--field);
+    color: var(--ink);
+  }
+
+  .secondary:hover {
+    border-color: var(--ink-mid);
+  }
+
+  .actions button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* 주소 검색 모달 --------------------------------------------------------- */
+
+  dialog {
+    width: min(402px, 100%);
+    max-width: 100%;
+    max-height: 78vh;
+    margin: auto auto 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: var(--frame);
+    color: var(--ink);
+    overflow: hidden;
+  }
+
+  dialog::backdrop {
+    background: var(--scrim);
+  }
+
+  .sheet {
+    display: flex;
+    flex-direction: column;
+    max-height: 78vh;
+  }
+
+  .sheet-head {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sheet-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .sheet-title button {
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .sheet-list {
+    flex: 1;
+    margin: 0;
+    padding: 6px 10px 14px;
+    list-style: none;
+    overflow-y: auto;
+  }
+
+  .sheet-list li button {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 12px;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .sheet-list li button:hover {
+    background: var(--field);
+  }
+
+  .sheet-list li button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .sheet-list .lon {
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .sheet-empty {
+    padding: 28px 12px;
+    color: var(--ink-soft);
+    font-size: 14px;
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+    }
+  }
+</style>
+
+<div class="phone">
+  <header class="topbar">
+    <div class="wordmark">AI 사주해석</div>
+  </header>
+
+  <form id="saju-form" autocomplete="off">
+    <div class="field">
+      <label class="label" for="name">이름</label>
+      <input type="text" id="name" name="name" maxlength="12" placeholder="최대 12글자 이내로 입력하세요" />
+    </div>
+
+    <fieldset class="gender">
+      <legend>성별</legend>
+      <div class="segment">
+        <input type="radio" id="g-f" name="gender" value="female" checked />
+        <label for="g-f">여자</label>
+        <input type="radio" id="g-m" name="gender" value="male" />
+        <label for="g-m">남자</label>
+      </div>
+    </fieldset>
+
+    <div class="field">
+      <span class="label" id="birth-label">생년월일시</span>
+      <div class="birth-row">
+        <select id="calendar" aria-label="양력 음력">
+          <option>양력</option>
+          <option>음력</option>
+        </select>
+        <input type="text" id="birth-date" class="num" inputmode="numeric" placeholder="1995/01/27" aria-labelledby="birth-label" />
+        <input type="text" id="birth-time" class="num" inputmode="numeric" placeholder="14:39" aria-label="태어난 시각" />
+      </div>
+      <div class="toggles">
+        <label class="toggle">
+          <input type="checkbox" id="no-time" />
+          <span class="dot"></span>
+          <span class="toggle-text">시간 모름</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" id="zi-policy" />
+          <span class="dot"></span>
+          <span class="toggle-text">야자시/조자시</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="label" for="city">도시</label>
+      <div class="search-row">
+        <input type="text" id="city" placeholder="시도를 검색해 선택하세요" readonly />
+        <button type="button" class="search-btn" id="open-search" aria-label="시도 검색">
+          <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
+            <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5" />
+            <path d="M12.8 12.8L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="primary" id="submit" disabled>사주보러가기</button>
+      <button type="button" class="secondary">사주 불러오기</button>
+    </div>
+  </form>
+</div>
+
+<dialog id="search-modal" aria-labelledby="sheet-title">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-title">
+        <span id="sheet-title">시도 검색</span>
+        <button type="button" id="close-search" aria-label="닫기">×</button>
+      </div>
+      <input type="text" id="query" placeholder="시도명을 입력하세요" aria-label="시도명 검색" />
+    </div>
+    <ul class="sheet-list" id="result-list"></ul>
+  </div>
+</dialog>
+
+<script>
+  /**
+   * 시도 17개와 대표 경도.
+   * 목업 전용 임시값이다. 출처를 확인하기 전에는 계산 엔진으로 옮기지 않는다.
+   * 실제 앱에서는 searchSido 를 주소 API 호출로 바꾼다.
+   */
+  const SIDO = [
+    { name: '서울특별시', lon: 126.98 },
+    { name: '부산광역시', lon: 129.08 },
+    { name: '대구광역시', lon: 128.6 },
+    { name: '인천광역시', lon: 126.71 },
+    { name: '광주광역시', lon: 126.85 },
+    { name: '대전광역시', lon: 127.38 },
+    { name: '울산광역시', lon: 129.31 },
+    { name: '세종특별자치시', lon: 127.29 },
+    { name: '경기도', lon: 127.01 },
+    { name: '강원특별자치도', lon: 127.73 },
+    { name: '충청북도', lon: 127.49 },
+    { name: '충청남도', lon: 126.67 },
+    { name: '전북특별자치도', lon: 127.11 },
+    { name: '전라남도', lon: 126.46 },
+    { name: '경상북도', lon: 128.73 },
+    { name: '경상남도', lon: 128.69 },
+    { name: '제주특별자치도', lon: 126.53 },
+  ];
+
+  /** 주소 API 를 붙일 자리. 지금은 내장 목록을 거른다 */
+  function searchSido(query) {
+    const q = query.trim();
+    if (q === '') return SIDO;
+    return SIDO.filter((sido) => sido.name.includes(q));
+  }
+
+  const form = document.getElementById('saju-form');
+  const submit = document.getElementById('submit');
+  const noTime = document.getElementById('no-time');
+  const time = document.getElementById('birth-time');
+  const city = document.getElementById('city');
+  const modal = document.getElementById('search-modal');
+  const query = document.getElementById('query');
+  const list = document.getElementById('result-list');
+
+  // 이름, 생년월일, 도시가 채워져야 사주를 낼 수 있다. 시각은 시간 모름으로 대신할 수 있다
+  function refresh() {
+    const filled =
+      document.getElementById('name').value.trim() !== '' &&
+      document.getElementById('birth-date').value.trim() !== '' &&
+      city.value.trim() !== '';
+    submit.disabled = !filled;
+  }
+
+  function render() {
+    const found = searchSido(query.value);
+    list.replaceChildren();
+
+    if (found.length === 0) {
+      const empty = document.createElement('li');
+      empty.className = 'sheet-empty';
+      empty.textContent = '검색 결과가 없습니다. 시도명을 다시 확인해 주세요.';
+      list.append(empty);
+      return;
+    }
+
+    for (const sido of found) {
+      const item = document.createElement('li');
+      const button = document.createElement('button');
+      button.type = 'button';
+      const name = document.createElement('span');
+      name.textContent = sido.name;
+      const lon = document.createElement('span');
+      lon.className = 'lon';
+      lon.textContent = sido.lon.toFixed(2) + '°E';
+      button.append(name, lon);
+      button.addEventListener('click', () => {
+        city.value = sido.name;
+        city.dataset.lon = String(sido.lon);
+        modal.close();
+        refresh();
+      });
+      item.append(button);
+      list.append(item);
+    }
+  }
+
+  function openSearch() {
+    query.value = '';
+    render();
+    modal.showModal();
+    query.focus();
+  }
+
+  document.getElementById('open-search').addEventListener('click', openSearch);
+  city.addEventListener('click', openSearch);
+  document.getElementById('close-search').addEventListener('click', () => modal.close());
+  query.addEventListener('input', render);
+
+  // 시트 바깥을 누르면 닫는다
+  modal.addEventListener('click', (event) => {
+    if (event.target === modal) modal.close();
+  });
+
+  noTime.addEventListener('change', () => {
+    time.disabled = noTime.checked;
+    if (noTime.checked) time.value = '';
+  });
+
+  form.addEventListener('input', refresh);
+  form.addEventListener('change', refresh);
+  form.addEventListener('submit', (event) => event.preventDefault());
+</script>
