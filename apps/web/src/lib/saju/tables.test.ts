@@ -9,19 +9,30 @@ import {
   type Element,
 } from './index';
 import {
+  BAEKHO_DAESAL,
   BRANCH_HIDDEN_STEMS,
   CHEONEUL_GWIIN,
+  DIRECTION_OF_BRANCH,
+  DOHWA,
   ELEMENT_CONTROLS,
   ELEMENT_GENERATES,
+  GEOPSAL,
   GEUMYEO_SEONG,
+  GOEGANG_SAL,
+  GOSIN,
   GWANGWI_HAKGWAN,
+  GWASUK,
   HAKDANG_GWIIN,
   hiddenElements,
+  HWAGAE,
   JEONGNOK,
+  MANGSIN,
   MUNCHANG_GWIIN,
   TAEGEUK_GWIIN,
   tenGodGroup,
+  TRIAD_OF_BRANCH,
   YANGIN,
+  YEOKMA,
   type StemBranchTable,
 } from './tables';
 
@@ -331,5 +342,151 @@ describe('일간 기준 신살 판정표 (docs/07 2장)', () => {
     expect(GWANGWI_HAKGWAN.갑).toEqual(GWANGWI_HAKGWAN.을);
     expect(GWANGWI_HAKGWAN.임).toEqual(GWANGWI_HAKGWAN.계);
     expect(CHEONEUL_GWIIN.갑).not.toEqual(CHEONEUL_GWIIN.을);
+  });
+});
+
+describe('지지 그룹 (docs/07 3장, 5장)', () => {
+  it('방위 그룹과 삼합 그룹이 12지지를 셋씩 남김없이 덮는다', () => {
+    for (const [name, table] of [
+      ['방위', DIRECTION_OF_BRANCH],
+      ['삼합', TRIAD_OF_BRANCH],
+    ] as const) {
+      const 묶음 = new Map<string, string[]>();
+      for (const branch of EARTHLY_BRANCHES) {
+        const group = table[branch];
+        묶음.set(group, [...(묶음.get(group) ?? []), branch]);
+      }
+      expect([...묶음.keys()], name).toHaveLength(4);
+      for (const [group, members] of 묶음) {
+        expect(members, `${name} ${group}`).toHaveLength(3);
+        expect(group.split('').sort(), `${name} ${group}`).toEqual(
+          [...members].sort(),
+        );
+      }
+    }
+  });
+});
+
+describe('년지 기준 신살 판정표 (docs/07 3장)', () => {
+  it('고신살과 과숙살이 문서 표와 같다', () => {
+    expect(GOSIN).toEqual({
+      해자축: '인',
+      인묘진: '사',
+      사오미: '신',
+      신유술: '해',
+    });
+    expect(GWASUK).toEqual({
+      해자축: '술',
+      인묘진: '축',
+      사오미: '진',
+      신유술: '미',
+    });
+  });
+
+  it('고신살은 생지이고 과숙살은 고지다', () => {
+    for (const group of Object.keys(GOSIN) as (keyof typeof GOSIN)[]) {
+      expect(['인', '사', '신', '해'], group).toContain(GOSIN[group]);
+      expect(['진', '술', '축', '미'], group).toContain(GWASUK[group]);
+      expect(GOSIN[group]).not.toBe(GWASUK[group]);
+    }
+  });
+
+  it('판정 지지가 년지 그룹 안에 들어오지 않는다', () => {
+    // 그래서 년지 자신은 스캔에 넣어도 걸리지 않는다.
+    for (const group of Object.keys(GOSIN) as (keyof typeof GOSIN)[]) {
+      expect(group, group).not.toContain(GOSIN[group]);
+      expect(group, group).not.toContain(GWASUK[group]);
+    }
+  });
+});
+
+describe('주 간지 기준 신살 판정표 (docs/07 4장)', () => {
+  it('백호대살 일곱과 괴강살 넷이 문서 표와 같다', () => {
+    expect(BAEKHO_DAESAL).toEqual([
+      '갑진',
+      '을미',
+      '병술',
+      '정축',
+      '무진',
+      '임술',
+      '계축',
+    ]);
+    expect(GOEGANG_SAL).toEqual(['경진', '경술', '임진', '무술']);
+  });
+
+  it('괴강살에 임술과 무진이 없다', () => {
+    // 문서 4장의 유파 선택이다. 둘 다 백호대살에는 있어 회귀가 나기 쉽다.
+    expect(GOEGANG_SAL).not.toContain('임술');
+    expect(GOEGANG_SAL).not.toContain('무진');
+    expect(BAEKHO_DAESAL).toContain('임술');
+    expect(BAEKHO_DAESAL).toContain('무진');
+  });
+
+  it('열한 간지가 전부 60갑자에 실재한다', () => {
+    for (const pillar of [...BAEKHO_DAESAL, ...GOEGANG_SAL]) {
+      const stem = HEAVENLY_STEMS.indexOf(pillar[0] as never);
+      const branch = EARTHLY_BRANCHES.indexOf(pillar[1] as never);
+      expect(stem, pillar).toBeGreaterThanOrEqual(0);
+      expect(branch, pillar).toBeGreaterThanOrEqual(0);
+      expect(stem % 2, pillar).toBe(branch % 2);
+    }
+  });
+});
+
+describe('삼합 기준 신살 판정표 (docs/07 5장)', () => {
+  const 다섯 = [
+    [
+      '도화살',
+      DOHWA,
+      { 신자진: '유', 인오술: '묘', 사유축: '오', 해묘미: '자' },
+    ],
+    [
+      '역마살',
+      YEOKMA,
+      { 신자진: '인', 인오술: '신', 사유축: '해', 해묘미: '사' },
+    ],
+    [
+      '화개살',
+      HWAGAE,
+      { 신자진: '진', 인오술: '술', 사유축: '축', 해묘미: '미' },
+    ],
+    [
+      '겁살',
+      GEOPSAL,
+      { 신자진: '사', 인오술: '해', 사유축: '인', 해묘미: '신' },
+    ],
+    [
+      '망신살',
+      MANGSIN,
+      { 신자진: '해', 인오술: '사', 사유축: '신', 해묘미: '인' },
+    ],
+  ] as const;
+
+  it.each(다섯)('%s 이 문서 표와 같다', (_name, table, expected) => {
+    expect(table).toEqual(expected);
+  });
+
+  it('다섯 열이 각각 단사다', () => {
+    for (const [name, table] of 다섯) {
+      const values = Object.values(table);
+      expect(new Set(values).size, name).toBe(values.length);
+    }
+  });
+
+  it('화개살만 그룹 안의 글자를 가리킨다', () => {
+    for (const [name, table] of 다섯) {
+      for (const group of Object.keys(table) as (keyof typeof table)[]) {
+        const 안에있다 = group.includes(table[group]);
+        expect(안에있다, `${name} ${group}`).toBe(name === '화개살');
+      }
+    }
+  });
+
+  it('겁살과 망신살이 서로 교차한다', () => {
+    // 신자진 겁살이 사이고 인오술 망신이 사다. 옮겨 적을 때 가장 틀리기 쉽다.
+    expect(GEOPSAL.신자진).toBe(MANGSIN.인오술);
+    expect(MANGSIN.신자진).toBe(GEOPSAL.인오술);
+    expect(GEOPSAL.사유축).toBe(MANGSIN.해묘미);
+    expect(MANGSIN.사유축).toBe(GEOPSAL.해묘미);
   });
 });

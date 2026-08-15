@@ -8,7 +8,7 @@
  * 이름과 분류와 등급은 sinsal.ts 가 갖는다. 여기서 신살은 상수 이름으로만 나온다.
  */
 
-import type { EarthlyBranch, Element, HeavenlyStem } from './index';
+import type { EarthlyBranch, Element, HeavenlyStem, Pillar } from './index';
 import { STEM_ELEMENT } from './index';
 
 /** 오행 다섯. index.ts 의 Element 를 순회할 때 쓴다. */
@@ -286,4 +286,132 @@ export const YANGIN: StemBranchTable = {
   신: [],
   임: ['자'],
   계: [],
+};
+
+// ---- 지지 그룹. 신살 밖에서도 쓰이는 관계라 이름에 신살을 넣지 않는다 ----
+
+/** 방위 삼회(방합) 그룹. 계절로 묶인 셋이다. */
+export type DirectionGroup = '해자축' | '인묘진' | '사오미' | '신유술';
+
+/** 삼합 그룹. 생지, 왕지, 고지 셋이다. */
+export type TriadGroup = '신자진' | '인오술' | '사유축' | '해묘미';
+
+/** 지지가 속한 방위 그룹. 12지지가 네 그룹을 남김없이 덮는다. */
+export const DIRECTION_OF_BRANCH: Record<EarthlyBranch, DirectionGroup> = {
+  해: '해자축',
+  자: '해자축',
+  축: '해자축',
+  인: '인묘진',
+  묘: '인묘진',
+  진: '인묘진',
+  사: '사오미',
+  오: '사오미',
+  미: '사오미',
+  신: '신유술',
+  유: '신유술',
+  술: '신유술',
+};
+
+/** 지지가 속한 삼합 그룹. 12지지가 네 그룹을 남김없이 덮는다. */
+export const TRIAD_OF_BRANCH: Record<EarthlyBranch, TriadGroup> = {
+  신: '신자진',
+  자: '신자진',
+  진: '신자진',
+  인: '인오술',
+  오: '인오술',
+  술: '인오술',
+  사: '사유축',
+  유: '사유축',
+  축: '사유축',
+  해: '해묘미',
+  묘: '해묘미',
+  미: '해묘미',
+};
+
+// ---- 신살 판정표: 년지 기준. docs/07 §3 ----
+
+/** 년지 방위 그룹으로 정해지는 판정 지지 하나. */
+export type DirectionBranchTable = Record<DirectionGroup, EarthlyBranch>;
+
+/** 고신살. 년지 그룹의 다음 방위 그룹 첫 글자다. docs/07 §3 */
+export const GOSIN: DirectionBranchTable = {
+  해자축: '인',
+  인묘진: '사',
+  사오미: '신',
+  신유술: '해',
+};
+
+/** 과숙살. 년지 그룹의 이전 방위 그룹 끝 글자다. docs/07 §3 */
+export const GWASUK: DirectionBranchTable = {
+  해자축: '술',
+  인묘진: '축',
+  사오미: '진',
+  신유술: '미',
+};
+
+// ---- 신살 판정표: 주 간지 기준. docs/07 §4 ----
+//
+// 한 기둥의 천간과 지지가 통째로 맞아야 하고, 맞으면 천간과 지지 양쪽에 붙는다.
+// 임술과 무진이 백호에는 있고 괴강에는 없다. 문서 4장의 유파 선택이다.
+
+/** 백호대살. docs/07 §4 */
+export const BAEKHO_DAESAL: readonly Pillar[] = [
+  '갑진',
+  '을미',
+  '병술',
+  '정축',
+  '무진',
+  '임술',
+  '계축',
+];
+
+/** 괴강살. 협의 4간지다. docs/07 §4 */
+export const GOEGANG_SAL: readonly Pillar[] = ['경진', '경술', '임진', '무술'];
+
+// ---- 신살 판정표: 삼합 기준. docs/07 §5 ----
+//
+// 다섯 표가 같은 모양이다. 기준 지지의 삼합 그룹 하나에 판정 지지 하나가 대응한다.
+// 화개살만 그룹 안의 글자를 가리켜 기준 지지 자신이 판정 자리가 될 수 있다.
+
+/** 삼합 그룹으로 정해지는 판정 지지 하나. */
+export type TriadBranchTable = Record<TriadGroup, EarthlyBranch>;
+
+/** 도화살. docs/07 §5 */
+export const DOHWA: TriadBranchTable = {
+  신자진: '유',
+  인오술: '묘',
+  사유축: '오',
+  해묘미: '자',
+};
+
+/** 역마살. docs/07 §5 */
+export const YEOKMA: TriadBranchTable = {
+  신자진: '인',
+  인오술: '신',
+  사유축: '해',
+  해묘미: '사',
+};
+
+/** 화개살. 그룹의 셋째 글자다. docs/07 §5 */
+export const HWAGAE: TriadBranchTable = {
+  신자진: '진',
+  인오술: '술',
+  사유축: '축',
+  해묘미: '미',
+};
+
+/** 겁살. 망신살과 값이 서로 교차한다. docs/07 §5 */
+export const GEOPSAL: TriadBranchTable = {
+  신자진: '사',
+  인오술: '해',
+  사유축: '인',
+  해묘미: '신',
+};
+
+/** 망신살. 겁살과 값이 서로 교차한다. docs/07 §5 */
+export const MANGSIN: TriadBranchTable = {
+  신자진: '해',
+  인오술: '사',
+  사유축: '신',
+  해묘미: '인',
 };
