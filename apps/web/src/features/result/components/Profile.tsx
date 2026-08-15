@@ -5,18 +5,7 @@ import {
 
 import type { CalendarDateTime } from '@saju/calendar';
 import type { Chart } from '@saju/chart';
-
-/**
- * 엔진이 알 수 없는 표시용 값. 사용자가 입력한 것을 그대로 받는다.
- *
- * `Chart` 에 성별이 없고 지역명은 경도에서 유도되지 않는다.
- * 성별은 대운 방향에만 쓰여 결과에 담기지 않고, 지역명은 애초에 엔진이 모른다.
- */
-export type ProfileInfo = {
-  name?: string;
-  gender?: '남자' | '여자';
-  region?: string;
-};
+import type { ProfileInfo } from '@shared/handoff';
 
 type ProfileProps = {
   chart: Chart;
@@ -31,18 +20,12 @@ const date = (at: CalendarDateTime): string =>
 const clock = (at: CalendarDateTime): string =>
   `${pad(at.hour)}:${pad(at.minute)}`;
 
-/**
- * 프로필과 계산이 세운 가정. 목업 result-screen.html 의 첫 절이다.
- *
- * 경고를 접지 않는다. 가정을 세웠다는 사실은 눌러야 보이면 안 된다(docs/01 5.1).
- * 적용한 유파 값은 표시하지 않는다. 근거는 docs/01 5장이다.
- */
 const Profile = ({ chart, info }: ProfileProps) => {
   const { correction, solar, pillars, ziBoundary } = chart;
   const { minutes } = correction.disclosure.trueSolar;
   const { notices, resolution } = correction.disclosure;
 
-  const 태어난곳 = [info?.gender, info?.region].filter(Boolean).join(' ');
+  const born = [info?.gender, info?.region].filter(Boolean).join(' ');
 
   return (
     <section className="border-line bg-field rounded-card border p-4">
@@ -58,7 +41,7 @@ const Profile = ({ chart, info }: ProfileProps) => {
       <dl className="m-0 grid grid-cols-[44px_1fr] gap-x-2.5 gap-y-1 text-[12.5px]">
         <dt className="text-ink-soft">양력</dt>
         <dd className="text-ink-mid m-0 tabular-nums">
-          {`${date(solar)} ${clock(correction.recorded)}${태어난곳 === '' ? '' : ` ${태어난곳}`}`}
+          {`${date(solar)} ${clock(correction.recorded)}${born === '' ? '' : ` ${born}`}`}
         </dd>
         <dt className="text-ink-soft">보정</dt>
         <dd className="text-ink-mid m-0 tabular-nums">

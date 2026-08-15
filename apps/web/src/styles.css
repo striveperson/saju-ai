@@ -25,6 +25,12 @@
   --color-header-ink: #16453b;
   --color-header-line: #c6d8ce;
 
+  /* 잘못된 입력. 목업 input-screen.html 의 .error 다 */
+  --color-danger: #c0392b;
+
+  /* 바텀시트 뒤를 덮는 것. 목업의 --scrim */
+  --color-scrim: rgb(35 49 47 / 0.3);
+
   /* 오행 다섯. 목업 result-screen.html 의 --el-* 이다 */
   --color-mok: #0d938a;
   --color-hwa: #d1494a;
