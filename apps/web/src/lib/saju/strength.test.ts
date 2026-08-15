@@ -1,12 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { VERIFIED_CASES } from './fixtures/cases';
-import {
-  computeStrength,
-  DEFAULT_STRENGTH_CONFIG,
-  hasRoot,
-  type FourPillars,
-} from './strength';
+import type { FourPillars } from './index';
+import { computeStrength, DEFAULT_STRENGTH_CONFIG, hasRoot } from './strength';
 
 /**
  * 규칙 검증용 합성 팔자.
