@@ -93,22 +93,30 @@ saju-ai/
 │   ├── 00-documentation-guide.md
 │   ├── 01-overview.md
 │   ├── 02-architecture.md
+│   ├── 03-frontend-rules.md         화면 규칙 SSOT
 │   ├── 05-saju-domain-rules.md      도메인 SSOT
-│   └── adr/                          0001 ~ 0013
+│   ├── 06-code-working-rules.md     코드 작업 방식
+│   ├── 07-sinsal-rules.md           신살 SSOT
+│   ├── mockups/                     화면 목업 HTML
+│   └── adr/                         0001 ~ 0018
 ├── apps/
 │   ├── web/                          TanStack Start
 │   │   └── src/
-│   │       ├── routes/               페이지와 API 라우트
+│   │       ├── routes/               라우트 정의와 API 라우트
+│   │       ├── features/             지면 단위 화면 조립
+│   │       ├── components/           지면 공통 컴포넌트
 │   │       ├── lib/saju/             계산 엔진 (외부 의존 0)
 │   │       │   └── fixtures/         검증 케이스
-│   │       ├── server/               Supabase 접근, LLM 공급자
-│   │       └── components/
+│   │       └── server/               Supabase 접근, LLM 공급자
 │   └── mobile/                       Capacitor 셸
 │       ├── ios/
 │       └── android/
 ├── package.json
 └── pnpm-workspace.yaml
 ```
+
+`features/` 와 `components/` 를 가르는 기준과 경로 별칭은
+[03-frontend-rules.md](03-frontend-rules.md) 3장에 있다.
 
 `packages/` 공유 패키지를 두지 않는 이유는 계산 엔진의 소비자가 웹 하나뿐이기 때문이다
 ([ADR 0001](adr/0001-monorepo-pnpm-workspaces.md)).
@@ -161,6 +169,7 @@ sequenceDiagram
 | 웹 프레임워크 | TanStack Start | [ADR 0002](adr/0002-tanstack-start-capacitor-shell.md) |
 | 모바일 | Capacitor | [ADR 0002](adr/0002-tanstack-start-capacitor-shell.md) |
 | 모노레포 | pnpm workspaces | [ADR 0001](adr/0001-monorepo-pnpm-workspaces.md) |
+| 화면 규칙 | [03-frontend-rules.md](03-frontend-rules.md) | [ADR 0018](adr/0018-frontend-rules-selective-port.md) |
 | 스키마 검증 | Zod | [ADR 0004](adr/0004-api-routes-over-server-functions.md) |
 | 인증·DB | Supabase | [ADR 0010](adr/0010-supabase-auth-and-db.md) |
 | LLM | Gemini Flash Lite | [ADR 0011](adr/0011-single-prompt-no-streaming.md) |
