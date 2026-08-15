@@ -830,15 +830,15 @@
       <div class="rows">
         <div class="row mok">
           <span class="row-name">목<em>관성</em></span>
-          <div class="row-bar"><div class="row-fill" style="width: 14.3%"></div><span class="row-pct">14.3%</span></div>
+          <div class="row-bar"><div class="row-fill" style="width: 12.5%"></div><span class="row-pct">12.5%</span></div>
         </div>
         <div class="row hwa">
           <span class="row-name">화<em>인성</em></span>
-          <div class="row-bar"><div class="row-fill" style="width: 28.6%"></div><span class="row-pct">28.6%</span></div>
+          <div class="row-bar"><div class="row-fill" style="width: 25.0%"></div><span class="row-pct">25.0%</span></div>
         </div>
         <div class="row to">
           <span class="row-name">토<em>비겁</em></span>
-          <div class="row-bar"><div class="row-fill" style="width: 57.1%"></div><span class="row-pct">57.1%</span></div>
+          <div class="row-bar"><div class="row-fill" style="width: 62.5%"></div><span class="row-pct">62.5%</span></div>
         </div>
         <div class="row geum">
           <span class="row-name">금<em>식상</em></span>
@@ -861,7 +861,9 @@
       <h2>신강/신약 지수</h2>
       <div class="grade">
         <strong>태강</strong>
-        <span>지원 세력 여섯 글자 / 일곱 글자</span>
+        <!-- 득세 기준이라 분모가 일곱이다. 일간을 뺀다(docs/05 11.3).
+             위 오행 분포의 분모 여덟과 다른 수이므로 무엇을 센 것인지 이름을 붙인다. -->
+        <span>득세 여섯 글자 / 일곱 글자</span>
       </div>
       <div class="scale">
         <span class="step">태약</span>
@@ -988,13 +990,16 @@
   /**
    * 오행 관계도. 상생 순서로 시계 방향에 놓는다.
    * 일간 무토가 맨 위이고, 이웃한 둘은 상생(i 에서 i+1), 건너뛴 둘은 상극(i 에서 i+2)이다.
+   *
+   * pct 는 elementDistribution 의 ratio 다. 일간을 포함한 여덟 글자를 각 12.5퍼센트로
+   * 세고 지지는 본기 오행으로 센다. 일간을 뺀 일곱 글자로 세지 않는다. docs/05 11.6.
    */
   const WHEEL = [
-    { cls: 'to', name: '토', sipsin: '비겁', pct: 57.1 },
+    { cls: 'to', name: '토', sipsin: '비겁', pct: 62.5 },
     { cls: 'geum', name: '금', sipsin: '식상', pct: 0 },
     { cls: 'su', name: '수', sipsin: '재성', pct: 0 },
-    { cls: 'mok', name: '목', sipsin: '관성', pct: 14.3 },
-    { cls: 'hwa', name: '화', sipsin: '인성', pct: 28.6 },
+    { cls: 'mok', name: '목', sipsin: '관성', pct: 12.5 },
+    { cls: 'hwa', name: '화', sipsin: '인성', pct: 25.0 },
   ];
 
   const SVG_NS = 'http://www.w3.org/2000/svg';
