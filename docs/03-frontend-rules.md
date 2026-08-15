@@ -101,6 +101,8 @@ apps/web/src/
 │   ├── input/
 │   │   ├── components/
 │   │   ├── hooks/
+│   │   ├── utils/      그 지면에서만 쓰는 순수 함수. named export (13장)
+│   │   ├── api/        그 지면이 부르는 queryOptions (9장)
 │   │   └── InputPage.tsx
 │   └── result/
 ├── components/        지면 공통 컴포넌트
