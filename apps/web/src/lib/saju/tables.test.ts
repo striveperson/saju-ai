@@ -345,6 +345,20 @@ describe('일간 기준 신살 판정표 (docs/07 2장)', () => {
   });
 });
 
+/**
+ * 라벨 세 글자의 지지 순환 자리.
+ *
+ * indexOf 가 돌려주는 -1 을 그대로 쓰면 X자축 같은 라벨이 간격 단언을 통과한다.
+ * 여기서 먼저 막아 아래 단언이 자리 계산만 보게 한다.
+ */
+function 라벨자리(group: string): readonly number[] {
+  return group.split('').map((b) => {
+    const at = EARTHLY_BRANCHES.indexOf(b as never);
+    if (at < 0) throw new Error(`지지가 아니다: ${b} (${group})`);
+    return at;
+  });
+}
+
 describe('지지 그룹 (docs/07 3장, 5장)', () => {
   it('방위 그룹과 삼합 그룹이 12지지를 셋씩 남김없이 덮는다', () => {
     for (const [name, table] of [
@@ -367,25 +381,27 @@ describe('지지 그룹 (docs/07 3장, 5장)', () => {
   });
 
   // 라벨 안의 글자 순서를 지지 순환에서 유도해 잠근다.
-  // 위 커버리지는 sort 로 비교해 집합만 보므로 라벨이 신진자 여도 통과한다.
+  // 위 커버리지는 sort 로 비교해 집합만 보므로 순서가 뒤바뀐 라벨도 통과한다.
   // 그런데 고신살과 화개살 방어선이 라벨의 몇 번째 글자인지에 기대고 있다.
   it('방위 그룹 라벨이 지지 순환의 연속 세 칸이다', () => {
     for (const group of new Set(Object.values(DIRECTION_OF_BRANCH))) {
-      const 자리 = group
-        .split('')
-        .map((b) => EARTHLY_BRANCHES.indexOf(b as never));
+      const 자리 = 라벨자리(group);
 
       expect(자리[1], group).toBe((자리[0] + 1) % 12);
       expect(자리[2], group).toBe((자리[0] + 2) % 12);
     }
   });
 
-  it('삼합 그룹 라벨이 네 칸 간격 세 글자다', () => {
-    for (const group of new Set(Object.values(TRIAD_OF_BRANCH))) {
-      const 자리 = group
-        .split('')
-        .map((b) => EARTHLY_BRANCHES.indexOf(b as never));
+  it('삼합 그룹 라벨이 생지에서 시작하는 네 칸 간격 세 글자다', () => {
+    // 간격만 보면 셋이 등간격이라 순환 회전이 단언을 통과한다.
+    // 신자진 을 진신자 로 돌려도 간격은 그대로이고, 그러면 셋째 글자가 자 가 되어
+    // 화개살 방어선이 틀린 값을 요구하게 된다. 시작점을 생지로 고정해 회전을 막는다.
+    const 생지 = ['인', '신', '사', '해'];
 
+    for (const group of new Set(Object.values(TRIAD_OF_BRANCH))) {
+      const 자리 = 라벨자리(group);
+
+      expect(생지, group).toContain(group[0]);
       expect(자리[1], group).toBe((자리[0] + 4) % 12);
       expect(자리[2], group).toBe((자리[0] + 8) % 12);
     }
