@@ -1,5 +1,49 @@
 @import 'tailwindcss';
 
+/*
+ * 팔레트는 docs/mockups/ 의 두 HTML 에서 옮겼다.
+ * 다크 모드는 넣지 않았다. MVP 화면 디자인이 아직 정해지지 않아서이고,
+ * 목업 HTML 에는 다크 정의가 남아 있으니 붙일 때 거기서 가져온다.
+ */
+@theme {
+  --color-ground: #e5e2d8;
+  --color-frame: #fcfbf9;
+  --color-field: #ffffff;
+
+  --color-ink: #23312f;
+  --color-ink-mid: #5f6b66;
+  --color-ink-soft: #a0a096;
+
+  --color-line: #e9e6dd;
+  --color-line-strong: #d0ccc0;
+
+  --color-accent: #1e7360;
+  --color-accent-ink: #ffffff;
+  --color-accent-soft: #e8f4ef;
+
+  --color-header: #e4ede7;
+  --color-header-ink: #16453b;
+  --color-header-line: #c6d8ce;
+
+  /* 오행 다섯. 목업 result-screen.html 의 --el-* 이다 */
+  --color-mok: #0d938a;
+  --color-hwa: #d1494a;
+  --color-to: #d59a1f;
+  --color-geum: #9aa3ab;
+  --color-su: #3b5f9e;
+
+  --radius-card: 14px;
+  --radius-sheet: 20px;
+
+  --shadow-frame:
+    0 1px 2px rgb(35 49 47 / 0.03), 0 24px 48px -28px rgb(35 49 47 / 0.22);
+
+  /* ui-rounded 가 라틴과 숫자를 둥근 활자로 받고, 한글은 시스템 고딕으로 떨어진다 */
+  --font-sans:
+    ui-rounded, 'Apple SD Gothic Neo', Pretendard, 'Noto Sans KR', system-ui,
+    sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,4 +52,13 @@ html,
 body {
   margin: 0;
   padding: 0;
+}
+
+/* 목업 두 HTML 의 body 규칙이다. 지면마다 다시 적지 않도록 여기 한 번 둔다 */
+body {
+  color: var(--color-ink);
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
