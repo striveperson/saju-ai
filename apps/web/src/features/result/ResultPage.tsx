@@ -34,7 +34,10 @@ const Section = ({ title, children }: SectionProps) => {
 };
 
 const ResultPage = ({ saju, info }: ResultPageProps) => {
-  const { chart, reading } = saju;
+  const {
+    chart,
+    reading: { strength, sinsal },
+  } = saju;
   const dayElement = STEM_ELEMENT[stemOf(chart.pillars.day)];
 
   return (
@@ -45,33 +48,33 @@ const ResultPage = ({ saju, info }: ResultPageProps) => {
         <PaljaTable pillars={chart.pillars} />
       </Section>
 
+      <Section title="신살과 길성">
+        <SinsalSection sinsal={sinsal} />
+      </Section>
+
       <Section title="오행과 십신">
         <OhaengBars
           dayElement={dayElement}
-          distribution={reading.strength.elementDistribution}
+          distribution={strength.elementDistribution}
         />
         <div className="mt-4">
           <OhaengWheel
             dayElement={dayElement}
-            distribution={reading.strength.elementDistribution}
+            distribution={strength.elementDistribution}
           />
         </div>
       </Section>
 
       <Section title="신강/신약 지수">
-        <StrengthScale strength={reading.strength} />
+        <StrengthScale strength={strength} />
       </Section>
 
       <Section title="용신">
-        <YongshinCard strength={reading.strength} />
+        <YongshinCard strength={strength} />
       </Section>
 
       <Section title="대운">
         <DaeunTrack daeun={chart.daeun} />
-      </Section>
-
-      <Section title="신살과 길성">
-        <SinsalSection sinsal={reading.sinsal} />
       </Section>
 
       <Section title="AI 해석">

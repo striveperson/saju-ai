@@ -36,11 +36,11 @@ describe('ResultPage', () => {
       .map((h) => h.textContent);
     expect(제목들).toEqual([
       '사주팔자',
+      '신살과 길성',
       '오행과 십신',
       '신강/신약 지수',
       '용신',
       '대운',
-      '신살과 길성',
       'AI 해석',
     ]);
   });
