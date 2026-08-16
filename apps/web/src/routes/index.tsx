@@ -7,19 +7,19 @@ import type { ChartInput } from '@saju/chart';
 import type { ProfileInfo } from '@shared/handoff';
 
 /**
- * 값을 URL 이 아니라 히스토리 항목에 싣는다.
+ * 값을 URL 이 아니라 스토어에 담고 넘어간다.
  *
  * 생년월일시는 개인정보라 search params 에 넣지 않는다(docs/03 5.1).
- * 새로고침하거나 `/result` 를 직접 열면 state 가 비어 입력 지면으로 되돌아온다.
+ * 스토어는 메모리에만 있어 새로고침하거나 `/result` 를 직접 열면 비어 있고,
+ * 그때는 결과 지면이 입력 지면으로 되돌린다.
  */
 const InputRoute = () => {
   const navigate = useNavigate();
+  const { sajuStore } = Route.useRouteContext();
 
   const handleSubmit = (input: ChartInput, info: ProfileInfo) => {
-    void navigate({
-      to: '/result',
-      state: (prev) => ({ ...prev, saju: { input, info } }),
-    });
+    sajuStore.getState().setHandoff({ input, info });
+    void navigate({ to: '/result' });
   };
 
   return (
