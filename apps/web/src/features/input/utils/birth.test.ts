@@ -1,6 +1,76 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseDate, parseTime } from './birth';
+import { maskDate, maskTime, parseDate, parseTime } from './birth';
+
+describe('maskDate', () => {
+  it('치는 대로 구분자를 넣는다', () => {
+    const 단계 = [
+      ['1', '1'],
+      ['19', '19'],
+      ['199', '199'],
+      ['1995', '1995'],
+      ['19951', '1995-1'],
+      ['199501', '1995-01'],
+      ['1995012', '1995-01-2'],
+      ['19950127', '1995-01-27'],
+    ];
+
+    for (const [입력, 나온것] of 단계) {
+      expect(maskDate(입력)).toBe(나온것);
+    }
+  });
+
+  it('이미 붙은 구분자에 또 붙이지 않는다', () => {
+    // 제어 컴포넌트라 마스킹한 값이 다시 들어온다. 한 번 더 돌려도 같아야 한다
+    expect(maskDate('1995-01-27')).toBe('1995-01-27');
+    expect(maskDate(maskDate('19950127'))).toBe('1995-01-27');
+  });
+
+  it('사람이 친 구분자를 가리지 않는다', () => {
+    expect(maskDate('1995/01/27')).toBe('1995-01-27');
+    expect(maskDate('1995. 01. 27.')).toBe('1995-01-27');
+  });
+
+  it('여덟 자리에서 끊는다', () => {
+    expect(maskDate('199501271')).toBe('1995-01-27');
+  });
+
+  it('구분자로 끝내지 않는다', () => {
+    // 지우기가 구분자를 먼저 먹으면 숫자 하나를 지우는 데 두 번 눌러야 한다
+    expect(maskDate('1995')).toBe('1995');
+    expect(maskDate('1995-')).toBe('1995');
+    expect(maskDate('1995-01')).toBe('1995-01');
+  });
+});
+
+describe('maskTime', () => {
+  it('치는 대로 구분자를 넣는다', () => {
+    const 단계 = [
+      ['1', '1'],
+      ['14', '14'],
+      ['143', '14:3'],
+      ['1439', '14:39'],
+    ];
+
+    for (const [입력, 나온것] of 단계) {
+      expect(maskTime(입력)).toBe(나온것);
+    }
+  });
+
+  it('이미 붙은 구분자에 또 붙이지 않는다', () => {
+    expect(maskTime('14:39')).toBe('14:39');
+    expect(maskTime(maskTime('1439'))).toBe('14:39');
+  });
+
+  it('네 자리에서 끊는다', () => {
+    expect(maskTime('14395')).toBe('14:39');
+  });
+
+  it('구분자로 끝내지 않는다', () => {
+    expect(maskTime('14')).toBe('14');
+    expect(maskTime('14:')).toBe('14');
+  });
+});
 
 describe('parseDate', () => {
   it('목업 표기를 읽는다', () => {

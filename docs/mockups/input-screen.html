@@ -561,7 +561,7 @@
           <option>양력</option>
           <option>음력</option>
         </select>
-        <input type="text" id="birth-date" class="num" inputmode="numeric" placeholder="1995/01/27" aria-labelledby="birth-label" />
+        <input type="text" id="birth-date" class="num" inputmode="numeric" placeholder="1995-01-27" aria-labelledby="birth-label" />
         <input type="text" id="birth-time" class="num" inputmode="numeric" placeholder="14:39" aria-label="태어난 시각" />
       </div>
       <p class="error" id="birth-error" role="alert"></p>
@@ -743,6 +743,28 @@
   // 실제 앱은 leapMonthOf(year) 로 판정한다
   document.getElementById('calendar').addEventListener('change', (event) => {
     document.getElementById('leap-toggle').hidden = event.target.value !== '음력';
+  });
+
+  // 구분자는 치는 대로 붙는다. 숫자만 남기고 자리마다 끊는다.
+  // 뒤에 숫자가 있을 때만 넣는 것은 지우기가 구분자를 먼저 먹지 않게 하려는 것이다.
+  // 실제 앱은 utils/birth.ts 의 maskDate 와 maskTime 이다
+  function mask(value, sizes, separator) {
+    const only = value.replace(/\D/g, '');
+    const parts = [];
+    let at = 0;
+    for (const size of sizes) {
+      parts.push(only.slice(at, at + size));
+      at += size;
+    }
+    return parts.filter((part) => part !== '').join(separator);
+  }
+
+  document.getElementById('birth-date').addEventListener('input', (event) => {
+    event.target.value = mask(event.target.value, [4, 2, 2], '-');
+  });
+
+  time.addEventListener('input', (event) => {
+    event.target.value = mask(event.target.value, [2, 2], ':');
   });
 
   form.addEventListener('input', refresh);

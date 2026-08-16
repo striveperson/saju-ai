@@ -1,3 +1,5 @@
+import { maskDate, maskTime } from '@features/input/utils/birth';
+
 import type { ChartInput } from '@saju/chart';
 
 type Calendar = ChartInput['calendar'];
@@ -46,12 +48,13 @@ const BirthFields = ({
     onCalendarChange(event.target.value === 'lunar' ? 'lunar' : 'solar');
   };
 
+  // 구분자는 치는 대로 붙는다. 값은 언제나 마스킹을 거친 것이라 폼이 날것을 보지 않는다
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onDateChange(event.target.value);
+    onDateChange(maskDate(event.target.value));
   };
 
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onTimeChange(event.target.value);
+    onTimeChange(maskTime(event.target.value));
   };
 
   const handleLeapChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +102,7 @@ const BirthFields = ({
           aria-labelledby="birth-label"
           aria-invalid={error?.on === 'date'}
           aria-describedby={error?.on === 'date' ? 'birth-error' : undefined}
-          placeholder="1995/01/27"
+          placeholder="1995-01-27"
           className={`${FIELD} w-full tabular-nums`}
           value={date}
           onChange={handleDateChange}
