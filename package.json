@@ -14,12 +14,20 @@
     "format:check": "oxfmt --check"
   },
   "devDependencies": {
+    "@tanstack/intent": "0.3.6",
     "oxfmt": "^0.59.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
       "lightningcss"
+    ]
+  },
+  "intent": {
+    "skills": [
+      "@tanstack/router-core",
+      "@tanstack/react-start",
+      "@tanstack/start-client-core"
     ]
   }
 }

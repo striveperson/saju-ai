@@ -11,11 +11,11 @@
     "lint": "oxlint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "verify:data": "node scripts/build-lunar-table.mjs --check && node scripts/check-lunar-newmoon.mjs"
+    "verify:data": "node scripts/build-lunar-table.mjs --check && node scripts/check-lunar-newmoon.mjs",
+    "verify:react": "REACT_DOCTOR_NO_TELEMETRY=1 react-doctor --no-telemetry --no-supply-chain"
   },
   "dependencies": {
     "@tailwindcss/vite": "4.3.2",
-    "@tanstack/history": "1.162.0",
     "@tanstack/react-devtools": "0.10.8",
     "@tanstack/react-query": "5.101.2",
     "@tanstack/react-query-devtools": "5.101.2",
@@ -49,6 +49,7 @@
     "jsdom": "28.1.0",
     "oxlint": "1.77.0",
     "oxlint-tsgolint": "7.0.2001",
+    "react-doctor": "0.9.12",
     "typescript": "7.0.2",
     "vite": "8.1.4",
     "vitest": "4.1.10"
