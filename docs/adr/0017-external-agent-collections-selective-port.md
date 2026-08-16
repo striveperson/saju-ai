@@ -1,6 +1,6 @@
 # ADR 0017. 외부 에이전트 모음은 통째 설치하지 않고 골라 이식한다
 
-- 상태: 채택(Accepted)
+- 상태: 채택(Accepted). react-doctor 절은 대체됨(Superseded by ADR 0020)
 - 날짜: 2026-08-14
 
 ## 배경
@@ -59,6 +59,9 @@ react-doctor 도 같이 검토했다. React 진단 CLI 이고 한 번 붙였다�
 그래서 가져오는 대신 `saju-engine-validator` 를 새로 썼다.
 
 ## react-doctor 는 보류
+
+이 절은 [ADR 0020](0020-react-doctor-adopted.md) 으로 대체됨(Superseded).
+아래 조건이 채워져 2026-08-16 에 도입했다. 조사 기록은 그대로 둔다.
 
 화면 코드가 생기면 다시 판단한다.
 지금 React 코드가 107줄뿐이라 얻을 것이 없고, 도입 비용이 그보다 크다.

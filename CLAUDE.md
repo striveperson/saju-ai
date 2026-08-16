@@ -181,6 +181,8 @@ em dash, 이모지, 번호 목록 안의 굵은 강조, 취소선, 한 줄에 �
 - `commit`: 커밋 메시지 규칙과 scope 목록. 메시지만 만들고 커밋은 하지 않는다.
 - `pr`: PR 본문을 쓰고 github MCP 로 올린다. 병합은 하지 않는다.
 - `validate-loop`: 검증기가 낸 기록 항목을 라운드로 정리한다. 종료 조건은 스킬에 있다.
+- `tanstack-skills`: TanStack 패키지가 npm 으로 함께 배포하는 공식 스킬을 `@tanstack/intent` 로
+  꺼내 읽는다. 무엇이 있고 우리 규약과 어긋나는 자리가 어디인지 거기 적혀 있다.
 
 PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 diff 를 보고 판단해 더한다.
 `.github/pull_request_template.md` 를 두지 않는다.
@@ -243,6 +245,12 @@ PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 di
 TanStack Start 는 버전이 빠르게 움직인다. API 를 추측하지 말고 `context7` 로 확인한다.
 설치된 `.d.ts` 를 뒤지는 것은 문서를 못 찾을 때의 차선이다.
 
+예외가 하나 있다. TanStack 이 주제별 스킬을 패키지 안에 실어 배포하고
+루트 devDependency 인 `@tanstack/intent` 가 그것을 꺼낸다.
+버전이 lockfile 에 고정되어 있어 라우터와 Start 는 그것부터 본다.
+읽는 법은 `tanstack-skills` 스킬에 있다.
+React Query 는 스킬을 배포하지 않아 `context7` 이 그대로 담당한다.
+
 ### github 서버
 
 원격 서버(`https://api.githubcopilot.com/mcp/`)를 쓰고 툴셋을 `repos,pull_requests` 로 제한한다.
@@ -265,8 +273,12 @@ PAT 이 필요하다. `gh` 의 OAuth 토큰은 keyring 에 있어 환경변수�
 
 [affaan-m/ECC](https://github.com/affaan-m/ECC) 같은 확장 모음은 플러그인으로 통째 설치하지 않는다.
 필요한 것만 골라 우리 규약에 맞게 고쳐 가져온다.
-무엇을 언제 가져올지, react-doctor 를 왜 뺐는지는
-[ADR 0017](docs/adr/0017-external-agent-collections-selective-port.md) 에 있다.
+무엇을 언제 가져올지는 [ADR 0017](docs/adr/0017-external-agent-collections-selective-port.md) 에 있다.
+
+react-doctor 는 그 ADR 이 보류했다가 화면 코드가 서면서 들였다.
+`pnpm --filter web verify:react` 로 부르고 텔레메트리와 공급망 스캔을 끈 채 돈다.
+패키지가 싣는 에이전트 스킬은 붙이지 않는다. 실행 중에 원격 플레이북을 받아 따르게 되어 있다.
+근거는 [ADR 0020](docs/adr/0020-react-doctor-adopted.md) 이다.
 
 ## ADR
 
