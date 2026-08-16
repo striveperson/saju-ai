@@ -9,8 +9,9 @@ import type { Region } from '@features/input/utils/region';
 import type { ChartInput } from '@saju/chart';
 import type { ProfileInfo } from '@shared/handoff';
 
-const 서울: Region = { name: '서울특별시', longitude: 126.9784 };
-const 부산: Region = { name: '부산광역시', longitude: 129.0756 };
+// 카카오가 실제로 내는 값이다. 시도는 약칭으로 온다
+const 서울: Region = { name: '서울', longitude: 126.978652258309 };
+const 부산: Region = { name: '부산', longitude: 129.075087492149 };
 
 const 검색결과를 = (regions: readonly Region[]) => {
   vi.stubGlobal(
@@ -107,12 +108,12 @@ describe('InputPage', () => {
       birth: { year: 1995, month: 1, day: 27, hour: 14, minute: 39 },
       gender: 'F',
       ziPolicy: 'nextDay',
-      longitude: 126.9784,
+      longitude: 126.978652258309,
     });
     expect(상자[0].info).toEqual({
       name: '김하늘',
       gender: '여자',
-      region: '서울특별시',
+      region: '서울',
     });
   });
 
@@ -128,8 +129,8 @@ describe('InputPage', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
 
     await user.click(제출());
-    expect(상자[0].input.longitude).toBe(129.0756);
-    expect(상자[0].info.region).toBe('부산광역시');
+    expect(상자[0].input.longitude).toBe(129.075087492149);
+    expect(상자[0].info.region).toBe('부산');
   });
 
   it('남자를 고르면 성별이 따라간다', async () => {

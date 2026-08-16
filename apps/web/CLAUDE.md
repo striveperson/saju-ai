@@ -7,7 +7,7 @@
 
 `src/routes/` 가 파일 기반 라우트, `src/routes/api/` 가 서버 라우트,
 `src/features/` 가 지면 단위 화면, `src/components/` 가 지면 공통 컴포넌트,
-`src/shared/` 가 지면 사이로 넘기는 값의 타입, `src/lib/saju/` 가 계산 엔진,
+`src/shared/` 가 지면 사이로 넘기는 값의 타입과 스토어, `src/lib/saju/` 가 계산 엔진,
 `scripts/` 가 SPA 변환과 절기 계산과 tz 정답지 생성이다.
 
 경로 별칭은 `@saju`, `@saju/*`, `@components/*`, `@features/*`, `@shared/*` 다.

@@ -112,7 +112,7 @@ saju-ai/
 │   │       │   └── api/              서버 라우트. 시크릿과 외부 API 호출
 │   │       ├── features/             지면 단위 화면 조립
 │   │       ├── components/           지면 공통 컴포넌트
-│   │       ├── shared/               지면 사이로 넘기는 값의 타입과 스키마
+│   │       ├── shared/               지면 사이로 넘기는 값의 타입과 스키마와 스토어
 │   │       ├── lib/saju/             계산 엔진 (외부 의존 0)
 │   │       │   └── fixtures/         검증 케이스
 │   │       └── server/               Supabase 접근, LLM 공급자

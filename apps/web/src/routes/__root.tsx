@@ -1,5 +1,6 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
 
+import type { SajuStore } from '@shared/saju-store';
 import type { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import {
@@ -13,6 +14,8 @@ import appCss from '../styles.css?url';
 
 interface RouterContext {
   queryClient: QueryClient;
+  /** 입력 지면이 채우고 결과 지면이 읽는다. 요청마다 새로 만든다 */
+  sajuStore: SajuStore;
 }
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
@@ -26,7 +29,10 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
         <TanStackDevtools
           config={{ position: 'bottom-right' }}
           plugins={[
-            { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
+            {
+              name: 'Tanstack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
             { name: 'Tanstack Query', render: <ReactQueryDevtoolsPanel /> },
           ]}
         />

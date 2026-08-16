@@ -18,12 +18,16 @@ const ResultRoute = () => {
 };
 
 /**
- * `computeSaju` 는 순수 함수라 입력 지면이 이미 한 번 돌려 본 것과 같은 값이 나온다.
- * 그래도 `errorComponent` 를 둔다. 앞 버전이 넣은 state 가 새로고침으로 돌아올 수 있다.
+ * 스토어가 비어 있으면 입력 지면으로 되돌린다. 새로고침과 직접 진입이 그 경로다.
+ *
+ * `errorComponent` 는 그것과 별개다. 스키마가 연도 범위까지 좁히지 않아
+ * 지원 범위 밖이면 `computeSaju` 가 `RangeError` 를 던진다(birth.ts 가 범위를 안 본다).
  */
 export const Route = createFileRoute('/result')({
-  beforeLoad: ({ location }) => {
-    const parsed = handoffSchema.safeParse(location.state.saju);
+  beforeLoad: ({ context }) => {
+    const parsed = handoffSchema.safeParse(
+      context.sajuStore.getState().handoff,
+    );
     if (!parsed.success) throw redirect({ to: '/' });
 
     return { saju: parsed.data };
