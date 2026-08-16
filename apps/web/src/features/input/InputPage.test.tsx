@@ -96,6 +96,45 @@ describe('InputPage', () => {
     expect(제출()).toBeEnabled();
   });
 
+  it('숫자만 쳐도 구분자가 따라 붙는다', async () => {
+    const { user } = 그린다();
+
+    await user.type(screen.getByLabelText('생년월일시'), '19950127');
+    expect(screen.getByLabelText('생년월일시')).toHaveValue('1995-01-27');
+
+    await user.type(screen.getByLabelText('태어난 시각'), '1439');
+    expect(screen.getByLabelText('태어난 시각')).toHaveValue('14:39');
+  });
+
+  it('구분자를 직접 쳐도 한 벌만 남는다', async () => {
+    // 자판에 따라 구분자가 있다. 친 것을 지우고 우리 것을 넣는다
+    const { user } = 그린다();
+
+    await user.type(screen.getByLabelText('생년월일시'), '1995/01/27');
+    expect(screen.getByLabelText('생년월일시')).toHaveValue('1995-01-27');
+  });
+
+  it('자리를 넘겨 쳐도 늘어나지 않는다', async () => {
+    const { user } = 그린다();
+
+    await user.type(screen.getByLabelText('생년월일시'), '199501279');
+    expect(screen.getByLabelText('생년월일시')).toHaveValue('1995-01-27');
+
+    await user.type(screen.getByLabelText('태어난 시각'), '14395');
+    expect(screen.getByLabelText('태어난 시각')).toHaveValue('14:39');
+  });
+
+  it('지우기가 구분자에 걸리지 않는다', async () => {
+    // 구분자로 끝나면 한 숫자를 지우는 데 두 번 눌러야 한다
+    const { user } = 그린다();
+
+    await user.type(screen.getByLabelText('생년월일시'), '19951');
+    expect(screen.getByLabelText('생년월일시')).toHaveValue('1995-1');
+
+    await user.type(screen.getByLabelText('생년월일시'), '{backspace}');
+    expect(screen.getByLabelText('생년월일시')).toHaveValue('1995');
+  });
+
   it('엔진이 받는 모양 그대로 넘긴다', async () => {
     // 검증 케이스 verified-19950127-1439-F-seoul 이다. 목업 placeholder 가 그 값이다.
     const { 상자, user } = 그린다();
@@ -150,7 +189,9 @@ describe('InputPage', () => {
     await user.click(제출());
 
     expect(상자).toHaveLength(0);
-    expect(screen.getByRole('alert')).toHaveTextContent('그런 날짜는 없습니다');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      '올바르지 않은 날짜입니다',
+    );
   });
 
   it('없는 시각을 막는다', async () => {
@@ -159,7 +200,9 @@ describe('InputPage', () => {
     await user.click(제출());
 
     expect(상자).toHaveLength(0);
-    expect(screen.getByRole('alert')).toHaveTextContent('그런 시각은 없습니다');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      '0시부터 23시까지로 적어주세요',
+    );
   });
 
   it('틀린 칸만 잘못된 것으로 표시한다', async () => {

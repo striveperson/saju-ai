@@ -15,6 +15,29 @@ type HourMinute = { hour: number; minute: number };
 /** 구분자를 가리지 않는다. inputmode="numeric" 자판에는 슬래시가 없다 */
 const digits = (text: string): string => text.replaceAll(/\D/gu, '');
 
+/**
+ * 치는 대로 `1995-01-27` 로 만든다. 숫자만 남기고 여덟 자리에서 끊는다.
+ *
+ * 뒤에 숫자가 있을 때만 구분자를 넣는다. `1995-` 로 끝나면 지우기가 구분자를
+ * 먼저 먹어 한 번 더 눌러야 숫자가 지워진다.
+ */
+export const maskDate = (text: string): string => {
+  const only = digits(text).slice(0, 8);
+
+  return [only.slice(0, 4), only.slice(4, 6), only.slice(6, 8)]
+    .filter((part) => part !== '')
+    .join('-');
+};
+
+/** 치는 대로 `14:39` 로 만든다. 규칙은 maskDate 와 같다 */
+export const maskTime = (text: string): string => {
+  const only = digits(text).slice(0, 4);
+
+  return [only.slice(0, 2), only.slice(2, 4)]
+    .filter((part) => part !== '')
+    .join(':');
+};
+
 /** 그 양력 날짜가 달력에 있는가. 왕복해서 같은 값이 나오면 있다 */
 const existsInSolar = ({ year, month, day }: YearMonthDay): boolean => {
   const back = calendarDateFromJdn(julianDayNumber(year, month, day));
@@ -23,7 +46,7 @@ const existsInSolar = ({ year, month, day }: YearMonthDay): boolean => {
 };
 
 /**
- * 생년월일. `1995/01/27` 과 `19950127` 을 같게 읽는다.
+ * 생년월일. `1995-01-27` 과 `19950127` 을 같게 읽는다.
  *
  * 지원 범위(1900~2100, 음력 상한, 1900년 입춘)는 보지 않는다.
  * 엔진이 `RangeError` 로 던지고 그 문구가 음력이면 음력 표기로 나온다(docs/05 12.4).
@@ -37,7 +60,7 @@ export const parseDate = (
   if (only.length !== 8) {
     return {
       ok: false,
-      message: '생년월일을 1995/01/27 처럼 여덟 자리로 적어주세요.',
+      message: '생년월일을 1995-01-27 처럼 여덟 자리로 적어주세요.',
     };
   }
 
@@ -53,7 +76,7 @@ export const parseDate = (
 
   return existsInSolar(value)
     ? { ok: true, value }
-    : { ok: false, message: '그런 날짜는 없습니다. 다시 확인해 주세요.' };
+    : { ok: false, message: '올바르지 않은 날짜입니다. 다시 확인해 주세요.' };
 };
 
 /** 태어난 시각. `14:39` 와 `1439` 를 같게 읽는다 */
@@ -74,7 +97,7 @@ export const parseTime = (text: string): Parsed<HourMinute> => {
   return value.hour > 23 || value.minute > 59
     ? {
         ok: false,
-        message: '그런 시각은 없습니다. 0시부터 23시까지로 적어주세요.',
+        message: '0시부터 23시까지로 적어주세요.',
       }
     : { ok: true, value };
 };
