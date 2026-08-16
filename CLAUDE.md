@@ -58,7 +58,7 @@ Gemini Flash Lite, Vercel 배포다.
 | `protect-env.sh`        | PreToolUse (Read/Edit/Write) | `.env*` 와 `.claude/settings.local.json` 접근 차단           |
 | `protect-routetree.sh`  | PreToolUse (Edit/Write)      | `routeTree.gen.ts` 편집 차단. 자동 생성 파일이다             |
 | `protect-main.sh`       | PreToolUse (Bash)            | `main` 에서의 커밋과 push, `main` 대상 push 차단             |
-| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 데이터 대조, 테스트. 실패하면 커밋 차단 |
+| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 데이터 대조, 테스트, react-doctor. 실패하면 커밋 차단 |
 | `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
 | `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
 | `md-style-guard.sh`     | PostToolUse (Edit/Write)     | 문서 스타일 규칙 검사                                        |
@@ -277,6 +277,8 @@ PAT 이 필요하다. `gh` 의 OAuth 토큰은 keyring 에 있어 환경변수�
 
 react-doctor 는 그 ADR 이 보류했다가 화면 코드가 서면서 들였다.
 `pnpm --filter web verify:react` 로 부르고 텔레메트리와 공급망 스캔을 끈 채 돈다.
+`pre-commit-check.sh` 가 커밋 직전에 이것을 부른다. 지적이 하나라도 있으면 막힌다.
+고칠 것이 아니라고 판단했으면 `react-doctor-disable-next-line` 을 근거와 함께 그 줄 위에 둔다.
 패키지가 싣는 에이전트 스킬은 붙이지 않는다. 실행 중에 원격 플레이북을 받아 따르게 되어 있다.
 근거는 [ADR 0020](docs/adr/0020-react-doctor-adopted.md) 이다.
 
