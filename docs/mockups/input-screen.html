@@ -319,8 +319,13 @@
     border-radius: 50%;
     background: var(--accent);
     content: '';
-    transform: scale(0);
-    transition: transform 0.12s;
+    /* scale(0) 이 아니다. 완전히 사라진 요소는 그리는 쪽이 건너뛰어
+       되살아날 때 한 프레임이 튄다. 작은 값에서 키우고 opacity 로 감춘다 */
+    transform: scale(0.5);
+    opacity: 0;
+    transition:
+      transform 0.12s,
+      opacity 0.12s;
   }
 
   .toggle input:checked + .dot {
@@ -328,6 +333,7 @@
   }
 
   .toggle input:checked + .dot::after {
+    opacity: 1;
     transform: scale(1);
   }
 

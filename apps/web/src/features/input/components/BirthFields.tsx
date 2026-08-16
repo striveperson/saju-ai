@@ -139,8 +139,10 @@ const BirthFields = ({
               checked={leapMonth}
               onChange={handleLeapChange}
             />
-            <span className="border-line-strong peer-checked:border-accent peer-checked:[&>span]:scale-100 peer-focus-visible:outline-accent grid size-[18px] place-items-center rounded-full border-[1.5px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
-              <span className="bg-accent size-[9px] scale-0 rounded-full transition-transform" />
+            {/* 점을 scale-0 에서 키우지 않는다. 완전히 사라진 요소는 그리는 쪽이 건너뛰어
+                되살아날 때 한 프레임이 튄다. 작은 값에서 키우고 opacity 로 감춘다 */}
+            <span className="border-line-strong peer-checked:border-accent peer-checked:[&>span]:scale-100 peer-checked:[&>span]:opacity-100 peer-focus-visible:outline-accent grid size-[18px] place-items-center rounded-full border-[1.5px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
+              <span className="bg-accent size-[9px] scale-50 rounded-full opacity-0 transition-[transform,opacity]" />
             </span>
             윤달
           </label>

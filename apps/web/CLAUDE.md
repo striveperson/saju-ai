@@ -25,7 +25,7 @@
 엔진만 빠르게 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
 node 환경이라 jsdom 을 띄우지 않는다.
 
-`verify:react` 는 react-doctor 진단이다. 조언이라 커밋 훅에 없고 필요할 때 부른다.
+`verify:react` 는 react-doctor 진단이다. 커밋 훅이 부르므로 지적이 남으면 커밋이 막힌다.
 플래그로 텔레메트리와 Socket.dev 공급망 스캔을 끈다. 지우지 않는다([ADR 0020](../../docs/adr/0020-react-doctor-adopted.md)).
 
 ## 계산 엔진

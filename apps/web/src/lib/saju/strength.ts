@@ -128,6 +128,8 @@ export function hasRoot(
   element: Element,
   branches: readonly EarthlyBranch[],
 ): boolean {
+  // 지지는 넷이고 지장간은 셋 이하다. Set 을 만드는 편이 비교 열두 번보다 비싸다
+  // react-doctor-disable-next-line react-doctor/js-set-map-lookups
   return branches.some((branch) => hiddenElements(branch).includes(element));
 }
 

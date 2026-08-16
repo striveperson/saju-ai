@@ -70,6 +70,12 @@ $(grep -vE "^>|^$" "$log" | tail -15)"
     deny "[pre-commit-check] 커밋 차단: apps/web 테스트 실패. 실패한 테스트를 고친 뒤 다시 커밋하세요:
 $(grep -E "FAIL|✕|Tests" "$log" | head -10)"
   fi
+  # react-doctor 진단. 지적이 하나라도 있으면 종료 코드가 1 이라 경고도 차단이 된다.
+  # 고칠 것이 아니라고 판단한 자리는 react-doctor-disable-next-line 으로 근거와 함께 끈다.
+  if ! pnpm --filter web verify:react >"$log" 2>&1; then
+    deny "[pre-commit-check] 커밋 차단: react-doctor 진단 실패. 고치거나 근거와 함께 끄세요:
+$(grep -E "^⚠|^  [a-z-]+/|^  (src|package)" "$log" | head -20)"
+  fi
 fi
 
 exit 0

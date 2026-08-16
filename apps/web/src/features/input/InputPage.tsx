@@ -96,6 +96,7 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
   });
 
   // watch 가 아니라 useWatch 다. watch 는 렌더 중에 부르는 구독이라
+  // react-doctor-disable-next-line react-hooks-js/incompatible-library
   // React Compiler 가 이 컴포넌트의 메모이제이션을 통째로 건너뛴다
   // 이름을 하나하나 적는다. 통째로 받으면 타입이 DeepPartial 이 되어
   // 값마다 없을 때를 다루게 되는데, defaultValues 가 넷 다 채워 두고 있다

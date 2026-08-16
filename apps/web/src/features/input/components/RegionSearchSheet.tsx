@@ -64,6 +64,8 @@ const RegionSearchSheet = ({ onSelect, onClose }: RegionSearchSheetProps) => {
         onClick={onClose}
       />
 
+      {/* jsdom 에 showModal 이 없어 dialog 를 못 쓴다. 테스트가 시트를 열지 못한다 */}
+      {/* react-doctor-disable-next-line react-doctor/prefer-html-dialog */}
       <section
         role="dialog"
         aria-modal="true"
