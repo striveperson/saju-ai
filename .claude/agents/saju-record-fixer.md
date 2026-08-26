@@ -44,7 +44,7 @@ tools: Read, Edit, Grep, Glob
 목록의 자리는 예시이고 항목의 범위는 부류다. 부류로 확장해 고친 자리는 보고에 전부 적는다.
 목록이 자리 하나를 못 박았으면 그 자리만 고친다.
 
-문서 문장을 새로 쓰게 되면 [docs/00](../../docs/00-documentation-guide.md) 5장을 먼저 읽는다.
+문서 문장을 새로 쓰게 되면 [.claude/rules/markdown-style.md](../rules/markdown-style.md) 를 먼저 읽는다.
 근거 없는 형용사, 메타 서술, 번역투, 말미 요약이 거기 있다.
 `docs/05` 는 SSOT 라 문장 하나가 다음 작업의 근거가 된다.
 

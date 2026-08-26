@@ -160,17 +160,11 @@ Gemini Flash Lite, Vercel 배포다.
 ## 문서와 마크다운 규칙
 
 문서(`*.md`)와 Claude 의 마크다운 답변 모두에 적용한다.
-canonical 목록은 [docs/00-documentation-guide.md](docs/00-documentation-guide.md) 5장이다.
+규칙 목록은 [.claude/rules/markdown-style.md](.claude/rules/markdown-style.md) 에 있다.
+`format-` 열, `structure-` 일곱, `tone-` 여섯이고 각 줄이 그 자체로 실행 가능한 지시다.
+`*.md` 를 건드릴 때 자동으로 붙는다.
 
-기계적으로 검사되는 것은 `md-style-guard.sh` 훅이 저장할 때 잡는다.
-em dash, 이모지, 번호 목록 안의 굵은 강조, 취소선, 한 줄에 짝을 이루는 물결표 다섯이다.
-규칙을 설명하느라 그 문자를 써야 하는 줄에는 `<!-- md-allow -->` 를 붙인다.
-
-굵은 강조(`**`)는 어겨서는 안 되는 규칙에만 쓴다. 한 문서에 두세 번을 넘기면 남용이다.
-
-정규식으로 검사할 수 없는 문장 규칙은 `writing-style` 스킬에 있다.
-근거 없는 형용사, 메타 서술, 문장 구조 반복, 번역투, 말미 요약 같은 것들이다.
-문서를 새로 쓰거나 크게 고칠 때, 긴 설명형 답변을 쓸 때 그 스킬을 부른다.
+검사하는 도구는 없다. 그 파일이 전부다.
 
 ## 스킬 (`.claude/skills/`)
 
@@ -178,7 +172,6 @@ em dash, 이모지, 번호 목록 안의 굵은 강조, 취소선, 한 줄에 �
   단계마다 담당과 넘어가는 조건이 있다. 부를 때만 적용되고 오타나 한 줄 변경에는 쓰지 않는다.
 - `frontend`: 화면 코드의 고치기 전후 예시와 체크리스트.
   규칙 목록은 [docs/03](docs/03-frontend-rules.md) 이고 이 스킬은 적용을 담당한다.
-- `writing-style`: 문장 규칙과 고치기 전후 예시. 훅이 잡지 못하는 항목을 담당한다.
 - `commit`: 커밋 메시지 규칙과 scope 목록. 메시지만 만들고 커밋은 하지 않는다.
 - `pr`: PR 본문을 쓰고 github MCP 로 올린다. 병합은 하지 않는다.
 - `validate-loop`: 검증기가 낸 기록 항목을 라운드로 정리한다. 종료 조건은 스킬에 있다.
