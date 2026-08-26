@@ -41,17 +41,11 @@ node 환경이라 jsdom 을 띄우지 않는다.
 - 규칙의 SSOT 는 [docs/05-saju-domain-rules.md](../../docs/05-saju-domain-rules.md) 다.
   코드와 어긋나면 코드가 틀린 것으로 간주한다.
 
-이 제약은 lint 와 훅 세 겹으로 강제된다.
+앞의 둘은 `.oxlintrc.json` 의 `overrides` 가 막는다. 규칙 목록은 README 의 표에 있다.
 
-| 수단                              | 담당           | 위치                            |
-| --------------------------------- | -------------- | ------------------------------- |
-| oxlint `no-restricted-imports`    | import 경계    | `.oxlintrc.json` 의 `overrides` |
-| oxlint `no-unnecessary-condition` | 도달 불가 분기 | `.oxlintrc.json` 의 `rules`     |
-| `saju-engine-purity.sh`           | 환경 의존 호출 | `.claude/hooks/`                |
-
-둘째는 타입 정보가 있어야 판정할 수 있어 tsgolint 가 돌린다.
-판정 함수에 절대 걸리지 않는 분기나 항상 참인 조건이 있으면 잡는다.
-예외가 터지는 대신 틀린 간지가 조용히 나가는 실패를 겨냥한 것이다.
+거기에 `no-unnecessary-condition` 이 하나 더 걸린다.
+타입 정보가 있어야 판정할 수 있어 tsgolint 가 돌리고, 판정 함수에 절대 걸리지 않는 분기나
+항상 참인 조건이 있으면 잡는다. 예외가 터지는 대신 틀린 간지가 조용히 나가는 실패를 겨냥한 것이다.
 
 테스트 파일은 `no-restricted-imports` 예외라 vitest 를 import 할 수 있다.
 소스 파일은 예외가 아니다.

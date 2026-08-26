@@ -21,19 +21,19 @@
 `apps/web/scripts/build-terms-table.mjs` 가 만든다. 근거는
 [ADR 0014](../../../../../docs/adr/0014-kasi-data-bundled-not-fetched.md).
 
-현재 시각과 실행 환경 타임존을 읽지 않는다.
-`Date.now()`, 인자 없는 `new Date()`, `Math.random()`, `getTimezoneOffset()`,
-`toLocale*`, `Intl.DateTimeFormat`, `process.env` 를 쓰지 않는다.
-시각은 항상 인자로 받는다.
+현재 시각과 실행 환경 타임존을 읽지 않는다. 시각은 항상 인자로 받는다.
 
-이 제약은 두 겹으로 강제된다.
+둘 다 `apps/web/.oxlintrc.json` 의 `overrides` 가 막는다.
 
-| 수단 | 담당           | 위치                                     |
-| ---- | -------------- | ---------------------------------------- |
-| lint | import 경계    | `apps/web/.oxlintrc.json` 의 `overrides` |
-| 훅   | 환경 의존 호출 | `.claude/hooks/saju-engine-purity.sh`    |
+| 규칙                       | 담당                                                                            |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| `no-restricted-imports`    | 상대 경로가 아닌 import                                                         |
+| `no-restricted-globals`    | `Date`, `Intl`, `performance`, `crypto`, `navigator`, `globalThis`              |
+| `no-restricted-properties` | `Math.random`, `process.env`, `getTimezoneOffset`, `toLocale*`, `localeCompare` |
 
-정당한 예외가 있으면 같은 줄에 `hook-allow` 와 사유를 주석으로 남긴다.
+규칙을 끄는 예외는 `data/solar-terms.test.ts` 하나다. 정답지 대조에 `Date.parse` 를 쓴다.
+다른 테스트 파일은 소스와 같은 규칙을 받는다.
+그 밖에 정당한 예외가 있으면 `oxlint-disable-next-line` 에 사유를 적어 통과시킨다.
 
 근거는 [ADR 0005](../../../../../docs/adr/0005-rule-engine-plus-llm-interpretation.md) 와
 [ADR 0013](../../../../../docs/adr/0013-saju-engine-purity-enforcement.md) 이다.
@@ -59,6 +59,9 @@ pnpm --filter web exec vitest run --project saju
 
 테스트 파일은 `no-restricted-imports` 예외라 vitest 를 import 할 수 있다.
 소스 파일은 예외가 아니다.
+
+`pnpm --filter web verify:tz` 는 같은 테스트를 `TZ=UTC` 로 한 번 더 돌린다.
+두 타임존의 결과가 갈리면 엔진이 실행 환경을 읽은 것이다.
 
 경계 케이스 테스트는 선택이 아니다.
 필수 목록은 [`docs/05-saju-domain-rules.md`](../../../../../docs/05-saju-domain-rules.md) 10장에 있다.

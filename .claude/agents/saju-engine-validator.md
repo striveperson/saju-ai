@@ -55,7 +55,7 @@ git diff --stat main...HEAD -- apps/web/src/lib/saju
 | 항목                            | 담당                                  |
 | ------------------------------- | ------------------------------------- |
 | import 경계                     | oxlint `no-restricted-imports`        |
-| 환경 의존 호출                  | `.claude/hooks/saju-engine-purity.sh` |
+| 환경 의존 호출                  | oxlint `no-restricted-globals` 와 `no-restricted-properties` |
 | 도달 불가 분기와 항상 참인 조건 | oxlint `no-unnecessary-condition`     |
 | 픽스처 회귀                     | vitest `saju` 프로젝트                |
 | 타입으로 잠근 계약              | tsc `--noEmit`                        |
@@ -111,8 +111,8 @@ pnpm --filter web exec tsc --noEmit
   절기 데이터가 없는 1900년 이전과 2100년 이후, 표준시가 없던 1908년 4월 이전이다
 - 같은 순간을 다른 표현으로 비교하고 있지 않은가.
   절입 시각 데이터의 기준과 입력 인스턴트의 기준이 같은지, 초나 밀리초를 한쪽만
-  절삭하고 비교하지 않는지 본다. 로컬 타임존 의존은 purity 훅이 잡지만 이 유형은
-  lint 로 잡히지 않고 경계에서만 하루씩 밀린다
+  절삭하고 비교하지 않는지 본다. 환경 의존 호출은 lint 가 잡지만 이 유형은
+  어떤 규칙으로도 잡히지 않고 경계에서만 하루씩 밀린다
 - 나머지 연산에 음수가 들어갈 수 있는가.
   JS `%` 는 음수를 그대로 반환한다. 60갑자 인덱스와 대운수처럼 역산이 있는 계산은
   `((n % m) + m) % m` 형태로 감싸져 있어야 한다. 감싸지 않으면 1900년 이전과

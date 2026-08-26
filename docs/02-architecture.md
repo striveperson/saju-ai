@@ -128,7 +128,7 @@ saju-ai/
 
 `packages/` 공유 패키지를 두지 않는 이유는 계산 엔진의 소비자가 웹 하나뿐이기 때문이다
 ([ADR 0001](adr/0001-monorepo-pnpm-workspaces.md)).
-패키지 경계가 없으므로 엔진의 순수성은 lint 규칙과 훅으로 강제한다
+패키지 경계가 없으므로 엔진의 순수성은 lint 규칙으로 강제한다
 ([ADR 0013](adr/0013-saju-engine-purity-enforcement.md)).
 
 ## 5. 데이터
