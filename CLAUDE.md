@@ -153,7 +153,7 @@ Gemini Flash Lite, Vercel 배포다.
 | 모호한 벽시계 해석 | `ambiguityChoice`         | `earlier`      |
 | 지원 세력 범위     | `supportIncludesResource` | true           |
 
-대운수 나머지 처리는 이 표에 있었으나 뺐다. 가르는 검증 케이스가 없어
+대운수 나머지 처리는 옵션으로 두지 않는다. 가르는 검증 케이스가 없어
 옵션으로 두면 근거 없이 다른 값을 내는 경로가 남는다. 근거는
 [docs/05](docs/05-saju-domain-rules.md) 9.1 이다.
 
@@ -225,7 +225,7 @@ PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 di
 | `supabase`   | 스키마와 RLS 작업                                  | 서버 작업 시작할 때 |
 | `vercel`     | 배포와 빌드 로그                                   | 붙일 때가 됐다      |
 
-`vercel` 이 앞당겨졌다. 출생지 검색이 서버 라우트를 타면서 앱이 부를 대상이 배포되어 있어야 한다
+`vercel` 은 출생지 검색이 서버 라우트를 타면서 필요해졌다. 앱이 부를 대상이 배포되어 있어야 한다
 ([ADR 0019](docs/adr/0019-region-lookup-via-address-api.md)).
 
 TanStack Start 는 버전이 빠르게 움직인다. API 를 추측하지 말고 `context7` 로 확인한다.
@@ -333,5 +333,3 @@ tz database 로 결정되는 값이라 만세력을 기다릴 이유가 없다.
 
 에이전트는 `saju-engine-validator`, `saju-screen-validator`, `saju-record-fixer` 셋이고
 커스텀 커맨드는 아직 없다. 대상이 생길 때 만든다.
-`/Users/mychoi/f-lab/saju` 의 `saju-calc` 스킬과 `saju-master` 에이전트는 가져오지 않았다.
-검증 쪽은 이미 자리가 찼고, 계산 쪽은 이 저장소의 순수 함수와 픽스처가 담당한다.
