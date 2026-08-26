@@ -642,8 +642,8 @@ CDN 을 무효화해도 브라우저 캐시는 지워지지 않는다. 파일명
 | 도달 불가 분기 | tsgolint `no-unnecessary-condition` |
 | 타입 계약 | `tsc --noEmit` |
 | 포맷 | oxfmt, `format-file.sh` 훅 |
-| 자동 생성 라우트 트리 편집 | `protect-routetree.sh` 훅 |
-| 엔진의 환경 의존 호출 | `saju-engine-purity.sh` 훅 |
+| 자동 생성 라우트 트리 편집 | `permissions.deny` |
+| 엔진의 환경 의존 호출 | oxlint `no-restricted-globals`, `no-restricted-properties` |
 | 표기 의무와 목업 대조 | `saju-screen-validator` 에이전트 |
 
 eslint 와 prettier 는 쓰지 않는다. oxlint 와 oxfmt 가 그 자리에 있다.

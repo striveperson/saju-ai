@@ -38,7 +38,7 @@ devtools 계열 여덟은 플러그인을 만들어 배포하는 쪽이라 소�
 
 공식 스킬은 우리 규약을 모른다. 아래 넷은 스킬이 뭐라고 적혀 있든 우리 쪽이 이긴다.
 
-- `routeTree.gen.ts` 를 편집하지 않는다. 자동 생성 파일이고 `protect-routetree.sh` 가 막는다
+- `routeTree.gen.ts` 를 편집하지 않는다. 자동 생성 파일이고 `permissions.deny` 가 막는다
 - 생년월일시를 검색 파라미터에 넣지 않는다. 개인정보이고 리퍼러와 서버 로그에 남는다
   ([docs/03](../../../docs/03-frontend-rules.md) 5.1). 지면 사이로 넘기는 것은
   `getRouter()` 가 만들어 라우터 컨텍스트에 실은 zustand 스토어다

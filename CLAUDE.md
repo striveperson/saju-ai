@@ -48,24 +48,25 @@ Gemini Flash Lite, Vercel 배포다.
 번들된 만세력 데이터가 원본과 어긋나는지는 `pnpm --filter web verify:data` 가 본다.
 음력표를 다시 구웠을 때 한 해 안에서 상쇄되는 오류는 vitest 가 잡지 못한다.
 접힌 표에서는 달 크기가 해 단위 합으로만 확인되기 때문이다.
-`pre-commit-check.sh` 가 커밋 직전에 이 스크립트를 부른다.
 표준시 이력을 고쳤을 때 쓰는 `dump-tzdb-seoul.mjs --check` 는 아직 여기 붙지 않았다.
 
-## 훅 (`.claude/hooks/`, 설정은 `.claude/settings.json`)
+## 자동으로 도는 것
 
-| 훅                      | 시점                         | 하는 일                                                      |
-| ----------------------- | ---------------------------- | ------------------------------------------------------------ |
-| `protect-env.sh`        | PreToolUse (Read/Edit/Write) | `.env*` 와 `.claude/settings.local.json` 접근 차단           |
-| `protect-routetree.sh`  | PreToolUse (Edit/Write)      | `routeTree.gen.ts` 편집 차단. 자동 생성 파일이다             |
-| `protect-main.sh`       | PreToolUse (Bash)            | `main` 에서의 커밋과 push, `main` 대상 push 차단             |
-| `pre-commit-check.sh`   | PreToolUse (Bash)            | `git commit` 직전 타입체크, lint, 데이터 대조, 테스트, react-doctor. 실패하면 커밋 차단 |
-| `format-file.sh`        | PostToolUse (Edit/Write)     | oxfmt 자동 포맷 + oxlint --fix                               |
-| `saju-engine-purity.sh` | PostToolUse (Edit/Write)     | 엔진의 환경 의존 호출 차단                                   |
-| `md-style-guard.sh`     | PostToolUse (Edit/Write)     | 문서 스타일 규칙 검사                                        |
-| `saju-validate-gate.sh` | Stop                         | 엔진 변경이 남아 있으면 검증 에이전트를 부르게 한다          |
+| 수단                           | 시점          | 하는 일                                                              |
+| ------------------------------ | ------------- | -------------------------------------------------------------------- |
+| `permissions.deny`             | 도구 실행 전  | `.env*`, `.claude/settings.local.json`, `routeTree.gen.ts` 접근 차단 |
+| `.claude/hooks/format-file.sh` | 편집 직후     | oxfmt 자동 포맷 + oxlint --fix                                       |
 
-계산 엔진의 import 경계는 훅이 아니라 oxlint 가 막는다.
-`apps/web/.oxlintrc.json` 의 `overrides` 에서 `src/lib/saju/**` 에 `no-restricted-imports` 를 건다.
+둘 다 Claude 안에서만 돈다. git hook 은 두지 않는다.
+`main` 브랜치는 GitHub 의 브랜치 보호 규칙이 막는다.
+
+타입체크와 lint 와 테스트, `verify:data`, `verify:tz` 는 자동으로 돌지 않는다.
+커밋 전에 직접 돌린다. CI 는 아직 없다.
+
+계산 엔진의 순수성은 oxlint 가 막는다. `apps/web/.oxlintrc.json` 의 `overrides` 에서
+`src/lib/saju/**` 에 import 경계와 환경 의존 호출을 건다.
+구문으로 잡히지 않는 우회는 `verify:tz` 가 값으로 본다.
+규칙 목록과 예외는 [ADR 0013](docs/adr/0013-saju-engine-purity-enforcement.md) 에 있다.
 
 ## 어겨서는 안 되는 규칙
 
@@ -121,7 +122,7 @@ Gemini Flash Lite, Vercel 배포다.
   클라이언트로 새지 않도록 `VITE_` 접두사를 붙이지 않는다. 서버 라우트 안에서만 읽는다.
   출생지 검색이 쓰는 `KAKAO_REST_API_KEY` 가 그것이다([ADR 0019](docs/adr/0019-region-lookup-via-address-api.md)).
 - 시크릿이 들어가는 파일은 사용자가 직접 관리한다. 읽거나 수정하지 않는다.
-  `.env*` 와 `.claude/settings.local.json` 둘이며, `protect-env.sh` 훅이 접근을 차단한다.
+  `.env*` 와 `.claude/settings.local.json` 둘이며, `permissions.deny` 가 읽기와 편집을 막는다.
 - `.mcp.json` 의 `${VAR}` 확장은 harness 가 처리한다.
   Claude 가 토큰 값을 볼 일이 없고, 볼 필요도 없다.
 
@@ -216,16 +217,8 @@ PR 본문은 고정 양식이 아니다. 요약만 항상 쓰고 나머지는 di
 편집 분량이 메인 컨텍스트에 쌓이지 않는 것도 얻는다. 라운드가 여럿 도는 작업이라 그것이 크다.
 대신 지시가 모호하면 실행자가 멈추고 돌려주므로 대장을 정확히 적어야 한다.
 
-엔진 검증기를 부르는 것은 `saju-validate-gate.sh` 가 챙긴다.
-`apps/web/src/lib/saju` 가 바뀐 채로 턴이 끝나려 하면 종료를 막고 검증기를 부르게 한다.
-편집마다가 아니라 턴이 끝날 때 한 번이다. 구현 중간의 미완성 코드를 검증해봐야 지적만 쌓인다.
-같은 변경 내용으로는 한 번만 막고, 커밋만 하고 넘어가는 경로를 막으려고
-워킹트리뿐 아니라 `main...HEAD` 도 함께 본다.
-건너뛰어야 하면 `SAJU_SKIP_VALIDATE=1` 을 준다.
-
-화면 검증기에는 훅이 없다. `feature` 스킬의 4단계가 부른다.
-엔진은 틀린 간지가 조용히 나가서 사람 눈으로 잡을 방법이 없지만
-화면은 목업과 나란히 놓고 볼 수 있다. 그 차이만큼 강제 수단을 덜 둔다.
+검증기 둘 다 `feature` 스킬의 4단계가 부른다. 강제하는 훅은 없다.
+구현을 끝낸 자리에서 한 번 부른다. 중간의 미완성 코드를 검증해봐야 지적만 쌓인다.
 
 ## MCP 서버 (`.mcp.json`)
 
@@ -297,9 +290,7 @@ react-doctor 는 그 ADR 이 보류했다가 화면 코드가 서면서 들였�
 
 - 브랜치: `feature/<요약>`, `fix/<요약>`, `chore/<요약>`
 - `main` 에 직접 push 하지 않는다. PR 을 거친다.
-  GitHub 의 브랜치 보호 규칙은 걸려 있지 않고 `protect-main.sh` 훅이 그 자리를 대신한다.
-  `main` 에서의 커밋과 push, 다른 브랜치에서 `main` 을 대상으로 하는 push 를 막는다.
-  사람이 판단해 `main` 을 직접 고쳐야 하면 명령에 `# allow-main` 을 붙인다.
+  GitHub 의 브랜치 보호 규칙이 `main` 에 걸려 있다.
 - 커밋과 push 는 명시적으로 요청받았을 때만 한다.
   `permissions.ask` 에 걸려 있어 매번 확인 프롬프트가 뜬다.
 - 커밋: Conventional Commits 규격에 한국어 본문.
