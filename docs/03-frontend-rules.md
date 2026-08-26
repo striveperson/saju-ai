@@ -5,10 +5,6 @@
 스택은 TanStack Start, TanStack Router, TanStack Query, React 19, Tailwind 4 다.
 버전은 `apps/web/package.json` 에 있고 고정되어 있다.
 
-출처는 멘토링 정리본이다. 저장소 밖에서 쓰인 문서라 여기 없는 도구와
-ADR 이 금지한 것이 섞여 있었고, 덜어내고 옮겼다. 무엇을 왜 뺐는지는
-[ADR 0018](adr/0018-frontend-rules-selective-port.md) 에 있다.
-
 이 문서는 코드 규칙만 정한다. 무엇이 어디에 어떤 값으로 나오는지는
 `docs/mockups/` 의 HTML 이 정답지다.
 
@@ -409,8 +405,8 @@ API 라우트는 입력을 검증한다. 비밀키와 DB 접근은 그 안에서
 
 하이드레이션이 어긋나는 값을 첫 렌더에 넣지 않는다.
 `Math.random()`, `Date.now()`, 로케일에 따라 달라지는 포맷이 그것이다.
-계산 엔진은 애초에 이 셋을 쓰지 않고 훅이 막는다([ADR 0013](adr/0013-saju-engine-purity-enforcement.md)).
-화면 코드에는 그 훅이 걸리지 않으므로 사람이 지킨다.
+계산 엔진은 애초에 이 셋을 쓰지 않고 lint 가 막는다([ADR 0013](adr/0013-saju-engine-purity-enforcement.md)).
+그 규칙은 `src/lib/saju/**` 에만 걸리므로 화면 코드에서는 사람이 지킨다.
 
 클라이언트에서만 도는 컴포넌트는 SSR 을 끄거나 마운트 이후에 그린다.
 
@@ -642,8 +638,8 @@ CDN 을 무효화해도 브라우저 캐시는 지워지지 않는다. 파일명
 | 도달 불가 분기 | tsgolint `no-unnecessary-condition` |
 | 타입 계약 | `tsc --noEmit` |
 | 포맷 | oxfmt, `format-file.sh` 훅 |
-| 자동 생성 라우트 트리 편집 | `protect-routetree.sh` 훅 |
-| 엔진의 환경 의존 호출 | `saju-engine-purity.sh` 훅 |
+| 자동 생성 라우트 트리 편집 | `permissions.deny` |
+| 엔진의 환경 의존 호출 | oxlint `no-restricted-globals`, `no-restricted-properties` |
 | 표기 의무와 목업 대조 | `saju-screen-validator` 에이전트 |
 
 eslint 와 prettier 는 쓰지 않는다. oxlint 와 oxfmt 가 그 자리에 있다.

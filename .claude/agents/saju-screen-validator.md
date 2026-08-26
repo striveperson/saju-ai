@@ -73,7 +73,7 @@ git diff --stat main...HEAD -- apps/web/src ':!apps/web/src/lib/saju'
 | 쿼리 사용 | oxlint `@tanstack/query/*` |
 | 타입 계약과 총망라 여부 | tsc `--noEmit` |
 | 렌더 회귀 | vitest `web` 프로젝트 |
-| 자동 생성 라우트 트리 편집 | `.claude/hooks/protect-routetree.sh` |
+| 자동 생성 라우트 트리 편집 | `permissions.deny` |
 | 포맷 | `.claude/hooks/format-file.sh` |
 
 각각 한 번 돌려 현재 상태만 확인한다.

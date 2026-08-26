@@ -63,8 +63,7 @@ base 는 `main` 이다. 커밋이 하나면 그 제목을 PR 제목으로 쓴다
 ## 넣지 않는 것
 
 - 파일 목록과 변경 내용 나열. PR 페이지가 커밋과 diff 를 이미 보여준다
-- 검증 체크리스트. `pnpm typecheck`, `lint`, `test` 는 통과해야 push 하는 것이고
-  `pre-commit-check.sh` 가 이미 막는다
+- 검증 체크리스트. `pnpm typecheck`, `lint`, `test` 는 통과해야 push 하는 것이다
 - 규약 준수 체크박스. 시크릿과 개인정보, 문서 동시 변경 같은 것은
   훅과 lint 가 강제한다. 자기 신고로 대신하지 않는다
 - 테스트 방법. 리뷰어가 직접 재현해야 할 절차가 있을 때만 쓴다.
@@ -77,4 +76,4 @@ base 는 `main` 이다. 커밋이 하나면 그 제목을 PR 제목으로 쓴다
 - PR 생성까지 한다. 병합은 별도 지시가 있을 때만 한다
 - 리뷰 코멘트는 `pull_request_review_write` 로 pending review 를 만들고
   `add_comment_to_pending_review` 로 채운 뒤 제출한다
-- 브랜치 보호 규칙은 아직 걸려 있지 않다. 규칙이 없다고 `main` 에 직접 올리지 않는다
+- `main` 에 브랜치 보호 규칙이 걸려 있다. 직접 올리지 않고 PR 을 거친다

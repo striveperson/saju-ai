@@ -25,8 +25,8 @@
 엔진만 빠르게 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
 node 환경이라 jsdom 을 띄우지 않는다.
 
-`verify:react` 는 react-doctor 진단이다. 커밋 훅이 부르므로 지적이 남으면 커밋이 막힌다.
-플래그로 텔레메트리와 Socket.dev 공급망 스캔을 끈다. 지우지 않는다([ADR 0020](../../docs/adr/0020-react-doctor-adopted.md)).
+`verify:tz` 는 엔진 테스트를 `TZ=UTC` 로 다시 돌린다. lint 의 구문 검사를 우회해
+실행 환경을 읽는 코드가 들어가면 두 타임존의 결과가 갈린다.
 
 ## 계산 엔진
 
@@ -41,17 +41,11 @@ node 환경이라 jsdom 을 띄우지 않는다.
 - 규칙의 SSOT 는 [docs/05-saju-domain-rules.md](../../docs/05-saju-domain-rules.md) 다.
   코드와 어긋나면 코드가 틀린 것으로 간주한다.
 
-이 제약은 lint 와 훅 세 겹으로 강제된다.
+앞의 둘은 `.oxlintrc.json` 의 `overrides` 가 막는다. 규칙 목록은 README 의 표에 있다.
 
-| 수단                              | 담당           | 위치                            |
-| --------------------------------- | -------------- | ------------------------------- |
-| oxlint `no-restricted-imports`    | import 경계    | `.oxlintrc.json` 의 `overrides` |
-| oxlint `no-unnecessary-condition` | 도달 불가 분기 | `.oxlintrc.json` 의 `rules`     |
-| `saju-engine-purity.sh`           | 환경 의존 호출 | `.claude/hooks/`                |
-
-둘째는 타입 정보가 있어야 판정할 수 있어 tsgolint 가 돌린다.
-판정 함수에 절대 걸리지 않는 분기나 항상 참인 조건이 있으면 잡는다.
-예외가 터지는 대신 틀린 간지가 조용히 나가는 실패를 겨냥한 것이다.
+거기에 `no-unnecessary-condition` 이 하나 더 걸린다.
+타입 정보가 있어야 판정할 수 있어 tsgolint 가 돌리고, 판정 함수에 절대 걸리지 않는 분기나
+항상 참인 조건이 있으면 잡는다. 예외가 터지는 대신 틀린 간지가 조용히 나가는 실패를 겨냥한 것이다.
 
 테스트 파일은 `no-restricted-imports` 예외라 vitest 를 import 할 수 있다.
 소스 파일은 예외가 아니다.
@@ -88,8 +82,15 @@ React Compiler 가 켜져 있다.
 
 ## 커밋 전
 
-`pre-commit-check.sh` 훅이 `git commit` 직전에 타입체크, lint, 데이터 대조, 테스트를 돌리고
-하나라도 실패하면 커밋을 차단한다. 미리 확인하려면 네 개를 직접 돌린다.
+자동으로 도는 검사가 없다. 커밋 전에 직접 돌린다.
+
+```bash
+pnpm --filter web typecheck
+pnpm --filter web lint
+pnpm --filter web test
+pnpm --filter web verify:data
+pnpm --filter web verify:tz
+```
 
 데이터 대조는 `verify:data` 다. 번들된 음력표가 원본 KASI 표에서 다시 재현되는지,
 초하루가 계산한 합삭과 맞는지 본다. 순수 node 라 python 이나 네트워크를 타지 않는다.

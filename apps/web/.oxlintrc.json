@@ -41,6 +41,66 @@
               }
             ]
           }
+        ],
+        "no-restricted-globals": [
+          "error",
+          {
+            "name": "Date",
+            "message": "엔진은 Date 를 쓰지 않는다. 시각은 인자로 받고 달력 산술은 calendar.ts 의 정수 연산을 쓴다. docs/adr/0013 참고."
+          },
+          {
+            "name": "globalThis",
+            "message": "전역 객체를 거치면 다른 금지 규칙을 우회한다. docs/adr/0013 참고."
+          },
+          {
+            "name": "Intl",
+            "message": "기본값이 실행 환경 로캘과 타임존이다. docs/adr/0013 참고."
+          },
+          {
+            "name": "performance",
+            "message": "현재 시각을 읽는다. 시각은 인자로 받는다. docs/adr/0013 참고."
+          },
+          {
+            "name": "crypto",
+            "message": "재현되지 않는 값을 낸다. docs/adr/0013 참고."
+          },
+          {
+            "name": "navigator",
+            "message": "실행 환경에 의존한다. docs/adr/0013 참고."
+          }
+        ],
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "재현되지 않는 값이다. docs/adr/0013 참고."
+          },
+          {
+            "object": "process",
+            "property": "env",
+            "message": "실행 환경에 의존한다. docs/adr/0013 참고."
+          },
+          {
+            "property": "getTimezoneOffset",
+            "message": "실행 환경 타임존에 의존한다. docs/adr/0013 참고."
+          },
+          {
+            "property": "toLocaleString",
+            "message": "실행 환경 로캘과 타임존에 의존한다. docs/adr/0013 참고."
+          },
+          {
+            "property": "toLocaleDateString",
+            "message": "실행 환경 로캘과 타임존에 의존한다. docs/adr/0013 참고."
+          },
+          {
+            "property": "toLocaleTimeString",
+            "message": "실행 환경 로캘과 타임존에 의존한다. docs/adr/0013 참고."
+          },
+          {
+            "property": "localeCompare",
+            "message": "실행 환경 로캘에 의존한다. 간지와 오행 정렬은 인덱스로 한다. docs/adr/0013 참고."
+          }
         ]
       }
     },
@@ -48,6 +108,13 @@
       "files": ["src/lib/saju/**/*.test.ts"],
       "rules": {
         "no-restricted-imports": "off"
+      }
+    },
+    {
+      "files": ["src/lib/saju/data/solar-terms.test.ts"],
+      "rules": {
+        "no-restricted-globals": "off",
+        "no-restricted-properties": "off"
       }
     }
   ],

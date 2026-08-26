@@ -19,7 +19,7 @@ pnpm exec intent load @tanstack/router-core#router-core/navigation   본문
 ```
 
 `pnpm dlx @tanstack/intent@latest` 를 쓰지 않는다. 그 형태가 매번 최신을 받아 와
-의존성 트리가 고정되지 않는다([ADR 0017](../../../docs/adr/0017-external-agent-collections-selective-port.md)).
+의존성 트리가 고정되지 않는다.
 루트 devDependency 로 박아 두었으므로 `pnpm exec` 로 부른다.
 
 보이는 것은 루트 `package.json` 의 `intent.skills` 가 정한다. 허용 목록이다.
@@ -38,7 +38,7 @@ devtools 계열 여덟은 플러그인을 만들어 배포하는 쪽이라 소�
 
 공식 스킬은 우리 규약을 모른다. 아래 넷은 스킬이 뭐라고 적혀 있든 우리 쪽이 이긴다.
 
-- `routeTree.gen.ts` 를 편집하지 않는다. 자동 생성 파일이고 `protect-routetree.sh` 가 막는다
+- `routeTree.gen.ts` 를 편집하지 않는다. 자동 생성 파일이고 `permissions.deny` 가 막는다
 - 생년월일시를 검색 파라미터에 넣지 않는다. 개인정보이고 리퍼러와 서버 로그에 남는다
   ([docs/03](../../../docs/03-frontend-rules.md) 5.1). 지면 사이로 넘기는 것은
   `getRouter()` 가 만들어 라우터 컨텍스트에 실은 zustand 스토어다
@@ -55,7 +55,7 @@ React Query 를 외부 캐시로 쓸 때의 공식 권장 조합이고 다시 �
 - `intent install` 을 돌리지 않았다. 그 명령은 `AGENTS.md` 에 안내를 쓰는데
   이 저장소에 없는 파일이고 Claude Code 가 읽는 것은 `CLAUDE.md` 다.
   `--map` 은 31개를 전부 적어 99줄이 되고, 그중 대부분이 우리와 무관하다.
-  안 쓰는 설명문이 매 세션 로드되는 것을 ADR 0017 이 통째 설치를 거부한 이유로 들었다
+  에이전트와 스킬은 설명문이 매칭용으로 로드되므로 안 쓰는 것도 비용이다
 - 스킬이 패키지보다 뒤처진다. frontmatter 가 `1.166.2` 를 가리키는데
   설치된 `router-core` 는 `1.171.14` 다. 최신 API 는 여전히 `context7` 로 확인한다
 - React Query 는 스킬을 배포하지 않는다. 2026-08-16 에 `5.101.4` 배포본을 받아 확인했다.

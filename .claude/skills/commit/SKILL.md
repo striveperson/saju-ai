@@ -100,7 +100,6 @@ calculateSaju({ birthedAt, gender, options }) 로 바꿔야 한다.
 메시지만 만든다. `git add`, `git commit`, `git commit --amend` 를 실행하지 않는다.
 붙여넣을 수 있는 코드 블록으로 출력한다.
 
-`git commit` 은 `.claude/hooks/pre-commit-check.sh` 가 가로채 타입체크와 lint 와 테스트를 돌린다.
-차단당하면 메시지를 고칠 것이 아니라 코드를 고쳐야 한다.
+타입체크와 lint 와 테스트는 커밋 전에 직접 돌린다.
 
 "이번엔 평소대로" 라고 하면 이 규칙을 적용하지 않는다.

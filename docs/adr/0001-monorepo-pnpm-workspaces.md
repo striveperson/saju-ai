@@ -36,7 +36,7 @@ saju-ai/
 - 워크스페이스가 필요한 진짜 이유는 코드 공유가 아니라 의존성 트리 분리다.
   Capacitor 와 네이티브 툴링 의존성이 웹 빌드와 같은 `package.json` 에 섞이면 안 된다.
 - 소비자가 하나뿐인 코드를 패키지로 빼면 얻는 것은 의존성 경계 강제 하나뿐인데,
-  그것은 lint 규칙과 훅으로도 얻을 수 있다([ADR 0013](0013-saju-engine-purity-enforcement.md)).
+  그것은 lint 규칙으로도 얻을 수 있다([ADR 0013](0013-saju-engine-purity-enforcement.md)).
   대신 설정 파일, tsconfig 경로, 빌드 순서라는 비용은 지금 당장 발생한다.
 - 두 앱이 서로 의존하지 않으므로 빌드 순서 문제가 없다.
   Turborepo 의 태스크 오케스트레이션과 캐싱이 해결할 문제 자체가 존재하지 않는다.
@@ -49,7 +49,7 @@ saju-ai/
 - 대안 2: `frontend/` + `backend/` 단순 분리(form-flow 방식). 워크스페이스 없이 각자 빌드한다.
   이 프로젝트는 백엔드를 따로 두지 않으므로 구조가 맞지 않는다.
 - 패키지 경계가 없으므로 엔진의 순수성이 컨벤션에만 의존하게 된다.
-  이 위험은 [ADR 0013](0013-saju-engine-purity-enforcement.md) 에서 lint 와 훅으로 막는다.
+  이 위험은 [ADR 0013](0013-saju-engine-purity-enforcement.md) 에서 lint 로 막는다.
 
 ## 영향
 
