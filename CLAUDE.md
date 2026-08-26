@@ -57,9 +57,6 @@ Gemini Flash Lite, Vercel 배포다.
 | `permissions.deny`             | 도구 실행 전  | `.env*`, `.claude/settings.local.json`, `routeTree.gen.ts` 접근 차단 |
 | `.claude/hooks/format-file.sh` | 편집 직후     | oxfmt 자동 포맷 + oxlint --fix                                       |
 
-둘 다 Claude 안에서만 돈다. git hook 은 두지 않는다.
-`main` 브랜치는 GitHub 의 브랜치 보호 규칙이 막는다.
-
 타입체크와 lint 와 테스트, `verify:data`, `verify:tz` 는 자동으로 돌지 않는다.
 커밋 전에 직접 돌린다. CI 는 아직 없다.
 
