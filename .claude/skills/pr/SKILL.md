@@ -76,4 +76,4 @@ base 는 `main` 이다. 커밋이 하나면 그 제목을 PR 제목으로 쓴다
 - PR 생성까지 한다. 병합은 별도 지시가 있을 때만 한다
 - 리뷰 코멘트는 `pull_request_review_write` 로 pending review 를 만들고
   `add_comment_to_pending_review` 로 채운 뒤 제출한다
-- 브랜치 보호 규칙은 아직 걸려 있지 않다. 규칙이 없다고 `main` 에 직접 올리지 않는다
+- `main` 에 브랜치 보호 규칙이 걸려 있다. 직접 올리지 않고 PR 을 거친다
