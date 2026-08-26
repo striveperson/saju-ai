@@ -5,10 +5,6 @@
 스택은 TanStack Start, TanStack Router, TanStack Query, React 19, Tailwind 4 다.
 버전은 `apps/web/package.json` 에 있고 고정되어 있다.
 
-출처는 멘토링 정리본이다. 저장소 밖에서 쓰인 문서라 여기 없는 도구와
-ADR 이 금지한 것이 섞여 있었고, 덜어내고 옮겼다. 무엇을 왜 뺐는지는
-[ADR 0018](adr/0018-frontend-rules-selective-port.md) 에 있다.
-
 이 문서는 코드 규칙만 정한다. 무엇이 어디에 어떤 값으로 나오는지는
 `docs/mockups/` 의 HTML 이 정답지다.
 

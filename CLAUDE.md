@@ -255,19 +255,6 @@ PAT 이 필요하다. `gh` 의 OAuth 토큰은 keyring 에 있어 환경변수�
 
 토큰은 사용자가 직접 관리한다. 저장소에 커밋하지 않는다.
 
-## 외부 에이전트 모음 (ECC)
-
-[affaan-m/ECC](https://github.com/affaan-m/ECC) 같은 확장 모음은 플러그인으로 통째 설치하지 않는다.
-필요한 것만 골라 우리 규약에 맞게 고쳐 가져온다.
-무엇을 언제 가져올지는 [ADR 0017](docs/adr/0017-external-agent-collections-selective-port.md) 에 있다.
-
-react-doctor 는 그 ADR 이 보류했다가 화면 코드가 서면서 들였다.
-`pnpm --filter web verify:react` 로 부르고 텔레메트리와 공급망 스캔을 끈 채 돈다.
-`pre-commit-check.sh` 가 커밋 직전에 이것을 부른다. 지적이 하나라도 있으면 막힌다.
-고칠 것이 아니라고 판단했으면 `react-doctor-disable-next-line` 을 근거와 함께 그 줄 위에 둔다.
-패키지가 싣는 에이전트 스킬은 붙이지 않는다. 실행 중에 원격 플레이북을 받아 따르게 되어 있다.
-근거는 [ADR 0020](docs/adr/0020-react-doctor-adopted.md) 이다.
-
 ## ADR
 
 큰 구조나 기술 결정은 코드보다 ADR 을 먼저 쓴다.
