@@ -1,6 +1,6 @@
 # ADR 0021. 입력 폼을 react-hook-form 으로 든다
 
-- 상태: 채택(Accepted)
+- 상태: 대체됨(Superseded by ADR 0022)
 - 날짜: 2026-08-16
 
 ## 배경
