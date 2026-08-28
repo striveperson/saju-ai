@@ -6,21 +6,16 @@ import { parseDate, parseTime } from '@features/input/utils/birth';
 import { computeSaju } from '@saju/chart';
 import { leapMonthOf } from '@saju/lunar';
 import { useState } from 'react';
-import { useController, useForm, useWatch } from 'react-hook-form';
 
 import type { BirthError } from '@features/input/components/BirthFields';
 import type { Region } from '@features/input/utils/region';
 import type { ChartInput } from '@saju/chart';
 import type { Gender } from '@saju/daeun';
 import type { ProfileInfo } from '@shared/handoff';
-
-type InputPageProps = {
-  onSubmit: (input: ChartInput, info: ProfileInfo) => void;
-};
+import { useField, useForm, useSelector } from '@tanstack/react-form';
 
 type Calendar = ChartInput['calendar'];
 
-/** 폼이 드는 값 전부. 출생지는 시트에서 고르는 것이라 입력칸이 없다 */
 type BirthForm = {
   name: string;
   gender: Gender;
@@ -48,65 +43,95 @@ const DEFAULTS: BirthForm = {
   region: null,
 };
 
-/**
- * 날짜 규칙. 양력인지 음력인지에 따라 잣대가 달라 폼의 다른 값을 함께 본다.
- *
- * 지원 범위와 음력 윤달은 여기서 보지 않는다. 엔진이 `RangeError` 로 던지고
- * 제출 시점에 그 문구를 그대로 옮긴다(docs/03 8장).
- */
-const validateDate = (value: string, values: BirthForm) => {
-  const parsed = parseDate(value, values.calendar);
+const validateDate = (value: string, calendar: Calendar) => {
+  const parsed = parseDate(value, calendar);
 
-  return parsed.ok || parsed.message;
+  return parsed.ok  ? undefined : parsed.message;
 };
 
 const validateTime = (value: string) => {
   const parsed = parseTime(value);
 
-  return parsed.ok || parsed.message;
+  return parsed.ok  ? undefined : parsed.message;
+};
+
+type InputPageProps = {
+  onSubmit: (input: ChartInput, info: ProfileInfo) => void;
 };
 
 const InputPage = ({ onSubmit }: InputPageProps) => {
   const [searching, setSearching] = useState(false);
 
-  // 되검증을 제출 시점으로 미룬다. 고치는 도중의 반쪽짜리 값에 대고
-  // 틀렸다고 말하지 않으려는 것이고, 지우는 것은 아래 handleForget 이 맡는다
-  const {
-    clearErrors,
-    control,
-    formState,
-    handleSubmit,
-    register,
-    setError,
-    setValue,
-  } = useForm<BirthForm>({
+  const toChartInput = (values: BirthForm): ChartInput | null => {
+    const parsed = parseDate(values.date, values.calendar);
+    const parsedTime = parseTime(values.time);
+    if (!parsed.ok || !parsedTime.ok || values.region === null) return null;
+
+    const birth = { ...parsed.value, ...parsedTime.value };
+    return {
+      ...(values.calendar === 'lunar'
+        ? { calendar: 'lunar', leapMonth: leapAvailable && values.leapMonth }
+        : { calendar: 'solar' }),
+      birth,
+      gender: values.gender,
+      ziPolicy: ZI_POLICY,
+      longitude: values.region.longitude,
+    } as ChartInput;
+  }
+
+  const form = useForm({
     defaultValues: DEFAULTS,
-    reValidateMode: 'onSubmit',
+    validators: {
+    onSubmit: ({ value }) => {
+      const input = toChartInput(value);
+      if (input === null) return { form: '계산하지 못했습니다. 입력을 다시 확인해 주세요.' };
+
+      try {
+        computeSaju(input);
+      } catch (thrown) {
+        if (thrown instanceof RangeError) {
+          return { fields: { date: thrown.message } };
+        }
+        
+        return { form: '계산하지 못했습니다. 입력을 다시 확인해 주세요.' };
+      }
+      return null;
+    },
+  },
+  onSubmit: ({ value }) => {
+    const input = toChartInput(value);
+    
+    if (input === null || value.region === null) return;
+
+    onSubmit(input, {
+      name: value.name.trim(),
+      gender: GENDER_LABEL[value.gender],
+      region: value.region.name,
+    });
+  },
   });
 
-  const { field: date } = useController({
-    control,
+  const date = useField({
+    form,
     name: 'date',
-    rules: { validate: validateDate },
+    validators: { 
+      onSubmit : ({value, fieldApi}) => 
+        validateDate(value, fieldApi.form.getFieldValue('calendar')) 
+    },
   });
-  const { field: time } = useController({
-    control,
+  const time = useField({
+    form,
     name: 'time',
-    rules: { validate: validateTime },
+    validators: { 
+      onSubmit: ({value}) => validateTime(value)
+    },
   });
 
-  // watch 가 아니라 useWatch 다. watch 는 렌더 중에 부르는 구독이라
-  // react-doctor-disable-next-line react-hooks-js/incompatible-library
-  // React Compiler 가 이 컴포넌트의 메모이제이션을 통째로 건너뛴다
-  // 이름을 하나하나 적는다. 통째로 받으면 타입이 DeepPartial 이 되어
-  // 값마다 없을 때를 다루게 되는데, defaultValues 가 넷 다 채워 두고 있다
-  const [calendar, gender, leapMonth, name, region] = useWatch({
-    control,
-    name: ['calendar', 'gender', 'leapMonth', 'name', 'region'],
-  });
-  const { errors } = formState;
+  const {calendar, gender, leapMonth, name, region} = useSelector(
+    form.store, s => s.values
+  );
 
-  const parsedDate = parseDate(date.value, calendar);
+  const parsedDate = parseDate(date.state.value, calendar);
 
   // 그 해 그 달이 실제로 윤달일 때만 물어본다. 아니면 물을 것이 없다
   const leapAvailable =
@@ -117,13 +142,13 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
   // 출생지가 없으면 서울 관례값이 답으로 나간다(ADR 0019 3항)
   const filled =
     name.trim() !== '' &&
-    date.value.trim() !== '' &&
-    time.value.trim() !== '' &&
+    date.state.value.trim() !== '' &&
+    time.state.value.trim() !== '' &&
     region !== null;
 
   // 두 칸이 문구 한 줄을 나눠 쓴다. 둘 다 틀렸으면 날짜를 먼저 낸다
-  const dateMessage = errors.date?.message;
-  const timeMessage = errors.time?.message;
+  const dateMessage = date.state.meta.errors[0];
+  const timeMessage = time.state.meta.errors[0];
   const birthError: BirthError | undefined =
     dateMessage !== undefined
       ? { on: 'date', message: dateMessage }
@@ -131,33 +156,24 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
         ? { on: 'time', message: timeMessage }
         : undefined;
 
-  // 고치기 시작하면 지운다. 남겨 두면 이미 고친 값에 대고 틀렸다고 말하게 된다.
-  // 한 줄을 나눠 쓰므로 한쪽을 고쳐도 둘 다 지운다
-  const handleForget = () => {
-    clearErrors(['date', 'time']);
-  };
-
   const handleGenderChange = (next: Gender) => {
-    setValue('gender', next);
+    form.setFieldValue('gender', next);
   };
 
   const handleCalendarChange = (next: Calendar) => {
-    setValue('calendar', next);
-    handleForget();
+    form.setFieldValue('calendar', next);
   };
 
   const handleDateChange = (next: string) => {
-    date.onChange(next);
-    handleForget();
+    date.handleChange(next);
   };
 
   const handleTimeChange = (next: string) => {
-    time.onChange(next);
-    handleForget();
+    time.handleChange(next);
   };
 
   const handleLeapMonthChange = (next: boolean) => {
-    setValue('leapMonth', next);
+    form.setFieldValue('leapMonth', next);
   };
 
   const handleOpenSearch = () => {
@@ -169,50 +185,8 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
   };
 
   const handleSelectRegion = (next: Region) => {
-    setValue('region', next);
+    form.setFieldValue('region', next);
     setSearching(false);
-  };
-
-  const handleValid = (values: BirthForm) => {
-    const parsed = parseDate(values.date, values.calendar);
-    const parsedTime = parseTime(values.time);
-    // 규칙이 이미 걸렀다. 값을 꺼내려고 다시 읽고 타입을 좁힌다
-    if (!parsed.ok || !parsedTime.ok || values.region === null) return;
-
-    const birth = { ...parsed.value, ...parsedTime.value };
-    const input: ChartInput = {
-      ...(values.calendar === 'lunar'
-        ? { calendar: 'lunar', leapMonth: leapAvailable && values.leapMonth }
-        : { calendar: 'solar' }),
-      birth,
-      gender: values.gender,
-      ziPolicy: ZI_POLICY,
-      longitude: values.region.longitude,
-    };
-
-    try {
-      computeSaju(input);
-    } catch (thrown) {
-      // 엔진이 던지는 것은 지원 범위와 음력 윤달이라 전부 날짜 쪽이다
-      setError('date', {
-        message:
-          thrown instanceof RangeError
-            ? thrown.message
-            : '계산하지 못했습니다. 입력을 다시 확인해 주세요.',
-      });
-      return;
-    }
-
-    onSubmit(input, {
-      name: values.name.trim(),
-      gender: GENDER_LABEL[values.gender],
-      region: values.region.name,
-    });
-  };
-
-  // handleSubmit 이 돌려주는 것은 Promise 라 폼의 onSubmit 자리에 그대로 못 건다
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    void handleSubmit(handleValid)(event);
   };
 
   return (
@@ -220,19 +194,24 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
       <form
         autoComplete="off"
         className="flex flex-1 flex-col gap-[26px] px-[18px] pt-[22px]"
-        onSubmit={handleFormSubmit}
+        onSubmit={form.handleSubmit}
       >
         <div className="flex flex-col gap-[9px]">
           <label className="text-[13.5px] font-semibold" htmlFor="name">
             이름
           </label>
-          <input
-            type="text"
-            id="name"
-            maxLength={12}
-            placeholder="최대 12글자 이내로 입력하세요"
-            className="border-line bg-field text-ink placeholder:text-ink-soft rounded-card focus-visible:border-accent focus-visible:outline-accent-soft h-12 w-full border px-3.5 text-[15px] focus-visible:outline-2"
-            {...register('name')}
+          <form.Field
+          name='name'
+          children={(field) =>(
+            <input
+              id={field.name}
+              value={field.state.value}
+              onChange={e => field.handleChange(e.target.value)}
+              type="text"
+              maxLength={12}
+              placeholder="최대 12글자 이내로 입력하세요"
+              className="border-line bg-field text-ink placeholder:text-ink-soft rounded-card focus-visible:border-accent focus-visible:outline-accent-soft h-12 w-full border px-3.5 text-[15px] focus-visible:outline-2"
+            />)}
           />
         </div>
 
@@ -240,8 +219,8 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
 
         <BirthFields
           calendar={calendar}
-          date={date.value}
-          time={time.value}
+          date={date.state.value}
+          time={time.state.value}
           leapMonth={leapMonth}
           leapAvailable={leapAvailable}
           error={birthError}
