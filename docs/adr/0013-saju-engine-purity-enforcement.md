@@ -100,8 +100,9 @@ lint 는 구문 검사라 계산된 접근을 통과시킨다.
 - 규칙은 `apps/web/.oxlintrc.json` 의 override 둘에 있다.
   `src/lib/saju/**` 가 세 규칙을 걸고 `data/solar-terms.test.ts` 가 둘을 끈다.
 - `verify:tz` 는 `apps/web/package.json` 에 있다. 부르는 것은 사람이다.
-- 규칙을 고치면 [엔진 README](../../apps/web/src/lib/saju/README.md) 의 표와
-  [docs/03](../03-frontend-rules.md) 의 강제 수단 표, `saju-engine-validator` 의
-  검사하지 않을 것 표를 같이 고친다. 셋 다 담당을 적어 두고 있다.
+- 막는 이름의 목록은 `apps/web/.oxlintrc.json` 이 SSOT 다.
+  다른 문서는 규칙 이름까지만 적고 이름 목록을 옮겨 적지 않는다.
+  옮겨 적은 자리가 생기면 설정을 고칠 때마다 같이 고쳐야 한다.
+- 위 결정 절의 표는 결정 당시의 목록이다. 현재 설정을 좇지 않는다.
 - KASI 데이터 모듈은 import 예외 목록에 있으므로 그 모듈 자체도 순수해야 한다.
   데이터를 값으로 품는 형태여야 하고 네트워크를 타면 안 된다.

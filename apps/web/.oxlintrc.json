@@ -8,7 +8,6 @@
     "typeAware": true
   },
   "env": {
-    "builtin": true,
     "browser": true,
     "node": true
   },
@@ -16,6 +15,7 @@
   "rules": {
     "typescript/no-unnecessary-condition": "error",
     "typescript/no-misused-promises": "error",
+    "typescript/no-floating-promises": "error",
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
     "react/react-compiler": "error",
@@ -36,7 +36,7 @@
           {
             "patterns": [
               {
-                "group": ["*", "!./**", "!../**"],
+                "group": ["**", "!./**", "!../**"],
                 "message": "사주 계산 엔진은 외부 의존이 0 이다. 상대 경로 import 만 쓴다. docs/adr/0013 참고."
               }
             ]
