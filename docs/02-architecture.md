@@ -88,23 +88,11 @@ flowchart LR
 그래서 서버 호출을 명시적 API 라우트로 통일하고 base URL 을 빌드 시점에 주입한다
 ([ADR 0004](adr/0004-api-routes-over-server-functions.md)).
 
-TanStack Start 를 클라이언트 전용으로 빌드해 Capacitor `webDir` 에 넣는 경로는 아직 검증되지 않았다.
-스캐폴딩 단계의 스파이크 대상이다.
-
 ## 4. 디렉토리 구조
 
 ```
 saju-ai/
-├── docs/
-│   ├── 00-documentation-guide.md
-│   ├── 01-overview.md
-│   ├── 02-architecture.md
-│   ├── 03-frontend-rules.md         화면 규칙 SSOT
-│   ├── 05-saju-domain-rules.md      도메인 SSOT
-│   ├── 06-code-working-rules.md     코드 작업 방식
-│   ├── 07-sinsal-rules.md           신살 SSOT
-│   ├── mockups/                     화면 목업 HTML
-│   └── adr/                         0001 ~ 0019
+├── docs/                             문서. 구성은 00-documentation-guide.md 1장
 ├── apps/
 │   ├── web/                          TanStack Start
 │   │   └── src/
@@ -177,18 +165,7 @@ sequenceDiagram
 | 웹 프레임워크 | TanStack Start | [ADR 0002](adr/0002-tanstack-start-capacitor-shell.md) |
 | 모바일 | Capacitor | [ADR 0002](adr/0002-tanstack-start-capacitor-shell.md) |
 | 모노레포 | pnpm workspaces | [ADR 0001](adr/0001-monorepo-pnpm-workspaces.md) |
-| 화면 규칙 | [03-frontend-rules.md](03-frontend-rules.md) | [ADR 0018](adr/0018-frontend-rules-selective-port.md) |
 | 스키마 검증 | Zod | [ADR 0004](adr/0004-api-routes-over-server-functions.md) |
 | 인증·DB | Supabase | [ADR 0010](adr/0010-supabase-auth-and-db.md) |
 | LLM | Gemini Flash Lite | [ADR 0011](adr/0011-single-prompt-no-streaming.md) |
 | 웹 배포 | Vercel | [ADR 0012](adr/0012-vercel-deploy.md) |
-
-## 8. 스캐폴딩 전에 확인할 것
-
-아직 검증되지 않은 가정이 둘 있다. 구현을 시작하기 전에 스파이크로 확인한다.
-
-1. TanStack Start 를 클라이언트 전용 SPA 로 빌드해 Capacitor `webDir` 에 넣을 수 있는가.
-   실패하면 [ADR 0003](adr/0003-spa-bundle-for-app.md) 을 대체하는 새 ADR 을 쓴다.
-2. Gemini 응답 시간이 Vercel 서버리스 실행시간 제한 안에 들어오는가.
-   넘치면 스트리밍이나 백그라운드 생성으로 우회한다
-   ([ADR 0011](adr/0011-single-prompt-no-streaming.md)).

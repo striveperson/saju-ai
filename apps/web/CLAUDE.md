@@ -10,13 +10,9 @@
 `src/shared/` 가 지면 사이로 넘기는 값의 타입과 스토어, `src/lib/saju/` 가 계산 엔진,
 `scripts/` 가 SPA 변환과 절기 계산과 tz 정답지 생성이다.
 
-경로 별칭은 `@saju`, `@saju/*`, `@components/*`, `@features/*`, `@shared/*` 다.
-`tsconfig.json` 의 `paths` 가 단일 소스이고 vite 와 vitest 가 `tsconfigPaths` 로 읽는다.
+경로 별칭은 `tsconfig.json` 의 `paths` 가 단일 소스이고 vite 와 vitest 가 `tsconfigPaths` 로 읽는다.
 
 시크릿은 `src/routes/api/` 안에서만 읽는다. `VITE_` 접두사를 붙이면 클라이언트 번들에 실린다.
-
-지면을 가르는 기준, 컴포넌트 선언 규칙, 경계 배치는
-[docs/03-frontend-rules.md](../../docs/03-frontend-rules.md) 에 있다.
 
 ## 명령어
 
@@ -25,30 +21,19 @@
 엔진만 빠르게 돌릴 때는 `pnpm --filter web exec vitest run --project saju` 를 쓴다.
 node 환경이라 jsdom 을 띄우지 않는다.
 
-`verify:tz` 는 엔진 테스트를 `TZ=UTC` 로 다시 돌린다. lint 의 구문 검사를 우회해
-실행 환경을 읽는 코드가 들어가면 두 타임존의 결과가 갈린다.
+`verify:tz` 는 엔진 테스트를 `TZ=UTC` 로 다시 돌린다.
 
 ## 계산 엔진
 
-`src/lib/saju/` 는 별도 규칙이 있다. 그 안에서 작업하기 전에
-[src/lib/saju/README.md](src/lib/saju/README.md) 를 읽는다.
-
-핵심만 옮기면 이렇다.
-
-- 외부 의존 0. React, 날짜 라이브러리, Supabase 클라이언트, UI 코드를 import 하지 않는다.
-  허용 예외는 KASI 절기·음력 데이터 모듈뿐이다.
-- 현재 시각과 실행 환경 타임존을 읽지 않는다. 시각은 인자로 받는다.
-- 규칙의 SSOT 는 [docs/05-saju-domain-rules.md](../../docs/05-saju-domain-rules.md) 다.
-  코드와 어긋나면 코드가 틀린 것으로 간주한다.
+`src/lib/saju/` 는 별도 규칙이 있다. 외부 의존 0 과 실행 환경을 읽지 않는 것 둘이고
+[docs/05-saju-domain-rules.md](../../docs/05-saju-domain-rules.md) 가 규칙의 SSOT 다.
+그 안에서 작업하기 전에 [src/lib/saju/README.md](src/lib/saju/README.md) 를 읽는다.
 
 앞의 둘은 `.oxlintrc.json` 의 `overrides` 가 막는다. 규칙 목록은 README 의 표에 있다.
 
 거기에 `no-unnecessary-condition` 이 하나 더 걸린다.
 타입 정보가 있어야 판정할 수 있어 tsgolint 가 돌리고, 판정 함수에 절대 걸리지 않는 분기나
 항상 참인 조건이 있으면 잡는다. 예외가 터지는 대신 틀린 간지가 조용히 나가는 실패를 겨냥한 것이다.
-
-테스트 파일은 `no-restricted-imports` 예외라 vitest 를 import 할 수 있다.
-소스 파일은 예외가 아니다.
 
 ## 빌드 타깃 두 개
 
@@ -63,22 +48,13 @@ node 환경이라 jsdom 을 띄우지 않는다.
 서버 호출은 명시적 API 라우트에 절대 URL 로 한다([ADR 0004](../../docs/adr/0004-api-routes-over-server-functions.md)).
 `createServerFn` 을 데이터 경로로 쓰지 않는다.
 
-## 라우팅
+## 화면 코드
 
-파일 기반이다. 라우트는 `src/routes/` 아래 파일로 추가한다.
+규칙은 [docs/03-frontend-rules.md](../../docs/03-frontend-rules.md) 에 있다.
+지면을 가르는 기준, 경로 별칭 목록, 컴포넌트 선언, 상태와 경계 배치, 스타일이 거기 있다.
 
-`routeTree.gen.ts` 는 자동 생성 파일이라 직접 수정하지 않는다.
-dev 서버나 `generate-routes` 가 재생성한다. 훅이 편집을 차단한다.
-
-## 스타일
-
-Tailwind 4 를 쓴다. 설정은 `src/styles.css` 의 `@theme` 블록에 둔다.
-별도 `tailwind.config` 파일을 만들지 않는다.
-
-## React
-
-React Compiler 가 켜져 있다.
-`useMemo`, `useCallback`, `React.memo` 를 수동으로 넣지 않는다. 컴파일러가 담당한다.
+라우팅은 파일 기반이다. 라우트는 `src/routes/` 아래 파일로 추가하고
+`routeTree.gen.ts` 는 dev 서버나 `generate-routes` 가 재생성한다. 훅이 그 파일의 편집을 차단한다.
 
 ## 커밋 전
 

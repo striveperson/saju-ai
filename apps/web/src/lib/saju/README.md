@@ -25,11 +25,13 @@
 
 둘 다 `apps/web/.oxlintrc.json` 의 `overrides` 가 막는다.
 
-| 규칙                       | 담당                                                                            |
-| -------------------------- | ------------------------------------------------------------------------------- |
-| `no-restricted-imports`    | 상대 경로가 아닌 import                                                         |
-| `no-restricted-globals`    | `Date`, `Intl`, `performance`, `crypto`, `navigator`, `globalThis`              |
-| `no-restricted-properties` | `Math.random`, `process.env`, `getTimezoneOffset`, `toLocale*`, `localeCompare` |
+| 규칙                       | 담당                                 |
+| -------------------------- | ------------------------------------ |
+| `no-restricted-imports`    | 상대 경로가 아닌 import              |
+| `no-restricted-globals`    | 시각과 실행 환경을 읽는 전역         |
+| `no-restricted-properties` | 시각과 로캘과 환경변수를 읽는 메서드 |
+
+막는 이름의 목록은 설정 파일에 있다. 여기 옮겨 적지 않는다.
 
 규칙을 끄는 예외는 `data/solar-terms.test.ts` 하나다. 정답지 대조에 `Date.parse` 를 쓴다.
 다른 테스트 파일은 소스와 같은 규칙을 받는다.
@@ -102,4 +104,3 @@ pnpm --filter web exec vitest run --project saju
 십신은 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있고 음양으로 가르는 10종은 없다.
 
 `fixtures/` 에는 공인 만세력 대조를 거친 검증 케이스가 들어간다.
-일주 앵커 값은 문서에 하드코딩하지 않고 `verified: true` 케이스 3개 이상으로 확정한다.

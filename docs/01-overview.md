@@ -155,12 +155,3 @@ A 단계는 서버를 거친다. 출생지가 필수 입력이고 그 경도를 
 | 야자시 | 夜子時 | `ziPolicy` | 23시 이후 출생의 일주 귀속 방식 |
 | 대운 | 大運 | `daeun` | 10년 단위로 바뀌는 운의 흐름 |
 | 세운 | 歲運 | `seun` | 연 단위 운 |
-
-## 7. 관련 문서
-
-| 알고 싶은 것 | 문서 |
-| ------------ | ---- |
-| 사주 계산 규칙 (SSOT) | [05-saju-domain-rules.md](05-saju-domain-rules.md) |
-| 시스템 구조 | [02-architecture.md](02-architecture.md) |
-| 왜 이렇게 결정했는가 | [adr/](adr/) |
-| 문서 작성 규칙 | [00-documentation-guide.md](00-documentation-guide.md) |

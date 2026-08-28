@@ -14,8 +14,8 @@
 17종을 전부 구현했다. 판정은 `apps/web/src/lib/saju/sinsal.ts` 에 있고
 판정표는 `tables.ts` 의 신살 섹션에 있다.
 
-코드와 이 문서가 어긋나면 코드가 틀린 것이다. 판정표는 2장에서 5장까지의 표를
-한 줄씩 옮겨 `tables.test.ts` 가 대조하고, 판정 규칙은 `sinsal.test.ts` 가 검사한다.
+판정표는 2장에서 5장까지의 표를 한 줄씩 옮겨 `tables.test.ts` 가 대조하고,
+판정 규칙은 `sinsal.test.ts` 가 검사한다.
 
 ## 1. 채택 등급
 
