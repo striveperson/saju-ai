@@ -104,4 +104,3 @@ pnpm --filter web exec vitest run --project saju
 십신은 5분류(비겁, 인성, 식상, 재성, 관성)까지만 있고 음양으로 가르는 10종은 없다.
 
 `fixtures/` 에는 공인 만세력 대조를 거친 검증 케이스가 들어간다.
-일주 앵커 값은 문서에 하드코딩하지 않고 `verified: true` 케이스 3개 이상으로 확정한다.

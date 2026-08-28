@@ -18,8 +18,8 @@ docs/
 ├── 05-saju-domain-rules.md      사주 도메인 SSOT
 ├── 06-code-working-rules.md     코드 작업 방식
 ├── 07-sinsal-rules.md           신살 SSOT
-└── adr/
-    └── 0001-monorepo-pnpm-workspaces.md ~ 0016-true-solar-time-always-applied.md
+├── mockups/                     화면 목업 HTML
+└── adr/                         결정 기록. 번호순
 ```
 
 ### 1.1 무엇을 기준으로 쪼개는가
@@ -85,27 +85,20 @@ ADR 은 아래 형식을 지킨다. 이 프로젝트의 모든 ADR 이 같은 �
 ## 5. 마크다운 스타일 규칙
 
 문서(`*.md`)와 Claude 의 마크다운 답변 모두에 적용한다.
-규칙 목록은 `.claude/rules/markdown-style.md` 에 있다.
-기호와 표기(`format-`), 문서와 문단의 짜임(`structure-`), 문장(`tone-`) 스물둘이다.
-
-검사하는 도구는 없다. 사람이 지킨다.
+규칙 목록은 `.claude/rules/markdown-style.md` 에 있고 그 파일이 전부다.
+검사하는 도구는 없다.
 
 ## 6. 문서를 최신으로 유지하는 규칙
 
 1. 코드와 문서는 같은 PR 에서 바꾼다.
-2. 사주 계산 규칙은 [`05-saju-domain-rules.md`](05-saju-domain-rules.md) 가 단일 진실 공급원(SSOT)이다.
-   코드와 이 문서가 어긋나면 코드가 틀린 것으로 간주한다.
-   문서가 틀렸다면 근거와 함께 문서를 먼저 고치고, 그 다음 코드를 고친다.
+2. 도메인 SSOT 는 [`05-saju-domain-rules.md`](05-saju-domain-rules.md) 와
+   [`07-sinsal-rules.md`](07-sinsal-rules.md) 다. 어긋났을 때 어느 쪽을 고치는지는 두 문서 머리말에 있다.
 3. 문서 리뷰도 코드 리뷰처럼 PR 로 진행한다.
 
 ## 7. 문서 추가 체크리스트
 
 - [ ] 파일명이 `kebab-case` + (필요 시) 번호 규칙을 따르는가
 - [ ] 최상단에 한 줄 요약이 있는가
-- [ ] 코드 블록에 언어와 파일 경로가 있는가
-- [ ] 용어가 용어집·SSOT 와 일치하는가
-- [ ] em dash 와 이모지를 쓰지 않았는가
-- [ ] 굵은 강조가 세 번 이하이고, 번호 목록 안에 강조가 없는가
-- [ ] 근거 없는 형용사와 메타 서술을 지웠는가
-- [ ] 트레이드오프에 포기한 것이 적혀 있는가
 - [ ] 루트 [`CLAUDE.md`](../CLAUDE.md) 의 문서 표에 링크를 추가했는가
+
+문장과 기호는 5장이 가리키는 규칙 파일의 확인 목록을 쓴다. 여기 옮겨 적지 않는다.

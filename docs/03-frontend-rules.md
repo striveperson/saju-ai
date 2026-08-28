@@ -654,5 +654,3 @@ eslint 와 prettier 는 쓰지 않는다. oxlint 와 oxfmt 가 그 자리에 있
 - 작업 방식과 성공 조건은 [06](06-code-working-rules.md) 이다
 - AI 에게 줄 컨텍스트를 어떻게 쪼갤지는 이 문서와 `frontend` 스킬의 관계가 그 예다.
   canonical 규칙은 여기 두고 적용 방법과 체크리스트는 스킬에 둔다
-- 이상 구간 경고 일곱 종의 문구는 [01](01-overview.md) 5.1 이 확정했다.
-  화면 디자인과 절입 근처 경고는 아직 정하지 않았다. 루트 CLAUDE.md 가 그렇게 적고 있다
