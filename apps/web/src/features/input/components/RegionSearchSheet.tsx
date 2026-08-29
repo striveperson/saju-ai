@@ -27,7 +27,7 @@ const SEARCHING = <Message>찾는 중입니다.</Message>;
 const SearchFailed = () => {
   return (
     <Message>
-      도시를 찾지 못했습니다. 연결을 확인하고 다시 시도해 주세요.
+      출생지를 찾지 못했습니다. 연결을 확인하고 다시 시도해 주세요.
     </Message>
   );
 };
