@@ -24,12 +24,6 @@ type BirthFieldsProps = {
 const FIELD =
   'border-line bg-field text-ink rounded-card focus-visible:border-accent focus-visible:outline-accent-soft h-12 border px-3.5 text-[15px] focus-visible:outline-2';
 
-/**
- * 생년월일시. 목업 input-screen.html 의 .birth-row 다.
- *
- * 시각은 비울 수 없다. `ChartInput.birth` 가 필수로 받고 시 미상은 규칙이 아직
- * 없다(docs/05 12.1). 목업의 "시간 모름" 토글이 그래서 아직 여기 없다.
- */
 const BirthFields = ({
   calendar,
   date,
@@ -46,19 +40,6 @@ const BirthFields = ({
     event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     onCalendarChange(event.target.value === 'lunar' ? 'lunar' : 'solar');
-  };
-
-  // 구분자는 치는 대로 붙는다. 값은 언제나 마스킹을 거친 것이라 폼이 날것을 보지 않는다
-  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onDateChange(maskDate(event.target.value));
-  };
-
-  const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onTimeChange(maskTime(event.target.value));
-  };
-
-  const handleLeapChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onLeapMonthChange(event.target.checked);
   };
 
   return (
@@ -78,7 +59,6 @@ const BirthFields = ({
             <option value="solar">양력</option>
             <option value="lunar">음력</option>
           </select>
-          {/* 목업은 배경 이미지로 넣었는데 색이 하드코딩되어 토큰을 안 따라간다 */}
           <svg
             width="10"
             height="7"
@@ -105,7 +85,7 @@ const BirthFields = ({
           placeholder="1995-01-27"
           className={`${FIELD} w-full tabular-nums`}
           value={date}
-          onChange={handleDateChange}
+          onChange={e => onDateChange(maskDate(e.target.value))}
         />
         <input
           type="text"
@@ -116,7 +96,7 @@ const BirthFields = ({
           placeholder="14:39"
           className={`${FIELD} w-full tabular-nums`}
           value={time}
-          onChange={handleTimeChange}
+          onChange={e => onTimeChange(maskTime(e.target.value))}
         />
       </div>
 
@@ -137,10 +117,8 @@ const BirthFields = ({
               type="checkbox"
               className="peer absolute m-0 h-px w-px opacity-0"
               checked={leapMonth}
-              onChange={handleLeapChange}
+              onChange={e => onLeapMonthChange(e.target.checked)}
             />
-            {/* 점을 scale-0 에서 키우지 않는다. 완전히 사라진 요소는 그리는 쪽이 건너뛰어
-                되살아날 때 한 프레임이 튄다. 작은 값에서 키우고 opacity 로 감춘다 */}
             <span className="border-line-strong peer-checked:border-accent peer-checked:[&>span]:scale-100 peer-checked:[&>span]:opacity-100 peer-focus-visible:outline-accent grid size-[18px] place-items-center rounded-full border-[1.5px] transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
               <span className="bg-accent size-[9px] scale-50 rounded-full opacity-0 transition-[transform,opacity]" />
             </span>

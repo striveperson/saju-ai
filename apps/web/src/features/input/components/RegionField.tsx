@@ -5,13 +5,6 @@ type RegionFieldProps = {
   onOpen: () => void;
 };
 
-/**
- * 출생지. 목업 input-screen.html 의 .search-row 다.
- *
- * 필수다. 비워 두면 엔진이 서울 관례값 -30분을 쓰는데 부산은 -24분이라
- * 8분이 어긋나고 시지 경계에 걸리면 시주가 통째로 바뀐다(ADR 0019 3항).
- * 직접 칠 수 없는 것은 이름이 아니라 경도가 값이기 때문이다.
- */
 const RegionField = ({ value, onOpen }: RegionFieldProps) => {
   return (
     <div className="flex flex-col gap-[9px]">
