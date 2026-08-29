@@ -397,6 +397,21 @@ describe('InputPage', () => {
     expect(제출()).toBeDisabled();
   });
 
+  it('빈 검색어로는 서버를 부르지 않는다', async () => {
+    // useSuspenseQuery 는 enabled 를 지원하지 않는다. 넘겨도 true 로 덮인다.
+    // 빈 검색어를 거르는 것이 RegionResults 를 안 그리는 것 하나뿐이라,
+    // 그 게이트가 사라지면 /api/regions?q= 가 그대로 나간다
+    const spy = vi.fn((_url: string) => Promise.resolve(Response.json([])));
+    vi.stubGlobal('fetch', spy);
+
+    const { user } = 그린다();
+    await user.click(screen.getByRole('button', { name: '출생지 검색' }));
+    await user.type(screen.getByLabelText('출생지 검색어'), '서');
+
+    const 빈검색 = spy.mock.calls.filter(([url]) => url.endsWith('q='));
+    expect(빈검색).toHaveLength(0);
+  });
+
   it('아직 없는 것을 누를 수 없게 둔다', () => {
     // 사주 불러오기는 소셜 로그인과 Supabase 가 붙어야 열린다(ADR 0008, 0010).
     그린다();

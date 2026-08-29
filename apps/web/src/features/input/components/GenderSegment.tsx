@@ -5,18 +5,11 @@ type GenderSegmentProps = {
   onChange: (next: Gender) => void;
 };
 
-/** 목업 순서대로 여자가 먼저다. 기본 선택도 여자다 */
 const CHOICES: readonly { gender: Gender; label: string }[] = [
   { gender: 'F', label: '여자' },
   { gender: 'M', label: '남자' },
 ];
 
-/**
- * 성별. 대운 방향이 이 값으로 갈린다(docs/05 9장).
- *
- * 라디오를 시각적으로 숨기고 라벨을 칠한다. 목업 input-screen.html 의 .segment 다.
- * `appearance-none` 으로 지우지 않는 것은 키보드 조작과 그룹 의미가 남아야 해서다.
- */
 const GenderSegment = ({ value, onChange }: GenderSegmentProps) => {
   return (
     <fieldset className="m-0 border-0 p-0">

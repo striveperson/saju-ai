@@ -73,7 +73,7 @@ describe('GET /api/regions', () => {
 
     // 날것으로 붙이면 공백과 & 가 쿼리스트링을 깬다
     expect(spy.mock.calls[0][0]).toBe(
-      'https://dapi.kakao.com/v2/local/search/address.json?query=%EC%A0%84%EC%A3%BC%20%EC%99%84%EC%82%B0&size=30',
+      'https://dapi.kakao.com/v2/local/search/address.json?query=%EC%A0%84%EC%A3%BC%20%EC%99%84%EC%82%B0&size=10',
     );
   });
 

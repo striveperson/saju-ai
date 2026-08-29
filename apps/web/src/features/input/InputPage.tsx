@@ -164,10 +164,10 @@ const InputPage = ({ onSubmit }: InputPageProps) => {
     validators: { onSubmit: ({ value }) => validateTime(value) },
   });
 
-  const { gender, leapMonth, region } = useSelector(
-    form.store,
-    (state) => state.values,
-  );
+  const gender = useSelector(form.store, (s) => s.values.gender);
+  const region = useSelector(form.store, (s) => s.values.region);
+  const leapMonth = useSelector(form.store, (s) => s.values.leapMonth);
+  
   // 어느 칸인지 모르는 오류가 여기로 온다. 필드 몫은 setErrorMap 이 갈라 놓는다
   const formMessage = useSelector(
     form.store,
