@@ -1,6 +1,7 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
 
 import type { SajuStore } from '@shared/saju-store';
+import { FormDevtoolsPanel } from '@tanstack/react-form-devtools';
 import type { QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import {
@@ -34,6 +35,7 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
               render: <TanStackRouterDevtoolsPanel />,
             },
             { name: 'Tanstack Query', render: <ReactQueryDevtoolsPanel /> },
+            { name: 'Tanstack Form', render: <FormDevtoolsPanel /> },
           ]}
         />
         <Scripts />

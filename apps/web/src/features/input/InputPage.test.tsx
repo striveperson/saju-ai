@@ -221,7 +221,9 @@ describe('InputPage', () => {
     );
   });
 
-  // 지우는 경로가 셋이다. 하나만 물리면 나머지 둘이 조용히 빠진다
+  // 지우는 경로가 셋이다. 하나만 물리면 나머지 둘이 조용히 빠진다.
+  // 첫째 갈래는 라이브러리가 자기 칸 오류를 스스로 지워서 통과하고,
+  // 나머지 둘은 남의 칸 오류라 폼 레벨 listeners.onChange 가 지운다
   describe('고치기 시작하면 지난 문구를 지운다', () => {
     const 고친다 = [
       {
@@ -256,6 +258,38 @@ describe('InputPage', () => {
         expect(screen.queryByRole('alert')).toBeNull();
       });
     }
+  });
+
+  it('이름을 쳐도 지난 문구가 지워진다', async () => {
+    // 고치는 칸이 아닌데도 지워진다. 문구를 지우는 리스너가 필드를 가리지 않아서다.
+    // 옮겨 오기 전에는 남아 있었다. ADR 0022 트레이드오프에 적어 둔 동작 변화다
+    const { user } = 그린다();
+    await 기본입력(user, '1995/02/30');
+    await user.click(제출());
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText('이름'), '님');
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('제출이 지면을 새로고침하지 않는다', async () => {
+    // react-hook-form 은 handleSubmit 안에서 preventDefault 를 대신 불러줬고
+    // TanStack Form 은 안 부른다. 빠뜨리면 브라우저가 폼을 실제로 보내
+    // 지면이 새로고침되고 입력이 통째로 날아간다.
+    // jsdom 은 폼 제출을 구현하지 않아 값으로만 확인할 수 있다
+    const { user } = 그린다();
+    await 기본입력(user);
+
+    let prevented: boolean | undefined;
+    const 엿본다 = (event: Event) => {
+      prevented = event.defaultPrevented;
+    };
+    // 리액트가 루트 컨테이너에서 받으므로 그보다 위인 document 에 건다
+    document.addEventListener('submit', 엿본다);
+    await user.click(제출());
+    document.removeEventListener('submit', 엿본다);
+
+    expect(prevented).toBe(true);
   });
 
   it('지원 범위 밖은 엔진 문구를 그대로 낸다', async () => {
